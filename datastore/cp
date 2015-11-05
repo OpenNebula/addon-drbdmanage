@@ -44,7 +44,7 @@ SAFE_DIRS="${XPATH_ELEMENTS[j++]}"
 BRIDGE_LIST="${XPATH_ELEMENTS[j++]}"
 DRBD_REDUNDANCY="${XPATH_ELEMENTS[j++]:-$DRBD_REDUNDANCY}"
 DRBD_MINOR_PREFIX="${XPATH_ELEMENTS[j++]:-$DRBD_MINOR_PREFIX}"
-IMAGE_SRC="${XPATH_ELEMENTS[j++]}"
+SRC="${XPATH_ELEMENTS[j++]}"
 SIZE="${XPATH_ELEMENTS[j++]:-0}"
 MD5="${XPATH_ELEMENTS[j++]}"
 SHA1="${XPATH_ELEMENTS[j++]}"
@@ -57,6 +57,8 @@ if [ -z "$DST_HOST" ]; then
     error_message "Datastore template missing 'BRIDGE_LIST' attribute."
     exit -1
 fi
+
+set_up_datastore "$BASE_PATH" "$RESTRICTED_DIRS" "$SAFE_DIRS"
 
 # Check if redundancy level is valid
 
@@ -77,12 +79,11 @@ elif [[ "$DRBD_REDUNDANCY" -gt "$REDUNDANCY_UPPER_BOUND" ]]; then
 
 fi
 
-set_up_datastore "$BASE_PATH" "$RESTRICTED_DIRS" "$SAFE_DIRS"
-
 DRBD_SIZE="${SIZE}M"
 VOLUME_NAME="one-img-${IMAGE_ID}"
 
 REGISTER_COMMAND=$(cat << EOF
+  set -e
   $(drbdmanage add-volume "$VOLUME_NAME" "$DRBD_SIZE" --deploy "$DRBD_REDUNDANCY")
   
     DRBD_MINOR="$(drbdmanage v -m -R "$VOLUME_NAME" | awk -F',' '{ print $6 }')"
@@ -95,5 +96,33 @@ EOF
 
 ssh_exec_and_log "$DST_HOST" "$REGISTER_CMD" \
    "Error registering $VOLUME_NAME on $DST_HOST"
+
+DOWNLOADER_ARGS=`set_downloader_args "$MD5" "$SHA1" "$NO_DECOMPRESS" "$LIMIT_TRANSFER_BW" "$SRC" -`
+
+COPY_COMMAND="$UTILS_PATH/downloader.sh $DOWNLOADER_ARGS"
+
+case $SRC in
+http://*|https://*)
+
+    log "Downloading $SRC to the image repository"
+    ;;
+
+*)
+
+    if [ `check_restricted $SRC` -eq 1 ]; then
+
+        log_error "Not allowed to copy images from $RESTRICTED_DIRS"
+        error_message "Not allowed to copy image file $SRC"
+        exit -1
+
+    fi
+
+    log "Copying local image $SRC to the image repository"
+    ;;
+
+esac
+
+exec_and_log "eval $COPY_COMMAND | $SSH $DST_HOST $DD of=$IMAGE_DEVICE bs=2M" \
+    "Error dumping $SRC to $DST_HOST:$TMP_DST"
 
 echo "$VOLUME_NAME"
