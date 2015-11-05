@@ -88,14 +88,7 @@ REGISTER_COMMAND=$(cat << EOF
     DRBD_MINOR="$(drbdmanage v -m -R "$VOLUME_NAME" | awk -F',' '{ print $6 }')"
     IMAGE_DEVICE="/dev/$DRBD_MINOR_PREFIX$DRBD_MINOR"
 
-  if [ "$FSTYPE" = "raw"]; then
-
-    log "created raw image: $VOLUME_NAME on device $IMAGE_DEVICE"
-    
-  else
-
-    log "Creating $FSTYPE filesystem for $VOLUME_NAME on device $IMAGE_DEVICE"
-    mkfs_command $IMAGE_DEVICE $FSTYPE $SIZE
+    log "Creating $VOLUME_NAME on device $IMAGE_DEVICE"
 
 EOF
 )
