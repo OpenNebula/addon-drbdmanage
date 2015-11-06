@@ -74,7 +74,7 @@ if [[ "$DRBD_REDUNDANCY" -lt "$REDUNDANCY_LOWER_BOUND" ]]; then
 elif [[ "$DRBD_REDUNDANCY" -gt "$REDUNDANCY_UPPER_BOUND" ]]; then
 
   error_message "Replication redundancy cannot be above \
-    "$REDUNDANCY_LOWER_BOUND", given: $DRBD_REDUNDANCY"
+    "$REDUNDANCY_UPPER_BOUND", given: $DRBD_REDUNDANCY"
   exit -1
 
 fi
