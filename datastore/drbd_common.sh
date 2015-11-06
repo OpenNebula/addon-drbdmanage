@@ -1,5 +1,4 @@
 #!/bin/bash
-VOLUME_HOST=$(drbdmanage asignments -m --resources "$VOLUME_NAME" | awk -F',' '{ print $2 }' | head -n1)
 
 # Return newline separted list of nodes that are assigned to a resource.
 get_vol_nodes () {
@@ -24,3 +23,13 @@ get_assignment_node () {
   echo $(get_vol_nodes $1 | head -n1)
 
 }
+
+# Returns path to device node for a resouce.
+get_device_for_vol () {
+
+DRBD_MINOR="$(drbdmanage v -m -R "$1" | awk -F',' '{ print $6 }')"
+
+echo $("/dev/$DRBD_MINOR_PREFIX$DRBD_MINOR")
+
+}
+
