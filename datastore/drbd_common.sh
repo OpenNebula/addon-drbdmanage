@@ -20,7 +20,7 @@ ASSIGNMENTS=$(drbdmanage asignments -m --resources "$1" | awk -F',' '{ print $2 
 # Return single node with a resource assigned to it.
 get_assignment_node () {
 
-  echo $(get_vol_nodes $1 | head -n1)
+    echo $(get_vol_nodes $1 | awk -F' ' '{ print $1 }' )
 
 }
 
