@@ -20,7 +20,7 @@ is_res_deployed () {
   if [ $NODE_STATE -eq "connect|deploy connect|deploy" ]; then
     return 0
   else
-    return -1
+    return 1
   fi
 
 }
