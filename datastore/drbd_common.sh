@@ -12,6 +12,19 @@ get_assignment_node () {
 
 }
 
+# Check if resource is in connected on a single node, deployed state
+is_res_deployed () {
+
+  NODE_STATE="$(drbdmanage assignments -m --resources $1 --nodes $2 | awk -F',' '{ print $4, $5 }')"
+
+  if [ $NODE_STATE -eq "connect|deploy connect|deploy" ]; then
+    return 0
+  else
+    return -1
+  fi
+
+}
+
 # Returns path to device node for a resource.
 get_device_for_res () {
 
