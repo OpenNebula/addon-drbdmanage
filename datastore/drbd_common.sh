@@ -30,7 +30,7 @@ get_device_for_res () {
 
   DRBD_MINOR="$(drbdmanage v -m -R "$1" | awk -F',' '{ print $6 }')"
 
-  echo $("/dev/$DRBD_MINOR_PREFIX$DRBD_MINOR")
+  echo "/dev/$DRBD_MINOR_PREFIX$DRBD_MINOR"
 
 }
 
