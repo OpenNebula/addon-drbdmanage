@@ -18,12 +18,13 @@ is_res_deployed () {
   NODE_STATE="$(drbdmanage assignments -m --resources $1 --nodes $2 | awk -F',' '{ print $4, $5 }')"
 
   if [ "$NODE_STATE" = "connect|deploy connect|deploy" ]; then
-    return 0
+    echo 0
   else
-    return 1
+    echo 1
   fi
 
 }
+
 
 # Returns path to device node for a resource.
 get_device_for_res () {
