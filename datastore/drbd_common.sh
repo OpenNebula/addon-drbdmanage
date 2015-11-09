@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Return newline separted list of nodes that are assigned to a resource.
+# Return newline separated list of nodes that are assigned to a resource.
 get_res_nodes () {
       echo "$(drbdmanage assignments -m --resources $1 | awk -F',' '{ print $1 }')"
 }
@@ -12,7 +12,7 @@ get_assignment_node () {
 
 }
 
-# Returns path to device node for a resouce.
+# Returns path to device node for a resource.
 get_device_for_res () {
 
   DRBD_MINOR="$(drbdmanage v -m -R "$1" | awk -F',' '{ print $6 }')"
