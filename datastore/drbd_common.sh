@@ -12,7 +12,7 @@ get_assignment_node () {
 
 }
 
-# Check if resource is in connected on a single node, deployed state
+# Check if resource is in connected and deployed on a single node.
 is_res_deployed () {
 
   NODE_STATE="$(drbdmanage assignments -m --resources $1 --nodes $2 | awk -F',' '{ print $4, $5 }')"
