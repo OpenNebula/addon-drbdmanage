@@ -42,6 +42,16 @@ wait_res_deployed () {
 
 }
 
+# Wait until resource is deployed and connected on all nodes.
+wait_nodes_ready () {
+
+  node_list=($2)
+
+  for node in "${node_list[@]}"
+  do
+    wait_res_deployed $1 $2
+  done
+}
 
 # Returns path to device node for a resource.
 get_device_for_res () {
