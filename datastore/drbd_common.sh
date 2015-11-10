@@ -45,11 +45,11 @@ wait_res_deployed () {
 # Wait until resource is deployed and connected on all nodes.
 wait_nodes_ready () {
 
-  node_list=($2)
+  node_list=$(get_res_nodes $1)
 
   for node in "${node_list[@]}"
   do
-    wait_res_deployed $1 $2
+    wait_res_deployed $1 $node
   done
 }
 
