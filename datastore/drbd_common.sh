@@ -25,6 +25,23 @@ is_res_deployed () {
 
 }
 
+# Wait until resource is deployed and connected on a single node.
+wait_res_deployed () {
+
+  RETRY_LIMIT=10
+
+  until [ $(is_res_deployed $1 $2) -eq 0 ]; do
+    sleep 1
+    if [ RETRY_LIMIT -lt 1 ]; then
+      exit -1
+    fi
+    ((RETRY_LIMIT--))
+  done
+
+  echo 0
+
+}
+
 
 # Returns path to device node for a resource.
 get_device_for_res () {
