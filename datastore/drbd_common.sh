@@ -5,8 +5,8 @@ get_res_nodes () {
 
   res_nodes="$(drbdmanage assignments -m --resources $1 | awk -F',' '{ print $1 }')"
 
-  if [ -n $res_nodes ]; then
-    echo $res_nodes
+  if [ -n $"res_nodes" ]; then
+    echo $"res_nodes"
   else
     exit -1
   fi
