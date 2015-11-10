@@ -17,6 +17,7 @@ is_res_deployed () {
 
   NODE_STATE="$(drbdmanage assignments -m --resources $1 --nodes $2 | awk -F',' '{ print $4, $5 }')"
 
+  echo "$NODE_STATE <---- node state"
   if [ "$NODE_STATE" = "connect|deploy connect|deploy" ]; then
     echo 0
   else
