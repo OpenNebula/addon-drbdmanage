@@ -17,7 +17,6 @@ is_res_deployed () {
 
   NODE_STATE="$(drbdmanage assignments -m --resources $1 --nodes $2 | awk -F',' '{ print $4, $5 }')"
 
-  echo "$NODE_STATE <---- node state"
   if [ "$NODE_STATE" = "connect|deploy connect|deploy" ]; then
     echo 0
   else
@@ -31,14 +30,16 @@ wait_res_deployed () {
 
   RETRY_LIMIT=10
 
+  if (( $# > 2 )); then
+    exit -1
+  fi
+
   until [ $(is_res_deployed $1 $2) -eq 0 ]; do
-    echo "going to sleep"
     sleep 1
     if (( RETRY_LIMIT < 1 )); then
       exit -1
     fi
     ((RETRY_LIMIT--))
-    echo "only $RETRY_LIMIT times left"
   done
 
   echo 0
