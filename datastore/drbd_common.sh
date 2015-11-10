@@ -32,7 +32,7 @@ wait_res_deployed () {
 
   until [ $(is_res_deployed $1 $2) -eq 0 ]; do
     sleep 1
-    if [ RETRY_LIMIT -lt 1 ]; then
+    if (( RETRY_LIMIT < 1 )); then
       exit -1
     fi
     ((RETRY_LIMIT--))
