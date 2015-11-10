@@ -2,7 +2,14 @@
 
 # Return newline separated list of nodes that are assigned to a resource.
 get_res_nodes () {
-      echo "$(drbdmanage assignments -m --resources $1 | awk -F',' '{ print $1 }')"
+
+  res_nodes="$(drbdmanage assignments -m --resources $1 | awk -F',' '{ print $1 }')"
+
+  if [ -n res_nodes ]; then
+    echo res_nodes
+  else
+    exit -1
+  fi
 }
 
 # Return single node with a resource assigned to it.
@@ -30,9 +37,6 @@ wait_res_deployed () {
 
   RETRY_LIMIT=10
 
-  if (( $# > 2 )); then
-    exit -1
-  fi
 
   until [ $(is_res_deployed $1 $2) -eq 0 ]; do
     sleep 1
