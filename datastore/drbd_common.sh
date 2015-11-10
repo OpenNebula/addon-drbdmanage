@@ -46,8 +46,6 @@ wait_res_deployed () {
     ((RETRY_LIMIT--))
   done
 
-  echo 0
-
 }
 
 # Wait until resource is deployed and connected on all nodes.
