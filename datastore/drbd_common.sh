@@ -72,8 +72,8 @@ get_device_for_res () {
 res_exsists () {
   echo "$(drbdmanage list-resources --resources $1 -m | awk -F',' '{ print $1 }')"
 }
-# Add a resource and volume to drbd with a given size.
-add_vol () {
+# Add a resource to drbd with a given size.
+add_res () {
 
   # Exit if resource already exsists.
   if [ -n "$(res_exsists $1)" ]; then
@@ -85,6 +85,6 @@ add_vol () {
 }
 
 # Deploy resource on a single node.
-deploy_vol_on_node () {
+deploy_res_on_node () {
   $(drbdmanage assign-resource $1 $2)
 }
