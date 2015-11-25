@@ -85,6 +85,6 @@ drbd_add_res () {
 }
 
 # Deploy resource on a single node.
-deploy_res_on_node () {
+drbd_deploy_res_on_node () {
   $(drbdmanage assign-resource $1 $2)
 }
