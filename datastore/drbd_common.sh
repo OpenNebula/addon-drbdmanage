@@ -86,7 +86,7 @@ add_vol () {
 
 # Deploy volume on a list of nodes.
 deploy_vol_on_nodes () {
-  $(drbdmanage assign-resource $1 $2)
+  $(drbdmanage assign-resource $1 "$2")
 
   $(wait_nodes_ready $1)
 }
