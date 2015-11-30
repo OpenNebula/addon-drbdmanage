@@ -68,7 +68,7 @@ DRBD_RES_NAME="OpenNebula-image-${IMAGE_ID}"
 log "Creating a new $DRBD_SIZE resource $DRBD_RES_NAME \
   on the following nodes: $BRIDGE_LIST"
 
-drbd_add_res $DRBD_RES_NAME $DRBD_SIZE 
+drbd_add_res $DRBD_RES_NAME $DRBD_SIZE
 drbd_deploy_res_on_nodes $DRBD_RES_NAME $BRIDGE_LIST
 
 # Get the location of the DRBD device node.
@@ -100,16 +100,10 @@ http://*|https://*)
 
 esac
 
-# Find host with VOLUME_NAME assigned to it, might be different than DST_HOST
+# Find node with a resource assigned to it.
+RES_HOST=$(drbd_get_assignment_node $DRBD_RES_NAME)
 
-VOLUME_HOST=$(drbdmanage asignments -m --resources "$VOLUME_NAME" | awk -F',' '{ print $2 }' | head -n1)
+exec_and_log "eval $COPY_COMMAND | $SSH $RES_HOST $DD of=$IMAGE_DEVICE bs=2M" \
+    "Error dumping $SRC to $RES_HOST:$DRBD_DEVICE_PATH"
 
-if [ VOLUME_HOST -eq "" ]; then
-  log_error "Unable to find $VOLUME_NAME assigned to any DRBD nodes"
-  exit -1
-fi
-
-exec_and_log "eval $COPY_COMMAND | $SSH $VOLUME_HOST $DD of=$IMAGE_DEVICE bs=2M" \
-    "Error dumping $SRC to $VOLUME_HOST:$IMAGE_DEVICE"
-
-echo "$VOLUME_NAME"
+echo "$DRBD_RES_NAME"
