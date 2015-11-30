@@ -12,7 +12,8 @@ fi
 
 DRIVER_PATH=$(dirname $0)
 source ${DRIVER_PATH}/../libfs.sh
-source ${DRIVER_PATH}/drbd.conf
+source ${DRIVER_PATH}/../drbd.conf
+source ${DRIVER_PATH}/../drbd_common.sh
 
 # Get arguments from OpenNebula Core
 
@@ -60,44 +61,19 @@ fi
 
 set_up_datastore "$BASE_PATH" "$RESTRICTED_DIRS" "$SAFE_DIRS"
 
-# Check if redundancy level is valid
-
-REDUNDANCY_LOWER_BOUND=1
-REDUNDANCY_UPPER_BOUND=64
-
-if [[ "$DRBD_REDUNDANCY" -lt "$REDUNDANCY_LOWER_BOUND" ]]; then
-
-  error_message "Replication redundancy cannot be below \
-    "$REDUNDANCY_LOWER_BOUND", given: $DRBD_REDUNDANCY"
-  exit -1
-  
-elif [[ "$DRBD_REDUNDANCY" -gt "$REDUNDANCY_UPPER_BOUND" ]]; then
-
-  error_message "Replication redundancy cannot be above \
-    "$REDUNDANCY_UPPER_BOUND", given: $DRBD_REDUNDANCY"
-  exit -1
-
-fi
-
+# Create new resource in drbd.
 DRBD_SIZE="${SIZE}M"
-VOLUME_NAME="one-img-${IMAGE_ID}"
+DRBD_RES_NAME="OpenNebula-image-${IMAGE_ID}"
 
-REGISTER_COMMAND=$(cat << EOF
-  set -e
-  $(drbdmanage add-volume "$VOLUME_NAME" "$DRBD_SIZE" --deploy "$DRBD_REDUNDANCY")
-  
-    DRBD_MINOR="$(drbdmanage v -m -R "$VOLUME_NAME" | awk -F',' '{ print $6 }')"
-    IMAGE_DEVICE="/dev/$DRBD_MINOR_PREFIX$DRBD_MINOR"
+log "Creating a new $DRBD_SIZE resource $DRBD_RES_NAME \
+  on the following nodes: $BRIDGE_LIST"
 
-    log "Creating $VOLUME_NAME on device $IMAGE_DEVICE"
+drbd_add_res $DRBD_RES_NAME $DRBD_SIZE 
+drbd_deploy_res_on_nodes $DRBD_RES_NAME $BRIDGE_LIST
 
-    if [
+# Get the location of the DRBD device node.
+DRBD_DEVICE_PATH=$(drbd_get_device_for_res $DRBD_RES_NAME)
 
-EOF
-)
-
-ssh_exec_and_log "$DST_HOST" "$REGISTER_CMD" \
-   "Error registering $VOLUME_NAME on $DST_HOST"
 
 DOWNLOADER_ARGS=`set_downloader_args "$MD5" "$SHA1" "$NO_DECOMPRESS" "$LIMIT_TRANSFER_BW" "$SRC" -`
 
