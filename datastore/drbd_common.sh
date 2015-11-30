@@ -70,7 +70,9 @@ drbd_get_device_for_res () {
 
 # Check if resource exsists, returns resource name if it does.
 drbd_res_exsists () {
+
   echo "$(drbdmanage list-resources --resources $1 -m | awk -F',' '{ print $1 }')"
+
 }
 # Add a resource to drbd with a given size.
 drbd_add_res () {
@@ -94,4 +96,5 @@ drbd_deploy_res_on_nodes () {
     drbdmanage assign-resource $1 $node
     drbd_wait_res_deployed $1 $node
   done
+
 }
