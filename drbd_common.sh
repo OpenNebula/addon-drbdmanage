@@ -98,3 +98,16 @@ drbd_deploy_res_on_host () {
     drbdmanage assign-resource $1 $2 --client
     drbd_wait_res_deployed $1 $2 "--client"
 }
+
+# Determine the size of a resource in bytes.
+drbd_get_res_size () {
+
+  size_in_bytes=$(drbdmanage volumes -m --resources $1 | awk -F',' '{ print $4 * 1024 }')
+
+  if [ -n size_in_bytes ]; then
+    echo $size_in_bytes
+  else
+    exit -1
+  fi
+
+}
