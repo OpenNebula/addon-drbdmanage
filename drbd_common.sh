@@ -54,17 +54,6 @@ drbd_wait_res_deployed () {
 
 }
 
-# Wait until resource is deployed and connected on all nodes.
-drbd_wait_nodes_ready () {
-
-  node_list=$(drbd_get_res_nodes $1)
-
-  for node in "${node_list[@]}"
-  do
-    drbd_wait_res_deployed $1 $node
-  done
-}
-
 # Returns path to device node for a resource.
 drbd_get_device_for_res () {
 
