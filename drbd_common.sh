@@ -84,9 +84,7 @@ drbd_add_res () {
 # Deploy resource on a list of nodes, wait for res to be deployed on each node.
 drbd_deploy_res_on_nodes () {
 
-  node_list=$($2)
-
-  for node in "${node_list[@]}"
+  for node in "${@:2}"
   do
     drbdmanage assign-resource $1 $node
     drbd_wait_res_deployed $1 $node
