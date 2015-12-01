@@ -24,7 +24,13 @@ drbd_is_res_deployed () {
 
   NODE_STATE="$(drbdmanage assignments -m --resources $1 --nodes $2 | awk -F',' '{ print $4, $5 }')"
 
-  if [ "$NODE_STATE" = "connect|deploy connect|deploy" ]; then
+  if [ "$3" = "--client" ]; then
+    TARGET_STATE="connect|deploy|diskless connect|deploy|diskless"
+  else
+    TARGET_STATE="connect|deploy connect|deploy"
+  fi
+
+  if [ "$NODE_STATE" = "$TARGET_STATE" ]; then
     echo 0
   else
     echo 1
@@ -48,17 +54,6 @@ drbd_wait_res_deployed () {
 
 }
 
-# Wait until resource is deployed and connected on all nodes.
-drbd_wait_nodes_ready () {
-
-  node_list=$(drbd_get_res_nodes $1)
-
-  for node in "${node_list[@]}"
-  do
-    drbd_wait_res_deployed $1 $node
-  done
-}
-
 # Returns path to device node for a resource.
 drbd_get_device_for_res () {
 
@@ -68,7 +63,7 @@ drbd_get_device_for_res () {
 
 }
 
-# Check if resource exsists, returns resource name if it does.
+# Check if resource exists, returns resource name if it does.
 drbd_res_exsists () {
 
   echo "$(drbdmanage list-resources --resources $1 -m | awk -F',' '{ print $1 }')"
@@ -77,7 +72,7 @@ drbd_res_exsists () {
 # Add a resource to drbd with a given size.
 drbd_add_res () {
 
-  # Exit if resource already exsists.
+  # Exit if resource already exists.
   if [ -n "$(drbd_res_exsists $1)" ]; then
     exit -1
   else
@@ -89,12 +84,17 @@ drbd_add_res () {
 # Deploy resource on a list of nodes, wait for res to be deployed on each node.
 drbd_deploy_res_on_nodes () {
 
-  node_list=$($2)
-
-  for node in "${node_list[@]}"
+  for node in "${@:2}"
   do
     drbdmanage assign-resource $1 $node
     drbd_wait_res_deployed $1 $node
   done
 
+}
+
+# Deploy resource on virtualization host in diskless mode.
+drbd_deploy_res_on_host () {
+
+    drbdmanage assign-resource $1 $node
+    drbd_wait_res_deployed $1 $node "--client"
 }
