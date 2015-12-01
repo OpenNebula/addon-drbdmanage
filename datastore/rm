@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Set up environment
+
+if [ -z "${ONE_LOCATION}" ]; then
+    LIB_LOCATION=/usr/lib/one
+else
+    LIB_LOCATION=$ONE_LOCATION/lib
+fi
+
+. $LIB_LOCATION/sh/scripts_common.sh
+
+DRIVER_PATH=$(dirname $0)
+source ${DRIVER_PATH}/../libfs.sh
+source ${DRIVER_PATH}/../drbd_common.sh
+source ${DRIVER_PATH}/../drbd.conf
+
+# Get arguments from OpenNebula Core
+
+DRIVER_ACTION=$1
+IMAGE_ID=$2
+
+XPATH="${DRIVER_PATH}/../xpath.rb -b $DRIVER_ACTION"
+
+unset i j XPATH_ELEMENTS
+
+while IFS= read -r -d '' element; do
+    XPATH_ELEMENTS[i++]="$element"
+done < <($XPATH     /DS_DRIVER_ACTION_DATA/IMAGE/SOURCE)
+
+DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
+
+log "Removing $DRBD_RES_NAME from the DRBD storage cluster."
+
+drbdmanage remove-resource -q $DRBD_RES_NAME
+
+exit 0
