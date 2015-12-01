@@ -91,3 +91,10 @@ drbd_deploy_res_on_nodes () {
   done
 
 }
+
+# Deploy resource on virtualization host in diskless mode.
+drbd_deploy_res_on_host () {
+
+    drbdmanage assign-resource $1 $node
+    drbd_wait_res_deployed $1 $node "--client"
+}
