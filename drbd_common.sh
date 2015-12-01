@@ -63,7 +63,7 @@ drbd_get_device_for_res () {
 
 }
 
-# Check if resource exsists, returns resource name if it does.
+# Check if resource exists, returns resource name if it does.
 drbd_res_exsists () {
 
   echo "$(drbdmanage list-resources --resources $1 -m | awk -F',' '{ print $1 }')"
@@ -72,7 +72,7 @@ drbd_res_exsists () {
 # Add a resource to drbd with a given size.
 drbd_add_res () {
 
-  # Exit if resource already exsists.
+  # Exit if resource already exists.
   if [ -n "$(drbd_res_exsists $1)" ]; then
     exit -1
   else
