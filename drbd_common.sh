@@ -24,7 +24,13 @@ drbd_is_res_deployed () {
 
   NODE_STATE="$(drbdmanage assignments -m --resources $1 --nodes $2 | awk -F',' '{ print $4, $5 }')"
 
-  if [ "$NODE_STATE" = "connect|deploy connect|deploy" ]; then
+  if [ "$3" = "--client" ]; then
+    TARGET_STATE="connect|deploy|diskless connect|deploy|diskless"
+  else
+    TARGET_STATE="connect|deploy connect|deploy"
+  fi
+
+  if [ "$NODE_STATE" = "$TARGET_STATE" ]; then
     echo 0
   else
     echo 1
