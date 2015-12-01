@@ -44,7 +44,7 @@ drbd_wait_res_deployed () {
   RETRY_LIMIT=10
 
 
-  until [ $(drbd_is_res_deployed $1 $2) -eq 0 ]; do
+  until [ $(drbd_is_res_deployed $1 $2 $3) -eq 0 ]; do
     sleep 1
     if (( RETRY_LIMIT < 1 )); then
       exit -1
