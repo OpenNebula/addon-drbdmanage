@@ -3,7 +3,9 @@
 # Return newline separated list of nodes that are assigned to a resource.
 drbd_get_res_nodes () {
 
-  res_nodes="$(drbdmanage assignments -m --resources $1 | awk -F',' '{ print $1 }')"
+  res_name=$1
+
+  res_nodes="$(drbdmanage assignments -m --resources $res_name awk -F',' '{ print $1 }')"
 
   if [ -n "$res_nodes" ]; then
     echo "$res_nodes"
@@ -15,22 +17,28 @@ drbd_get_res_nodes () {
 # Return single node with a resource assigned to it.
 drbd_get_assignment_node () {
 
-  echo $(drbd_get_res_nodes $1 | awk -F' ' '{ print $1 }' )
+  res_name=$1
+
+  echo $(drbd_get_res_nodes $res_name awk -F' ' '{ print $1 }' )
 
 }
 
 # Check if resource is in connected and deployed on a single node.
 drbd_is_res_deployed () {
 
-  NODE_STATE="$(drbdmanage assignments -m --resources $1 --nodes $2 | awk -F',' '{ print $4, $5 }')"
+  res_name=$1
+  node_name=$2
+  client_option=$3
 
-  if [ "$3" = "--client" ]; then
-    TARGET_STATE="connect|deploy|diskless connect|deploy|diskless"
+  node_state="$(drbdmanage assignments -m --resources $res_name --nodes $node_name | awk -F',' '{ print $4, $5 }')"
+
+  if [ "$client_option" = "--client" ]; then
+    target_state="connect|deploy|diskless connect|deploy|diskless"
   else
-    TARGET_STATE="connect|deploy connect|deploy"
+    target_state="connect|deploy connect|deploy"
   fi
 
-  if [ "$NODE_STATE" = "$TARGET_STATE" ]; then
+  if [ "$node_state" = "$target_state" ]; then
     echo 0
   else
     echo 1
@@ -41,15 +49,18 @@ drbd_is_res_deployed () {
 # Wait until resource is deployed and connected on a single node.
 drbd_wait_res_deployed () {
 
-  RETRY_LIMIT=10
+  res_name=$1
+  node_name=$2
+  client_option=$3
 
+  retries=10
 
-  until [ $(drbd_is_res_deployed $1 $2 $3) -eq 0 ]; do
+  until [ $(drbd_is_res_deployed $res_name $node_name $client_option) -eq 0 ]; do
     sleep 1
-    if (( RETRY_LIMIT < 1 )); then
+    if (( retries < 1 )); then
       exit -1
     fi
-    ((RETRY_LIMIT--))
+    ((retries--))
   done
 
 }
@@ -57,26 +68,33 @@ drbd_wait_res_deployed () {
 # Returns path to device node for a resource.
 drbd_get_device_for_res () {
 
-  DRBD_MINOR="$(drbdmanage v -m -R "$1" | awk -F',' '{ print $6 }')"
+  res_name=$1
 
-  echo "/dev/$DRBD_MINOR_PREFIX$DRBD_MINOR"
+  drbd_minor="$(drbdmanage v -m -R $res_name | awk -F',' '{ print $6 }')"
+
+  echo "/dev/$DRBD_MINOR_PREFIX$drbd_minor"
 
 }
 
 # Check if resource exists, returns resource name if it does.
 drbd_res_exsists () {
 
-  echo "$(drbdmanage list-resources --resources $1 -m | awk -F',' '{ print $1 }')"
+  res_name=$1
+
+  echo "$(drbdmanage list-resources --resources $res_name -m | awk -F',' '{ print $1 }')"
 
 }
 # Add a resource to drbd with a given size.
 drbd_add_res () {
 
+  res_name=$1
+  size=$2
+
   # Exit if resource already exists.
-  if [ -n "$(drbd_res_exsists $1)" ]; then
+  if [ -n "$(drbd_res_exsists $res_name)" ]; then
     exit -1
   else
-    $(drbdmanage add-volume $1 $2)
+    $(drbdmanage add-volume $res_name $size)
   fi
 
 }
@@ -84,10 +102,12 @@ drbd_add_res () {
 # Deploy resource on a list of nodes, wait for res to be deployed on each node.
 drbd_deploy_res_on_nodes () {
 
+  res_name=$1
+
   for node in "${@:2}"
   do
-    drbdmanage assign-resource $1 $node
-    drbd_wait_res_deployed $1 $node
+    drbdmanage assign-resource $res_name $node
+    drbd_wait_res_deployed $res_name $node
   done
 
 }
@@ -95,14 +115,19 @@ drbd_deploy_res_on_nodes () {
 # Deploy resource on virtualization host in diskless mode.
 drbd_deploy_res_on_host () {
 
-    drbdmanage assign-resource $1 $2 --client
-    drbd_wait_res_deployed $1 $2 "--client"
+    res_name=$1
+    node_name=$2
+
+    drbdmanage assign-resource $res_name $node_name --client
+    drbd_wait_res_deployed $res_name $node_name "--client"
 }
 
 # Determine the size of a resource in bytes.
 drbd_get_res_size () {
 
-  size_in_bytes=$(drbdmanage volumes -m --resources $1 | awk -F',' '{ print $4 * 1024 }')
+  res_name=$1
+
+  size_in_bytes=$(drbdmanage volumes -m --resources $res_name | awk -F',' '{ print $4 * 1024 }')
 
   if [ -n size_in_bytes ]; then
     echo $size_in_bytes
