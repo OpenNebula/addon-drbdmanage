@@ -2,8 +2,9 @@
 
 # Return newline separated list of nodes that are assigned to a resource.
 drbd_get_res_nodes () {
+  res_name=$1
 
-  res_nodes="$(drbdmanage assignments -m --resources $1 | awk -F',' '{ print $1 }')"
+  res_nodes="$(drbdmanage assignments -m --resources $res_name awk -F',' '{ print $1 }')"
 
   if [ -n "$res_nodes" ]; then
     echo "$res_nodes"
@@ -14,100 +15,114 @@ drbd_get_res_nodes () {
 
 # Return single node with a resource assigned to it.
 drbd_get_assignment_node () {
+  res_name=$1
 
-  echo $(drbd_get_res_nodes $1 | awk -F' ' '{ print $1 }' )
-
+  echo $(drbd_get_res_nodes $res_name awk -F' ' '{ print $1 }' )
 }
 
 # Check if resource is in connected and deployed on a single node.
 drbd_is_res_deployed () {
+  res_name=$1
+  node_name=$2
+  client_option=$3
 
-  NODE_STATE="$(drbdmanage assignments -m --resources $1 --nodes $2 | awk -F',' '{ print $4, $5 }')"
+  node_state="$(drbdmanage assignments -m --resources $res_name --nodes $node_name | awk -F',' '{ print $4, $5 }')"
 
-  if [ "$3" = "--client" ]; then
-    TARGET_STATE="connect|deploy|diskless connect|deploy|diskless"
+  if [ "$client_option" = "--client" ]; then
+    target_state="connect|deploy|diskless connect|deploy|diskless"
   else
-    TARGET_STATE="connect|deploy connect|deploy"
+    target_state="connect|deploy connect|deploy"
   fi
 
-  if [ "$NODE_STATE" = "$TARGET_STATE" ]; then
+  if [ "$node_state" = "$target_state" ]; then
     echo 0
   else
     echo 1
   fi
-
 }
 
 # Wait until resource is deployed and connected on a single node.
 drbd_wait_res_deployed () {
+  res_name=$1
+  node_name=$2
+  client_option=$3
 
-  RETRY_LIMIT=10
+  retries=10
 
-
-  until [ $(drbd_is_res_deployed $1 $2 $3) -eq 0 ]; do
+  until [ $(drbd_is_res_deployed $res_name $node_name $client_option) -eq 0 ]; do
     sleep 1
-    if (( RETRY_LIMIT < 1 )); then
+    if (( retries < 1 )); then
+      log_error "Failed to deploy $res_name on $node_name: retries exceeded"
       exit -1
     fi
-    ((RETRY_LIMIT--))
+    ((retries--))
+    log "Waiting for resource $res_name to be deployed on $node_name. $retries attempts remaining"
   done
-
 }
 
 # Returns path to device node for a resource.
 drbd_get_device_for_res () {
+  res_name=$1
 
-  DRBD_MINOR="$(drbdmanage v -m -R "$1" | awk -F',' '{ print $6 }')"
+  drbd_minor="$(drbdmanage v -m -R $res_name | awk -F',' '{ print $6 }')"
 
-  echo "/dev/$DRBD_MINOR_PREFIX$DRBD_MINOR"
-
+  echo "/dev/$DRBD_MINOR_PREFIX$drbd_minor"
 }
 
 # Check if resource exists, returns resource name if it does.
 drbd_res_exsists () {
+  res_name=$1
 
-  echo "$(drbdmanage list-resources --resources $1 -m | awk -F',' '{ print $1 }')"
-
+  echo "$(drbdmanage list-resources --resources $res_name -m | awk -F',' '{ print $1 }')"
 }
+
 # Add a resource to drbd with a given size.
 drbd_add_res () {
+  res_name=$1
+  size=$2
 
   # Exit if resource already exists.
-  if [ -n "$(drbd_res_exsists $1)" ]; then
+  if [ -n "$(drbd_res_exsists $res_name)" ]; then
+    log_error "Resource $res_name already defined."
     exit -1
   else
-    $(drbdmanage add-volume $1 $2)
+    log "Adding resource $res_name."
+    $(drbdmanage add-volume $res_name $size)
   fi
-
 }
 
 # Deploy resource on a list of nodes, wait for res to be deployed on each node.
 drbd_deploy_res_on_nodes () {
+  res_name=$1
 
   for node in "${@:2}"
   do
-    drbdmanage assign-resource $1 $node
-    drbd_wait_res_deployed $1 $node
+    log "Assigning resource $res_name to storage node $node"
+    drbdmanage assign-resource $res_name $node
+    drbd_wait_res_deployed $res_name $node
   done
-
 }
 
 # Deploy resource on virtualization host in diskless mode.
 drbd_deploy_res_on_host () {
+    res_name=$1
+    node_name=$2
 
-    drbdmanage assign-resource $1 $2 --client
-    drbd_wait_res_deployed $1 $2 "--client"
+    log "Assigning resource $res_name to client node $node_name"
+    drbdmanage assign-resource $res_name $node_name --client
+    drbd_wait_res_deployed $res_name $node_name "--client"
 }
 
 # Determine the size of a resource in bytes.
 drbd_get_res_size () {
+  res_name=$1
 
-  size_in_bytes=$(drbdmanage volumes -m --resources $1 | awk -F',' '{ print $4 * 1024 }')
+  size_in_bytes=$(drbdmanage volumes -m --resources $res_name | awk -F',' '{ print $4 * 1024 }')
 
   if [ -n size_in_bytes ]; then
     echo $size_in_bytes
   else
+    log_error "Unable to determine size for $res_name"
     exit -1
   fi
-
 }
