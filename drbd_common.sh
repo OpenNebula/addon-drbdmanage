@@ -164,6 +164,4 @@ drbd_clone_res () {
 
   log "Removing snapshot taken from $res_name."
   drbdmanage remove-snapshot $res_name $snap_name
-
-  drbd_deploy_res_on_nodes $res_from_snap_name $nodes
 }
