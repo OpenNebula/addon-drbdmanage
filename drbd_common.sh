@@ -83,8 +83,10 @@ drbd_add_res () {
 
   # Exit if resource already exists.
   if [ -n "$(drbd_res_exsists $res_name)" ]; then
+    log_error "Resource $res_name already defined."
     exit -1
   else
+    log "Adding resource $res_name."
     $(drbdmanage add-volume $res_name $size)
   fi
 }
