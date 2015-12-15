@@ -126,3 +126,22 @@ drbd_get_res_size () {
     exit -1
   fi
 }
+
+# Removes a resource, waits for operation to complete on all nodes.
+drbd_remove_res () {
+  res_name=$1
+
+  drbdmanage remove-resource -q $res_name
+
+  retries=10
+
+  until [ -n $(drbd_res_exsists $res_name) ]; do
+    sleep 1
+    if (( retries < 1 )); then
+      log_error "Failed to remove $res_name: retries exceeded"
+      exit -1
+    fi
+    ((retries--))
+    log "Waiting for resource $res_name to be removed from all nodes."
+  done
+}
