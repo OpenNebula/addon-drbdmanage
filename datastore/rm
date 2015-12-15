@@ -30,8 +30,6 @@ done < <($XPATH     /DS_DRIVER_ACTION_DATA/IMAGE/SOURCE)
 
 DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
 
-log "Removing $DRBD_RES_NAME from the DRBD storage cluster."
-
-drbdmanage remove-resource -q $DRBD_RES_NAME
+drbd_remove_res $DRBD_RES_NAME
 
 exit 0
