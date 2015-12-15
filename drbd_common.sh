@@ -97,6 +97,7 @@ drbd_deploy_res_on_nodes () {
 
   for node in "${@:2}"
   do
+    log "Assigning resource $res_name to storage node $node_name"
     drbdmanage assign-resource $res_name $node
     drbd_wait_res_deployed $res_name $node
   done
@@ -107,6 +108,7 @@ drbd_deploy_res_on_host () {
     res_name=$1
     node_name=$2
 
+    log "Assigning resource $res_name to client node $node_name"
     drbdmanage assign-resource $res_name $node_name --client
     drbd_wait_res_deployed $res_name $node_name "--client"
 }
