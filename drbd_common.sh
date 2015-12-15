@@ -52,10 +52,11 @@ drbd_wait_res_deployed () {
   until [ $(drbd_is_res_deployed $res_name $node_name $client_option) -eq 0 ]; do
     sleep 1
     if (( retries < 1 )); then
+      log_error "Failed to deploy $res_name on $node_name: retries exceeded"
       exit -1
     fi
     ((retries--))
-    log "Waiting for resource $res_name to be deployed on $node_name. $retries attemps remaining"
+    log "Waiting for resource $res_name to be deployed on $node_name. $retries attempts remaining"
   done
 }
 
