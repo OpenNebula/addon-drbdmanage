@@ -56,7 +56,7 @@ drbd_wait_res_deployed () {
       exit -1
     fi
     ((retries--))
-    log "Waiting for resource $res_name to be deployed on $node_name. $retries attempts remaining"
+    log "Waiting for resource $res_name to be deployed on $node_name. $retries attempts remaining."
   done
 }
 
@@ -131,6 +131,7 @@ drbd_get_res_size () {
 drbd_remove_res () {
   res_name=$1
 
+  log "Removing $res_name from DRBD storage cluster."
   drbdmanage remove-resource -q $res_name
 
   retries=10
@@ -138,10 +139,12 @@ drbd_remove_res () {
   until [ -n $(drbd_res_exsists $res_name) ]; do
     sleep 1
     if (( retries < 1 )); then
-      log_error "Failed to remove $res_name: retries exceeded"
+      log_error "Failed to remove $res_name: retries exceeded."
       exit -1
     fi
     ((retries--))
-    log "Waiting for resource $res_name to be removed from all nodes."
+    log "Waiting for resource $res_name to be removed from all nodes. $retries attempts remaining."
   done
+
+  log "$res_name successfully removed from all nodes."
 }
