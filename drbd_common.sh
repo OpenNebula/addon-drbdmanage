@@ -156,7 +156,7 @@ drbd_clone_res () {
   nodes=$3
   snap_name="$res_name"_snap_"$(date +%s)"
 
-  log "Creating snapshot of $resname."
+  log "Creating snapshot of $res_name."
   drbdmanage add-snapshot $snap_name $res_name $nodes
   
   log "Creating new resource $res_from_snap_name from snapshot of $snap_name."
