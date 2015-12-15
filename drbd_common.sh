@@ -55,6 +55,7 @@ drbd_wait_res_deployed () {
       exit -1
     fi
     ((retries--))
+    log "Waiting for resource $res_name to be deployed on $node_name. $retries attemps remaining"
   done
 }
 
