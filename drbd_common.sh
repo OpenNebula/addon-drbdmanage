@@ -136,7 +136,7 @@ drbd_remove_res () {
 
   retries=10
 
-  until [ -n $(drbd_res_exsists $res_name) ]; do
+  until [ -z $(drbd_res_exsists $res_name) ]; do
     sleep 1
     if (( retries < 1 )); then
       log_error "Failed to remove $res_name: retries exceeded."
