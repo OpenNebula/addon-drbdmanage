@@ -122,6 +122,7 @@ drbd_get_res_size () {
   if [ -n size_in_bytes ]; then
     echo $size_in_bytes
   else
+    log_error "Unable to determine size for $res_name"
     exit -1
   fi
 }
