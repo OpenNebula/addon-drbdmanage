@@ -166,3 +166,16 @@ drbd_clone_res () {
   log "Removing snapshot taken from $res_name."
   drbdmanage remove-snapshot $res_name $snap_name
 }
+
+drbd_monitor () {
+  nodes="${@:2}"
+
+  USED_MB=$(drbdmanage v -m | awk -F',' '{ sum+=$4 } END { print sum / 1024 }')
+  TOTAL_MB=$(drbdmanage n -N $nodes -m | \
+    awk -F',' '{ if (!total || $4<total) total=$4 } END { print total / 1024 }')
+  FREE_MB=$(($TOTAL_MB - $USED_MB))
+
+  echo "FREE_MB=$FREE_MB"
+  echo "USED_MB=$USED_MB"
+  echo "TOTAL_MB=$TOTAL_MB"
+}
