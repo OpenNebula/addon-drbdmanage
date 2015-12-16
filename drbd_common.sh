@@ -168,7 +168,7 @@ drbd_clone_res () {
 }
 
 drbd_monitor () {
-  nodes="${@:2}"
+  nodes="${@:1}"
 
   USED_MB=$(drbdmanage v -m | awk -F',' '{ sum+=$4 } END { print sum / 1024 }')
   TOTAL_MB=$(drbdmanage n -N $nodes -m | \
