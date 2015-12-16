@@ -95,10 +95,11 @@ drbd_add_res () {
 drbd_deploy_res_on_nodes () {
   res_name=$1
 
+  log "Assigning resource $res_name to storage nodes."
+  drbdmanage assign-resource $res_name "${@:2}"
+
   for node in "${@:2}"
   do
-    log "Assigning resource $res_name to storage node $node"
-    drbdmanage assign-resource $res_name $node
     drbd_wait_res_deployed $res_name $node
   done
 }
