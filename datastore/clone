@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Set up environment
+
+if [ -z "${ONE_LOCATION}" ]; then
+    LIB_LOCATION=/usr/lib/one
+else
+    LIB_LOCATION=$ONE_LOCATION/lib
+fi
+
+. $LIB_LOCATION/sh/scripts_common.sh
+
+DRIVER_PATH=$(dirname $0)
+source ${DRIVER_PATH}/../libfs.sh
+source ${DRIVER_PATH}/../drbd.conf
+source ${DRIVER_PATH}/../drbd_common.sh
+
+# Get arguments from OpenNebula Core
+
+DRIVER_ACTION=$1
+IMAGE_ID=$2
+
+XPATH="${DRIVER_PATH}/../xpath.rb -b $DRIVER_ACTION"
+
+unset i j XPATH_ELEMENTS
+
+while IFS= read -r -d '' element; do
+    XPATH_ELEMENTS[i++]="$element"
+done < <($XPATH     /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/BRIDGE_LIST \
+                    /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/DRBD_REDUNDANCY \
+                    /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/DRBD_MINOR_PREFIX \
+                    /DS_DRIVER_ACTION_DATA/IMAGE/PATH)
+
+BRIDGE_LIST="${XPATH_ELEMENTS[j++]}"
+DRBD_REDUNDANCY="${XPATH_ELEMENTS[j++]:-$DRBD_REDUNDANCY}"
+DRBD_MINOR_PREFIX="${XPATH_ELEMENTS[j++]:-$DRBD_MINOR_PREFIX}"
+SRC="${XPATH_ELEMENTS[j++]}"
+
+DST_HOST=`get_destination_host $IMAGE_ID`
+
+if [ -z "$DST_HOST" ]; then
+    error_message "Datastore template missing 'BRIDGE_LIST' attribute."
+    exit -1
+fi
+
+DRBD_RES_NAME="OpenNebula-clone-${IMAGE_ID}"
+
+drbd_clone_res $DRBD_RES_NAME $SRC $BRIDGE_LIST
+
+exit 0

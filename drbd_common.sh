@@ -148,3 +148,20 @@ drbd_remove_res () {
 
   log "$res_name successfully removed from all nodes."
 }
+
+# Clones a resource
+drbd_clone_res () {
+  res_from_snap_name=$1
+  res_name=$2
+  nodes=$3
+  snap_name="$res_name"_snap_"$(date +%s)"
+
+  log "Creating snapshot of $res_name."
+  drbdmanage add-snapshot $snap_name $res_name $nodes
+  
+  log "Creating new resource $res_from_snap_name from snapshot of $snap_name."
+  drbdmanage restore-snapshot $res_from_snap_name $res_name $snap_name
+
+  log "Removing snapshot taken from $res_name."
+  drbdmanage remove-snapshot $res_name $snap_name
+}
