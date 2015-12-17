@@ -1,0 +1,16 @@
+SRC=$1
+DST=$2
+
+VM_ID=$3
+DS_ID=$4
+
+if [ -z "${ONE_LOCATION}" ]; then
+    TMCOMMON=/var/lib/one/remotes/tm/tm_common.sh
+else
+    TMCOMMON=$ONE_LOCATION/var/remotes/tm/tm_common.sh
+fi
+
+source $TMCOMMON
+
+DRIVER_PATH=$(dirname $0)
+source ${DRIVER_PATH}/../drbd_common.sh
