@@ -1,3 +1,5 @@
+#!/bin/bash
+
 SRC=$1
 DST=$2
 
