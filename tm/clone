@@ -43,7 +43,7 @@ LINK_COMMAND=$(cat <<EOF
     # Find DRBD device and link it to the host ds path
     DRBD_DEVICE_NAME=\$(drbd_get_device_for_res \$DRBD_CLONE_NAME)
     ln -s "\$DRBD_DEVICE_NAME" "$DST_PATH"
-  EOF
+EOF
 )
 
 shh_exec_and_log "$DST_HOST" "$LINK COMMAND" \
