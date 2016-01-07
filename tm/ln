@@ -1,0 +1,44 @@
+#!/bin/bash
+
+SRC=$1
+DST=$2
+
+VM_ID=$3
+DS_ID=$4
+
+if [ -z "${ONE_LOCATION}" ]; then
+    TMCOMMON=/var/lib/one/remotes/tm/tm_common.sh
+else
+    TMCOMMON=$ONE_LOCATION/var/remotes/tm/tm_common.sh
+fi
+
+source $TMCOMMON
+
+DRIVER_PATH=$(dirname $0)
+source ${DRIVER_PATH}/../drbd_common.sh
+
+# Get virtualization host information
+DST_PATH=$(arg_path $DST)
+DST_HOST=$(arg_host $DST)
+DST_DIR=$(dirname $DST_PATH)
+
+# Recouce name.
+DRBD_RES_NAME=$SRC
+
+# Assign resource to host.
+$(drbd_deploy_res_on_host $DRBD_CLONE_NAME $DST_HOST)
+
+# Link DRBD device to datastore location.
+LINK_COMMAND=$(cat <<EOF
+    set -e
+
+    # Find DRBD device and link it to the host ds path
+    DRBD_DEVICE_NAME=$(drbd_get_device_for_res $DRBD_RES_NAME)
+    ln -s "\$DRBD_DEVICE_NAME" "$DST_PATH"
+EOF
+)
+
+shh_exec_and_log "$DST_HOST" "$LINK_COMMAND" \
+          "Error: Unable to link $DRBD_RES_NAME to $DST_PATH on $DST_HOST"
+
+exit 0
