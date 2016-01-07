@@ -46,7 +46,7 @@ LINK_COMMAND=$(cat <<EOF
 EOF
 )
 
-shh_exec_and_log "$DST_HOST" "$LINK COMMAND" \
+shh_exec_and_log "$DST_HOST" "$LINK_COMMAND" \
           "Error: Unable to link $DRBD_CLONE_NAME to $DST_PATH on $DST_HOST"
 
 exit 0
