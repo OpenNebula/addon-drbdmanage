@@ -1,0 +1,56 @@
+#!/bin/bash
+
+SRC=$1
+DST=$2
+
+VM_ID=$3
+DS_ID=$4
+
+if [ -z "${ONE_LOCATION}" ]; then
+    TMCOMMON=/var/lib/one/remotes/tm/tm_common.sh
+else
+    TMCOMMON=$ONE_LOCATION/var/remotes/tm/tm_common.sh
+fi
+
+DRIVER_PATH=$(dirname $0)
+
+source $TMCOMMON
+
+source ${DRIVER_PATH}/../drbd_common.sh
+
+SRC_HOST=`arg_host $SRC`
+
+DISK_ID=$(echo $SRC|awk -F. '{print $NF}')
+
+# Get image information
+
+XPATH="${DRIVER_PATH}/../../datastore/xpath.rb --stdin"
+
+unset i j XPATH_ELEMENTS
+
+while IFS= read -r -d '' element; do
+    XPATH_ELEMENTS[i++]="$element"
+done < <(onevm show -x $VM_ID| $XPATH \
+                    /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/SOURCE \
+                    /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/SAVE_AS \
+                    /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/PERSISTENT)
+
+DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
+SAVE_AS="${XPATH_ELEMENTS[j++]}"
+PERSISTENT="${XPATH_ELEMENTS[j++]}"
+
+# Change resource name to match non-persistent image name.
+if [ -z "$PERSISTENT" ]; then
+  DRBD_RES_NAME="OpenNebula-clone-$DRBD_RES_NAME"
+fi
+
+# Get new (cloned) resource name.
+DRBD_CLONE_NAME="OpenNebula-clone-$DRBD_RES_NAME"
+
+# Node that holds temporary snapshot needed to clone resource.
+DRBD_SNAP_NODE=$(drbd_get_assignment_node $RBD_RES_NAME)
+
+# Create new resource from DRBD_RES_NAME
+$(drbd_clone_res $DRBD_CLONE_NAME $DRBD_RES_NAME $DRBD_SNAP_NODE)
+
+exit 0
