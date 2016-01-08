@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Log argument to the syslog.
+drbd_log () {
+  logger -t "addon-drbdmanage" "$1"
+}
+
 # Return newline separated list of nodes that are assigned to a resource.
 drbd_get_res_nodes () {
   res_name=$1
