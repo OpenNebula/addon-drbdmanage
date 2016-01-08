@@ -179,3 +179,22 @@ drbd_monitor () {
   echo "USED_MB=$USED_MB"
   echo "TOTAL_MB=$TOTAL_MB"
 }
+
+# Unassign resouce from node.
+drbd_unassign_res () {
+  res_name=$1
+  node=$2
+
+  # Wait until resource is unassigned.
+  retries=10
+
+  until [ -z $(drbdmanage list-assignments --resources $res_name --nodes $node -m) ]; do
+    sleep 1
+    if (( retries < 1 )); then
+      log_error "Failed to unassign $res_name: retries exceeded."
+      exit -1
+    fi
+    ((retries--))
+    log "Waiting for resource $res_name to be unassigned from $node. $retries attempts remaining."
+  done
+}
