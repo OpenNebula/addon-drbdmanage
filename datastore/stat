@@ -34,6 +34,6 @@ DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
 
 SIZE=$(drbd_get_res_size $DRBD_RES_NAME)
 
-log "$DRBD_RES_NAME has a size of $SIZE bytes."
+drbd_log "$DRBD_RES_NAME has a size of $SIZE bytes."
 
 echo $SIZE
