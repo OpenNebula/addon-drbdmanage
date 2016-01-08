@@ -57,11 +57,11 @@ drbd_wait_res_deployed () {
   until [ $(drbd_is_res_deployed $res_name $node_name $client_option) -eq 0 ]; do
     sleep 1
     if (( retries < 1 )); then
-      log_error "Failed to deploy $res_name on $node_name: retries exceeded"
+      drbd_log "Failed to deploy $res_name on $node_name: retries exceeded"
       exit -1
     fi
     ((retries--))
-    log "Waiting for resource $res_name to be deployed on $node_name. $retries attempts remaining."
+    drbd_log "Waiting for resource $res_name to be deployed on $node_name. $retries attempts remaining."
   done
 }
 
@@ -88,10 +88,10 @@ drbd_add_res () {
 
   # Exit if resource already exists.
   if [ -n "$(drbd_res_exsists $res_name)" ]; then
-    log_error "Resource $res_name already defined."
+    drbd_log "Resource $res_name already defined."
     exit -1
   else
-    log "Adding resource $res_name."
+    drbd_log "Adding resource $res_name."
     $(drbdmanage add-volume $res_name $size)
   fi
 }
@@ -100,7 +100,7 @@ drbd_add_res () {
 drbd_deploy_res_on_nodes () {
   res_name=$1
 
-  log "Assigning resource $res_name to storage nodes."
+  drbd_log "Assigning resource $res_name to storage nodes."
   drbdmanage assign-resource $res_name "${@:2}"
 
   for node in "${@:2}"
@@ -114,7 +114,7 @@ drbd_deploy_res_on_host () {
     res_name=$1
     node_name=$2
 
-    log "Assigning resource $res_name to client node $node_name"
+    drbd_log "Assigning resource $res_name to client node $node_name"
     drbdmanage assign-resource $res_name $node_name --client
     drbd_wait_res_deployed $res_name $node_name "--client"
 }
@@ -128,7 +128,7 @@ drbd_get_res_size () {
   if [ -n size_in_mb ]; then
     echo $size_in_mb
   else
-    log_error "Unable to determine size for $res_name"
+    drbd_log "Unable to determine size for $res_name"
     exit -1
   fi
 }
@@ -137,7 +137,7 @@ drbd_get_res_size () {
 drbd_remove_res () {
   res_name=$1
 
-  log "Removing $res_name from DRBD storage cluster."
+  drbd_log "Removing $res_name from DRBD storage cluster."
   drbdmanage remove-resource -q $res_name
 
   retries=10
@@ -145,14 +145,14 @@ drbd_remove_res () {
   until [ -z $(drbd_res_exsists $res_name) ]; do
     sleep 1
     if (( retries < 1 )); then
-      log_error "Failed to remove $res_name: retries exceeded."
+      drbd_log "Failed to remove $res_name: retries exceeded."
       exit -1
     fi
     ((retries--))
-    log "Waiting for resource $res_name to be removed from all nodes. $retries attempts remaining."
+    drbd_log "Waiting for resource $res_name to be removed from all nodes. $retries attempts remaining."
   done
 
-  log "$res_name successfully removed from all nodes."
+  drbd_log "$res_name successfully removed from all nodes."
 }
 
 # Clones a resource
@@ -162,13 +162,13 @@ drbd_clone_res () {
   nodes=$3
   snap_name="$res_name"_snap_"$(date +%s)"
 
-  log "Creating snapshot of $res_name."
+  drbd_log "Creating snapshot of $res_name."
   drbdmanage add-snapshot $snap_name $res_name $nodes
   
-  log "Creating new resource $res_from_snap_name from snapshot of $snap_name."
+  drbd_log "Creating new resource $res_from_snap_name from snapshot of $snap_name."
   drbdmanage restore-snapshot $res_from_snap_name $res_name $snap_name
 
-  log "Removing snapshot taken from $res_name."
+  drbd_log "Removing snapshot taken from $res_name."
   drbdmanage remove-snapshot $res_name $snap_name
 }
 
@@ -196,10 +196,10 @@ drbd_unassign_res () {
   until [ -z $(drbdmanage list-assignments --resources $res_name --nodes $node -m) ]; do
     sleep 1
     if (( retries < 1 )); then
-      log_error "Failed to unassign $res_name: retries exceeded."
+      drbd_log "Failed to unassign $res_name: retries exceeded."
       exit -1
     fi
     ((retries--))
-    log "Waiting for resource $res_name to be unassigned from $node. $retries attempts remaining."
+    drbd_log "Waiting for resource $res_name to be unassigned from $node. $retries attempts remaining."
   done
 }
