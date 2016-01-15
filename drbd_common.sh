@@ -100,7 +100,7 @@ drbd_add_res () {
 drbd_deploy_res_on_nodes () {
   res_name=$1
 
-  drbd_log "Assigning resource $res_name to storage nodes."
+  drbd_log "Assigning resource $res_name to storage nodes ${@:2}"
   sudo drbdmanage assign-resource $res_name "${@:2}"
 
   for node in "${@:2}"
