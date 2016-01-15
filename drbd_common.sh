@@ -71,7 +71,7 @@ drbd_get_device_for_res () {
 
   drbd_minor="$(sudo drbdmanage v -m -R $res_name | awk -F',' '{ print $6 }')"
 
-  echo "/dev/$DRBD_MINOR_PREFIX$drbd_minor"
+  echo "/dev/drbd$drbd_minor"
 }
 
 # Check if resource exists, returns resource name if it does.
