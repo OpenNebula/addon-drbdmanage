@@ -13,6 +13,7 @@ fi
 DRIVER_PATH=$(dirname $0)
 source ${DRIVER_PATH}/../drbd_common.sh
 source ${DRIVER_PATH}/../drbd.conf
+source ${DRIVER_PATH}/../libfs.sh
 
 # Get arguments from OpenNebula Core
 
@@ -21,19 +22,20 @@ IMAGE_ID=$2
 
 XPATH="${DRIVER_PATH}/../xpath.rb -b $DRIVER_ACTION"
 
-unset i j XPATH_ELEMENTS
+unset i XPATH_ELEMENTS
 
 while IFS= read -r -d '' element; do
     XPATH_ELEMENTS[i++]="$element"
-done < <($XPATH     /DS_DRIVER_ACTION_DATA/IMAGE/SOURCE)
+done < <($XPATH /DS_DRIVER_ACTION_DATA/IMAGE/PATH)
 
-DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
-
+SRC="${XPATH_ELEMENTS[0]}"
 
 # Determine resource size.
+SIZE=$(fs_size $SRC)
 
-SIZE=$(drbd_get_res_size $DRBD_RES_NAME)
-
-drbd_log "$DRBD_RES_NAME has a size of $SIZE bytes."
+if [ "$SIZE" = "0" ]; then
+  log_error "Cannot determine size for $SRC"
+  exit -1
+fi                
 
 echo $SIZE
