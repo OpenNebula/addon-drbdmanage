@@ -103,7 +103,7 @@ esac
 # Find node with a resource assigned to it.
 RES_HOST=$(drbd_get_assignment_node $DRBD_RES_NAME)
 
-exec_and_log "eval $COPY_COMMAND | $SSH $RES_HOST $DD of=$IMAGE_DEVICE bs=2M" \
+exec_and_log "eval $COPY_COMMAND | $SSH $RES_HOST $SUDO $DD of=$DRBD_DEVICE_PATH bs=2M" \
     "Error dumping $SRC to $RES_HOST:$DRBD_DEVICE_PATH"
 
 echo "$DRBD_RES_NAME"
