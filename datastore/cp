@@ -68,8 +68,8 @@ DRBD_RES_NAME="OpenNebula-image-${IMAGE_ID}"
 drbd_log "Creating a new $DRBD_SIZE resource $DRBD_RES_NAME \
   on the following nodes: $BRIDGE_LIST"
 
-drbd_add_res $DRBD_RES_NAME $DRBD_SIZE
-drbd_deploy_res_on_nodes $DRBD_RES_NAME $BRIDGE_LIST
+$(drbd_add_res $DRBD_RES_NAME $DRBD_SIZE)
+$(drbd_deploy_res_on_nodes $DRBD_RES_NAME $BRIDGE_LIST)
 
 # Get the location of the DRBD device node.
 DRBD_DEVICE_PATH=$(drbd_get_device_for_res $DRBD_RES_NAME)
@@ -103,7 +103,7 @@ esac
 # Find node with a resource assigned to it.
 RES_HOST=$(drbd_get_assignment_node $DRBD_RES_NAME)
 
-exec_and_log "eval $COPY_COMMAND | $SSH $RES_HOST $DD of=$IMAGE_DEVICE bs=2M" \
+exec_and_log "eval $COPY_COMMAND | $SSH $RES_HOST $SUDO $DD of=$DRBD_DEVICE_PATH bs=2M" \
     "Error dumping $SRC to $RES_HOST:$DRBD_DEVICE_PATH"
 
 echo "$DRBD_RES_NAME"
