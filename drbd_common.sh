@@ -71,7 +71,7 @@ drbd_get_device_for_res () {
 
   drbd_minor="$(sudo drbdmanage v -m -R $res_name | awk -F',' '{ print $6 }')"
 
-  echo "/dev/$DRBD_MINOR_PREFIX$drbd_minor"
+  echo "/dev/drbd$drbd_minor"
 }
 
 # Check if resource exists, returns resource name if it does.
@@ -100,7 +100,7 @@ drbd_add_res () {
 drbd_deploy_res_on_nodes () {
   res_name=$1
 
-  drbd_log "Assigning resource $res_name to storage nodes."
+  drbd_log "Assigning resource $res_name to storage nodes ${@:2}"
   sudo drbdmanage assign-resource $res_name "${@:2}"
 
   for node in "${@:2}"
