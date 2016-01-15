@@ -56,7 +56,7 @@ DRBD_SIZE="${SIZE}M"
 DRBD_RES_NAME="OpenNebula-image-${IMAGE_ID}"
 
 drbd_log "Creating a new $DRBD_SIZE resource $DRBD_RES_NAME \
-    on the following nodes: $BRIDGE_LIST"
+  on the following nodes: $BRIDGE_LIST"
 
 drbd_add_res $DRBD_RES_NAME $DRBD_SIZE
 drbd_deploy_res_on_nodes $DRBD_RES_NAME $BRIDGE_LIST
