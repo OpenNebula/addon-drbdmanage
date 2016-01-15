@@ -9,7 +9,7 @@ drbd_log () {
 drbd_get_res_nodes () {
   res_name=$1
 
-  res_nodes="$(drbdmanage assignments -m --resources $res_name awk -F',' '{ print $1 }')"
+  res_nodes="$(drbdmanage assignments -m --resources $res_name | awk -F',' '{ print $1 }')"
 
   if [ -n "$res_nodes" ]; then
     echo "$res_nodes"
@@ -22,7 +22,7 @@ drbd_get_res_nodes () {
 drbd_get_assignment_node () {
   res_name=$1
 
-  echo $(drbd_get_res_nodes $res_name awk -F' ' '{ print $1 }' )
+  echo $(drbd_get_res_nodes $res_name | head -n 1 )
 }
 
 # Check if resource is in connected and deployed on a single node.
