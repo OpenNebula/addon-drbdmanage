@@ -9,7 +9,7 @@ drbd_log () {
 drbd_get_res_nodes () {
   res_name=$1
 
-  res_nodes="$(drbdmanage assignments -m --resources $res_name | awk -F',' '{ print $1 }')"
+  res_nodes="$(sudo drbdmanage assignments -m --resources $res_name | awk -F',' '{ print $1 }')"
 
   if [ -n "$res_nodes" ]; then
     echo "$res_nodes"
@@ -31,7 +31,7 @@ drbd_is_res_deployed () {
   node_name=$2
   client_option=$3
 
-  node_state="$(drbdmanage assignments -m --resources $res_name --nodes $node_name | awk -F',' '{ print $4, $5 }')"
+  node_state="$(sudo drbdmanage assignments -m --resources $res_name --nodes $node_name | awk -F',' '{ print $4, $5 }')"
 
   if [ "$client_option" = "--client" ]; then
     target_state="connect|deploy|diskless connect|deploy|diskless"
@@ -69,7 +69,7 @@ drbd_wait_res_deployed () {
 drbd_get_device_for_res () {
   res_name=$1
 
-  drbd_minor="$(drbdmanage v -m -R $res_name | awk -F',' '{ print $6 }')"
+  drbd_minor="$(sudo drbdmanage v -m -R $res_name | awk -F',' '{ print $6 }')"
 
   echo "/dev/$DRBD_MINOR_PREFIX$drbd_minor"
 }
@@ -78,7 +78,7 @@ drbd_get_device_for_res () {
 drbd_res_exsists () {
   res_name=$1
 
-  echo "$(drbdmanage list-resources --resources $res_name -m | awk -F',' '{ print $1 }')"
+  echo "$(sudo drbdmanage list-resources --resources $res_name -m | awk -F',' '{ print $1 }')"
 }
 
 # Add a resource to drbd with a given size.
@@ -92,7 +92,7 @@ drbd_add_res () {
     exit -1
   else
     drbd_log "Adding resource $res_name."
-    $(drbdmanage add-volume $res_name $size)
+    $(sudo drbdmanage add-volume $res_name $size)
   fi
 }
 
@@ -101,7 +101,7 @@ drbd_deploy_res_on_nodes () {
   res_name=$1
 
   drbd_log "Assigning resource $res_name to storage nodes."
-  drbdmanage assign-resource $res_name "${@:2}"
+  sudo drbdmanage assign-resource $res_name "${@:2}"
 
   for node in "${@:2}"
   do
@@ -115,7 +115,7 @@ drbd_deploy_res_on_host () {
     node_name=$2
 
     drbd_log "Assigning resource $res_name to client node $node_name"
-    drbdmanage assign-resource $res_name $node_name --client
+    sudo drbdmanage assign-resource $res_name $node_name --client
     drbd_wait_res_deployed $res_name $node_name "--client"
 }
 
@@ -123,7 +123,7 @@ drbd_deploy_res_on_host () {
 drbd_get_res_size () {
   res_name=$1
 
-  size_in_mb=$(drbdmanage volumes -m --resources $res_name | awk -F',' '{ print $4 / 1024 }')
+  size_in_mb=$(sudo drbdmanage volumes -m --resources $res_name | awk -F',' '{ print $4 / 1024 }')
 
   if [ -n size_in_mb ]; then
     echo $size_in_mb
@@ -138,7 +138,7 @@ drbd_remove_res () {
   res_name=$1
 
   drbd_log "Removing $res_name from DRBD storage cluster."
-  drbdmanage remove-resource -q $res_name
+  sudo drbdmanage remove-resource -q $res_name
 
   retries=10
 
@@ -163,20 +163,20 @@ drbd_clone_res () {
   snap_name="$res_name"_snap_"$(date +%s)"
 
   drbd_log "Creating snapshot of $res_name."
-  drbdmanage add-snapshot $snap_name $res_name $nodes
+  sudo drbdmanage add-snapshot $snap_name $res_name $nodes
   
   drbd_log "Creating new resource $res_from_snap_name from snapshot of $snap_name."
-  drbdmanage restore-snapshot $res_from_snap_name $res_name $snap_name
+  sudo drbdmanage restore-snapshot $res_from_snap_name $res_name $snap_name
 
   drbd_log "Removing snapshot taken from $res_name."
-  drbdmanage remove-snapshot $res_name $snap_name
+  sudo drbdmanage remove-snapshot $res_name $snap_name
 }
 
 drbd_monitor () {
   nodes="${@:1}"
 
-  USED_MB=$(drbdmanage v -m | awk -F',' '{ sum+=$4 } END { print sum / 1024 }')
-  TOTAL_MB=$(drbdmanage n -N $nodes -m | \
+  USED_MB=$(sudo drbdmanage v -m | awk -F',' '{ sum+=$4 } END { print sum / 1024 }')
+  TOTAL_MB=$(sudo drbdmanage n -N $nodes -m | \
     awk -F',' '{ if (!total || $4<total) total=$4 } END { print total / 1024 }')
   FREE_MB=$(($TOTAL_MB - $USED_MB))
 
@@ -193,7 +193,7 @@ drbd_unassign_res () {
   # Wait until resource is unassigned.
   retries=10
 
-  until [ -z $(drbdmanage list-assignments --resources $res_name --nodes $node -m) ]; do
+  until [ -z $(sudo drbdmanage list-assignments --resources $res_name --nodes $node -m) ]; do
     sleep 1
     if (( retries < 1 )); then
       drbd_log "Failed to unassign $res_name: retries exceeded."
