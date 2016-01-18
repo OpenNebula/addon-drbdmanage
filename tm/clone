@@ -25,7 +25,7 @@ DST_HOST=$(arg_host $DST)
 DST_DIR=$(dirname $DST_PATH)
 
 # Get new (cloned) resource name and original resource name.
-DRBD_CLONE_NAME="OpenNebula-clone-${SRC_PATH}"
+DRBD_CLONE_NAME=${SRC_PATH}-clone
 DRBD_RES_NAME=$SRC_PATH
 
 # Node that holds temporary snapshot needed to clone resource.
