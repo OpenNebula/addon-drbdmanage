@@ -18,6 +18,8 @@ source $TMCOMMON
 
 source ${DRIVER_PATH}/../../datastore/drbdmanage/drbd_common.sh
 
+drbd_log "Begining mvds action."
+
 SRC_HOST=`arg_host $SRC`
 
 DISK_ID=$(echo $SRC|awk -F. '{print $NF}')
@@ -65,5 +67,7 @@ $(drbd_clone_res $DRBD_CLONE_NAME $DRBD_RES_NAME $DRBD_SNAP_NODE)
 if [ -z "$PERSISTENT" ]; then
   $(drbd_remove_res $DRBD_RES_NAME)
 fi
+
+drbd_log "Ending mvds action."
 
 exit 0
