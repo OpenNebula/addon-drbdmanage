@@ -15,6 +15,8 @@ source ${DRIVER_PATH}/../drbd_common.sh
 source ${DRIVER_PATH}/../drbd.conf
 source ${DRIVER_PATH}/../libfs.sh
 
+drbd_log "Begining stat action."
+
 # Get arguments from OpenNebula Core
 
 DRIVER_ACTION=$1
@@ -37,5 +39,7 @@ if [ "$SIZE" = "0" ]; then
   log_error "Cannot determine size for $SRC"
   exit -1
 fi                
+
+drbd_log "Ending stat action."
 
 echo $SIZE

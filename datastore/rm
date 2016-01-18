@@ -15,6 +15,8 @@ source ${DRIVER_PATH}/../libfs.sh
 source ${DRIVER_PATH}/../drbd_common.sh
 source ${DRIVER_PATH}/../drbd.conf
 
+drbd_log "Begining rm action."
+
 # Get arguments from OpenNebula Core
 
 DRIVER_ACTION=$1
@@ -37,5 +39,7 @@ if [ -z "$(drbd_res_exsists $DRBD_RES_NAME)" ]; then
 fi
 
 drbd_remove_res $DRBD_RES_NAME
+
+drbd_log "Ending rm action."
 
 exit 0

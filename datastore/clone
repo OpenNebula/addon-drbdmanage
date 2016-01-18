@@ -10,6 +10,7 @@ fi
 
 . $LIB_LOCATION/sh/scripts_common.sh
 
+drbd_log "Begining clone action."
 DRIVER_PATH=$(dirname $0)
 source ${DRIVER_PATH}/../libfs.sh
 source ${DRIVER_PATH}/../drbd.conf
@@ -46,5 +47,7 @@ fi
 DRBD_RES_NAME="OpenNebula-clone-${IMAGE_ID}"
 
 drbd_clone_res $DRBD_RES_NAME $SRC $BRIDGE_LIST
+
+drbd_log "Ending clone action."
 
 exit 0
