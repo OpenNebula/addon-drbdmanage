@@ -15,8 +15,6 @@ source ${DRIVER_PATH}/../libfs.sh
 source ${DRIVER_PATH}/../drbd_common.sh
 source ${DRIVER_PATH}/drbd.conf
 
-drbd_log "Begining monitor action."
-
 # Get arguments from OpenNebula Core
 
 DRIVER_ACTION=$1
@@ -38,7 +36,5 @@ if [ -z "$DST_HOST" ]; then
     error_message "Datastore template missing 'BRIDGE_LIST' attribute."
     exit -1
 fi
-
-drbd_log "Ending monitor action."
 
 drbd_monitor $BRIDGE_LIST
