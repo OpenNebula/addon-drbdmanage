@@ -20,12 +20,13 @@ source ${DRIVER_PATH}/../../datastore/drbdmanage/drbd_common.sh
 drbd_log "Begining clone action."
 # Get virtualization host information
 DST_PATH=$(arg_path $DST)
+SRC_PATH=$(arg_path $SRC)
 DST_HOST=$(arg_host $DST)
 DST_DIR=$(dirname $DST_PATH)
 
 # Get new (cloned) resource name and original resource name.
-DRBD_CLONE_NAME="OpenNebula-clone-${SRC}"
-DRBD_RES_NAME=$SRC
+DRBD_CLONE_NAME="OpenNebula-clone-${SRC_PATH}"
+DRBD_RES_NAME=$SRC_PATH
 
 # Node that holds temporary snapshot needed to clone resource.
 DRBD_SNAP_NODE=$(drbd_get_assignment_node $RBD_RES_NAME)
