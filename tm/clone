@@ -15,7 +15,7 @@ fi
 source $TMCOMMON
 
 DRIVER_PATH=$(dirname $0)
-source ${DRIVER_PATH}/../drbd_common.sh
+source ${DRIVER_PATH}/../../datastore/drbdmanage/drbd_common.sh
 
 # Get virtualization host information
 DST_PATH=$(arg_path $DST)

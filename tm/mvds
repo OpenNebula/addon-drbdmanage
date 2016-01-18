@@ -16,7 +16,7 @@ DRIVER_PATH=$(dirname $0)
 
 source $TMCOMMON
 
-source ${DRIVER_PATH}/../drbd_common.sh
+source ${DRIVER_PATH}/../../datastore/drbdmanage/drbd_common.sh
 
 SRC_HOST=`arg_host $SRC`
 
