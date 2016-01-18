@@ -29,7 +29,7 @@ DRBD_CLONE_NAME=${SRC_PATH}-clone
 DRBD_RES_NAME=$SRC_PATH
 
 # Node that holds temporary snapshot needed to clone resource.
-DRBD_SNAP_NODE=$(drbd_get_assignment_node $RBD_RES_NAME)
+DRBD_SNAP_NODE=$(drbd_get_assignment_node $DRBD_RES_NAME)
 
 # Create new resource from DRBD_RES_NAME
 $(drbd_clone_res $DRBD_CLONE_NAME $DRBD_RES_NAME $DRBD_SNAP_NODE)

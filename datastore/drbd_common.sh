@@ -22,6 +22,7 @@ drbd_get_res_nodes () {
 drbd_get_assignment_node () {
   res_name=$1
 
+  drbd_log "Getting assignment for $res_name"
   echo $(drbd_get_res_nodes $res_name | head -n 1 )
 }
 
