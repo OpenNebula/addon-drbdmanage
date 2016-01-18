@@ -44,9 +44,12 @@ if [ -z "$DST_HOST" ]; then
     exit -1
 fi
 
-DRBD_RES_NAME="OpenNebula-clone-${IMAGE_ID}"
+DRBD_RES_NAME=OpenNebula-clone-${IMAGE_ID}
 
+# Make a new resource from an exsisting one.
 drbd_clone_res $DRBD_RES_NAME $SRC $BRIDGE_LIST
+
+echo $DRBD_RES_NAME
 
 drbd_log "Ending clone action."
 
