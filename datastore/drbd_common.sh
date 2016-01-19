@@ -22,6 +22,7 @@ drbd_get_res_nodes () {
 drbd_get_assignment_node () {
   res_name=$1
 
+  drbd_log "Getting assignment for $res_name"
   echo $(drbd_get_res_nodes $res_name | head -n 1 )
 }
 
@@ -52,7 +53,7 @@ drbd_wait_res_deployed () {
   node_name=$2
   client_option=$3
 
-  retries=10
+  retries=60
 
   until [ $(drbd_is_res_deployed $res_name $node_name $client_option) -eq 0 ]; do
     sleep 1
@@ -162,7 +163,7 @@ drbd_clone_res () {
   nodes=$3
   snap_name="$res_name"_snap_"$(date +%s)"
 
-  drbd_log "Creating snapshot of $res_name."
+  drbd_log "Creating snapshot of $res_name on $nodes."
   sudo drbdmanage add-snapshot $snap_name $res_name $nodes
   
   drbd_log "Creating new resource $res_from_snap_name from snapshot of $snap_name."
