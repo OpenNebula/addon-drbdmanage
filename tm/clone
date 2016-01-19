@@ -25,7 +25,7 @@ DST_HOST=$(arg_host $DST)
 DST_DIR=$(dirname $DST_PATH)
 
 # Get new (cloned) resource name and original resource name.
-DRBD_CLONE_NAME=${SRC_PATH}-clone
+DRBD_CLONE_NAME=${SRC_PATH}-vm${VM_ID}
 DRBD_RES_NAME=$SRC_PATH
 
 # Node that holds temporary snapshot needed to clone resource.
@@ -37,18 +37,18 @@ $(drbd_clone_res $DRBD_CLONE_NAME $DRBD_RES_NAME $DRBD_SNAP_NODE)
 # Assign cloned resource to host.
 $(drbd_deploy_res_on_host $DRBD_CLONE_NAME $DST_HOST)
 
-# Link DRBD device to datastore location.
+# Get Device path.
+DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_CLONE_NAME")
 
+# Link DRBD device to datastore location.
 LINK_COMMAND=$(cat <<EOF
     set -e
 
-    # Find DRBD device and link it to the host ds path
-    DRBD_DEVICE_NAME=\$(drbd_get_device_for_res \$DRBD_CLONE_NAME)
-    ln -s "\$DRBD_DEVICE_NAME" "$DST_PATH"
+    ln -s "$DRBD_DEVICE_PATH" "$DST_PATH"
 EOF
 )
 
-shh_exec_and_log "$DST_HOST" "$LINK_COMMAND" \
+ssh_exec_and_log "$DST_HOST" "$LINK_COMMAND" \
           "Error: Unable to link $DRBD_CLONE_NAME to $DST_PATH on $DST_HOST"
 
 drbd_log "Ending clone action."

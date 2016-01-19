@@ -53,7 +53,7 @@ drbd_wait_res_deployed () {
   node_name=$2
   client_option=$3
 
-  retries=10
+  retries=60
 
   until [ $(drbd_is_res_deployed $res_name $node_name $client_option) -eq 0 ]; do
     sleep 1
