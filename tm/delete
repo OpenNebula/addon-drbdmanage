@@ -48,8 +48,9 @@ EOF
 ssh_exec_and_log "$DST_HOST" "$UNLINK_COMMAND" \
           "Error: Unable to remove symbolic link $DST_PATH on $DST_HOST"
 
-if [ -n $PERSISTENT ]; then
-  drbd_remove_res $DRBD_RES_NAME-vm${VM_ID}
+# If the images is not persisent, remove it. 
+if [ -z $PERSISTENT ]; then
+  drbd_remove_res $DRBD_RES_NAME-vm${VM_ID}-disk${DISK_ID}
 
   drbd_log "Ending non-persistent delete action."
 
