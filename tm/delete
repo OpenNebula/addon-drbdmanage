@@ -1,10 +1,8 @@
 #!/bin/bash
 
-SRC=$1
-DST=$2
-
-VM_ID=$3
-DS_ID=$4
+DST=$1
+VM_ID=$2
+DS_ID=$3
 
 if [ -z "${ONE_LOCATION}" ]; then
     TMCOMMON=/var/lib/one/remotes/tm/tm_common.sh
@@ -18,13 +16,50 @@ DRIVER_PATH=$(dirname $0)
 source ${DRIVER_PATH}/../../datastore/drbdmanage/drbd_common.sh
 
 drbd_log "Begining delete action."
+
 # Get virtualization host information
 DST_PATH=$(arg_path $DST)
 SRC_PATH=$(arg_path $SRC)
 DST_HOST=$(arg_host $DST)
 DST_DIR=$(dirname $DST_PATH)
+DISK_ID=$(echo "$DST_PATH" | $AWK -F. '{print $NF}')
+
+XPATH="${DRIVER_PATH}/../../datastore/xpath.rb --stdin"
+
+unset i j
+
+while IFS= read -r -d '' element; do
+      XPATH_ELEMENTS[i++]="$element"
+    done < <(onevm show -x $VM_ID| $XPATH \
+                        /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/SOURCE \
+                        /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/PERSISTENT)
+
+    DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
+    PERSISTENT="${XPATH_ELEMENTS[j++]}"
+
+    drbd_log "res name: $DRBD_RES_NAME"
+    drbd_log "persistent: $PERSISTENT"
 
 
-drbd_log "Ending delete action."
+# Link DRBD device to datastore location.
+UNLINK_COMMAND=$(cat <<EOF
+    set -e
 
-exit 0
+    rm -f "$DST_PATH"
+EOF
+)
+
+ssh_exec_and_log "$DST_HOST" "$UNLINK_COMMAND" \
+          "Error: Unable to remove symbolic link $DST_PATH on $DST_HOST"
+
+if [ -n $PERSISTENT ]; then
+  drbd_remove_res $DRBD_RES_NAME-vm${VM_ID}
+
+  drbd_log "Ending non-persistent delete action."
+
+  exit 0
+else
+  drbd_log "Ending persistent delete action."
+
+  exit 0
+fi
