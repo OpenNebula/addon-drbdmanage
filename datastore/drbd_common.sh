@@ -2,7 +2,7 @@
 
 # Log argument to the syslog.
 drbd_log () {
-  logger -t "addon-drbdmanage" "${0##*/}: $1"
+  logger -t "addon-drbdmanage" "${0##*/}: [$$] $1"
 }
 
 # Return newline separated list of nodes that are assigned to a resource.
