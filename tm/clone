@@ -23,9 +23,10 @@ DST_PATH=$(arg_path $DST)
 SRC_PATH=$(arg_path $SRC)
 DST_HOST=$(arg_host $DST)
 DST_DIR=$(dirname $DST_PATH)
+DISK_ID=$(echo "$DST_PATH" | $AWK -F. '{print $NF}')
 
 # Get new (cloned) resource name and original resource name.
-DRBD_CLONE_NAME=${SRC_PATH}-vm${VM_ID}
+DRBD_CLONE_NAME=${SRC_PATH}-vm${VM_ID}-disk${DISK_ID}
 DRBD_RES_NAME=$SRC_PATH
 
 # Node that holds temporary snapshot needed to clone resource.
