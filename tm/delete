@@ -37,10 +37,6 @@ while IFS= read -r -d '' element; do
     DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
     PERSISTENT="${XPATH_ELEMENTS[j++]}"
 
-    drbd_log "res name: $DRBD_RES_NAME"
-    drbd_log "persistent: $PERSISTENT"
-
-
 # Link DRBD device to datastore location.
 UNLINK_COMMAND=$(cat <<EOF
     set -e
