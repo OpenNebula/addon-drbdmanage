@@ -2,7 +2,14 @@
 
 # Log argument to the syslog.
 drbd_log () {
-  logger -t "addon-drbdmanage" "${0##*/}: $1"
+
+addon_path=$(dirname $0)
+driver_path=$(dirname $addon_path)
+driver_name=$(basename $driver_path)
+
+script_name="${0##*/}"
+
+logger -t "addon-drbdmanage: $driver_name-$script_name: [$$]" "$1"
 }
 
 # Return newline separated list of nodes that are assigned to a resource.
