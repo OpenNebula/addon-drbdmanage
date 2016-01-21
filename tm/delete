@@ -56,6 +56,8 @@ if [ -z $PERSISTENT ]; then
 
   exit 0
 else
+  drbd_unassign_res $DRBD_RES_NAME $DST_HOST
+
   drbd_log "Ending persistent delete action."
 
   exit 0

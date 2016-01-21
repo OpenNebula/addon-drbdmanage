@@ -198,6 +198,7 @@ drbd_unassign_res () {
   res_name=$1
   node=$2
 
+  $(sudo drbdmanage unassign-resource -q $res_name $node)
   # Wait until resource is unassigned.
   retries=10
 
