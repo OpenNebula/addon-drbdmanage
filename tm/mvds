@@ -38,6 +38,7 @@ while IFS= read -r -d '' element; do
 
     DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
     SAVE_AS="${XPATH_ELEMENTS[j++]}"
+    drbd_log "Save as status: $SAVE_AS"
     PERSISTENT="${XPATH_ELEMENTS[j++]}"
 
 # Link DRBD device to datastore location.
