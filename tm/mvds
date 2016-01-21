@@ -51,9 +51,9 @@ EOF
 ssh_exec_and_log "$SRC_HOST" "$UNLINK_COMMAND" \
           "Error: Unable to remove symbolic link $SRC_PATH on $SRC_HOST"
 
-# If the images is not persisent, remove it. 
+# If the images is not persisent //TODO figure out what do to
 if [ -z $"PERSISTENT" ]; then
-  drbd_remove_res $DRBD_RES_NAME-vm${VM_ID}-disk${DISK_ID}
+  drbd_unassign_res $DRBD_RES_NAME-vm${VM_ID}-disk${DISK_ID}
 
   drbd_log "Ending non-persistent mvds action."
 
