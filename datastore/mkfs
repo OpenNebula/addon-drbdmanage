@@ -74,7 +74,7 @@ DRBD_DEVICE_PATH=$(drbd_get_device_for_res $DRBD_RES_NAME)
 
 
 REGISTER_COMMAND=$(cat << EOF
-  if [ "$FSTYPE" = "raw"]; then
+  if [ "$FSTYPE" = "raw" ]; then
 
     drbd_log "$DRBD_RES_NAME created with device $DRBD_DEVICE_PATH"
 
