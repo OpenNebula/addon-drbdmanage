@@ -46,9 +46,15 @@ SIZE="${XPATH_ELEMENTS[j++]:-0}"
 
 DST_HOST=`get_destination_host $IMAGE_ID`
 
-# Do not make a new image for save as.
+# Get the name and size for a drbd resource.
+DRBD_SIZE="${SIZE}M"
+DRBD_RES_NAME="OpenNebula-image-${IMAGE_ID}"
+
+# Do not make a new resrouce for save as, just return the name.
 if [  "$FSTYPE" = "save_as" ]; then
     drbd_log "No need to create new image, exiting."
+
+    echo "$DRBD_RES_NAME"
     exit 0
 fi
 
@@ -60,9 +66,6 @@ fi
 set_up_datastore "$BASE_PATH" "$RESTRICTED_DIRS" "$SAFE_DIRS"
 
 # Create new resource in drbd.
-DRBD_SIZE="${SIZE}M"
-DRBD_RES_NAME="OpenNebula-image-${IMAGE_ID}"
-
 drbd_log "Creating a new $DRBD_SIZE resource $DRBD_RES_NAME \
   on the following nodes: $BRIDGE_LIST"
 
