@@ -85,6 +85,7 @@ case $SRC in
 http://*|https://*)
 
     log "Downloading $SRC to the image repository"
+    drbd_log "Downloading $SRC to the image repository"
     ;;
 
 *)
@@ -98,12 +99,14 @@ http://*|https://*)
     fi
 
     log "Copying local image $SRC to the image repository"
+    drbd_log "Copying local image $SRC to the image repository"
     ;;
 
 esac
 
 # Find node with a resource assigned to it.
 RES_HOST=$(drbd_get_assignment_node $DRBD_RES_NAME)
+drbd_log "res host: $RES_HOST"
 
 exec_and_log "eval $COPY_COMMAND | $SSH $RES_HOST $SUDO $DD of=$DRBD_DEVICE_PATH bs=2M" \
     "Error dumping $SRC to $RES_HOST:$DRBD_DEVICE_PATH"
