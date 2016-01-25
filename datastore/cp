@@ -79,12 +79,13 @@ DRBD_DEVICE_PATH=$(drbd_get_device_for_res $DRBD_RES_NAME)
 
 DOWNLOADER_ARGS=`set_downloader_args "$MD5" "$SHA1" "$NO_DECOMPRESS" "$LIMIT_TRANSFER_BW" "$SRC" -`
 
-COPY_COMMAND="$UTILS_PATH/downloader.sh $DOWNLOADER_ARGS"
+COPY_COMMAND="$DRIVER_PATH/../downloader.sh $DOWNLOADER_ARGS"
 
 case $SRC in
 http://*|https://*)
 
     log "Downloading $SRC to the image repository"
+    drbd_log "Downloading $SRC to the image repository"
     ;;
 
 *)
@@ -98,6 +99,7 @@ http://*|https://*)
     fi
 
     log "Copying local image $SRC to the image repository"
+    drbd_log "Copying local image $SRC to the image repository"
     ;;
 
 esac
