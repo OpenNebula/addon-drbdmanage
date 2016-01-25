@@ -30,16 +30,16 @@ XPATH="${DRIVER_PATH}/../../datastore/xpath.rb --stdin"
 unset i j
 
 while IFS= read -r -d '' element; do
-      XPATH_ELEMENTS[i++]="$element"
-    done < <(onevm show -x $VM_ID| $XPATH \
-                        /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/SOURCE \
-                        /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/SAVE_AS \
-                        /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/PERSISTENT)
+  XPATH_ELEMENTS[i++]="$element"
+done < <(onevm show -x $VM_ID| $XPATH \
+  /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/SOURCE \
+  /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/SAVE_AS \
+  /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/PERSISTENT)
 
-    DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
-    SAVE_AS="${XPATH_ELEMENTS[j++]}"
-    drbd_log "Save as status: $SAVE_AS"
-    PERSISTENT="${XPATH_ELEMENTS[j++]}"
+DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
+SAVE_AS="${XPATH_ELEMENTS[j++]}"
+drbd_log "Save as status: $SAVE_AS"
+PERSISTENT="${XPATH_ELEMENTS[j++]}"
 
 # Link DRBD device to datastore location.
 UNLINK_COMMAND=$(cat <<EOF
