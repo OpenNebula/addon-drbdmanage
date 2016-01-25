@@ -24,6 +24,16 @@ SRC_PATH=$(arg_path $SRC)
 DST_HOST=$(arg_host $DST)
 DST_DIR=$(dirname $DST_PATH)
 
+drbd_log "src: $SRC"
+drbd_log "dst: $DST"
+drbd_log "vm id: $VM_ID"
+drbd_log "ds is: $DS_ID"
+
+
+drbd_log "dst_path: $DST_PATH"
+drbd_log "src path: $SRC_PATH"
+drbd_log "dst host: $DST_HOST"
+drbd_log "dst dir: $DST_DIR"
 
 drbd_log "Ending mv action."
 
