@@ -45,6 +45,8 @@ DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_CLONE_NAME")
 LINK_COMMAND=$(cat <<EOF
     set -e
 
+    mkdir -p $DST_DIR
+
     ln -s "$DRBD_DEVICE_PATH" "$DST_PATH"
 EOF
 )
