@@ -1,0 +1,85 @@
+#!/bin/bash
+
+SRC=$1
+DST=$2
+
+VM_ID=$3
+DS_ID=$4
+
+if [ -z "${ONE_LOCATION}" ]; then
+    TMCOMMON=/var/lib/one/remotes/tm/tm_common.sh
+else
+    TMCOMMON=$ONE_LOCATION/var/remotes/tm/tm_common.sh
+fi
+
+source $TMCOMMON
+
+DRIVER_PATH=$(dirname $0)
+source ${DRIVER_PATH}/../../datastore/drbdmanage/drbd_common.sh
+
+drbd_log "src: $SRC"
+drbd_log "dst: $DST"
+drbd_log "vm id: $VM_ID"
+drbd_log "ds is: $DS_ID"
+
+drbd_log "Begining mv action."
+# Determine the source, host, and the location of the images.
+SRC_HOST=$(arg_host $SRC)
+SRC_PATH=$(arg_path $SRC)
+DISK_ID=$(echo "$SRC"|awk -F. '{print $NF}')
+
+DST_HOST=$(arg_host $DST)
+DST_PATH=$(arg_path $DST)
+DST_DIR=$(dirname $DST_PATH)
+
+# Exit if we're not actually moving anything.
+if [ "$SRC" == "$DST" ]; then
+  drbd_log "$SRC and $DST are the same, exiting."
+
+  exit 0
+fi
+
+# Make a new path for the dst_host, remove the src_host's path.
+ssh_make_path $DST_HOST $DST_DIR
+
+ssh_exec_and_log "$SRC_HOST" "rm -rf $SRC_PATH" \
+  "Error removing $SRC_PATH on $SRC_HOST"
+
+# Get image information
+XPATH="${DRIVER_PATH}/../../datastore/xpath.rb --stdin"
+
+unset i j
+
+while IFS= read -r -d '' element; do
+  XPATH_ELEMENTS[i++]="$element"
+done < <(onevm show -x $VM_ID| $XPATH \
+  /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/SOURCE \
+  /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/PERSISTENT)
+
+DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
+PERSISTENT="${XPATH_ELEMENTS[j++]}"
+
+if [ -z "$PERSISTENT" ]; then
+  DRBD_RES_NAME=$DRBD_RES_NAME-vm${VM_ID}-disk${DISK_ID}
+fi
+
+# Unassign res from source, assign it to dest.
+$(drbd_unassign_res $DRBD_RES_NAME $SRC_HOST)
+$(drbd_deploy_res_on_host $DRBD_RES_NAME $DST_HOST)
+
+# Get device path for DRBD resource and link it to the disk location.
+DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_RES_NAME")
+
+LINK_COMMAND=$(cat <<EOF
+    set -e
+
+    ln -s "$DRBD_DEVICE_PATH" "$DST_PATH"
+EOF
+)
+
+ssh_exec_and_log "$DST_HOST" "$LINK_COMMAND" \
+          "Error: Unable to link $DRBD_RES_NAME to $DST_PATH on $DST_HOST"
+
+drbd_log "Ending mv action."
+
+exit 0

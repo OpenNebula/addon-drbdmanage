@@ -1,0 +1,59 @@
+#!/bin/bash
+
+SRC=$1
+DST=$2
+
+VM_ID=$3
+DS_ID=$4
+
+if [ -z "${ONE_LOCATION}" ]; then
+    TMCOMMON=/var/lib/one/remotes/tm/tm_common.sh
+else
+    TMCOMMON=$ONE_LOCATION/var/remotes/tm/tm_common.sh
+fi
+
+source $TMCOMMON
+
+DRIVER_PATH=$(dirname $0)
+source ${DRIVER_PATH}/../../datastore/drbdmanage/drbd_common.sh
+
+drbd_log "Begining clone action."
+# Get virtualization host information
+DST_PATH=$(arg_path $DST)
+SRC_PATH=$(arg_path $SRC)
+DST_HOST=$(arg_host $DST)
+DST_DIR=$(dirname $DST_PATH)
+DISK_ID=$(echo "$DST_PATH" | $AWK -F. '{print $NF}')
+
+# Get new (cloned) resource name and original resource name.
+DRBD_CLONE_NAME=${SRC_PATH}-vm${VM_ID}-disk${DISK_ID}
+DRBD_RES_NAME=$SRC_PATH
+
+# Node that holds temporary snapshot needed to clone resource.
+DRBD_SNAP_NODE=$(drbd_get_assignment_node $DRBD_RES_NAME)
+
+# Create new resource from DRBD_RES_NAME
+$(drbd_clone_res $DRBD_CLONE_NAME $DRBD_RES_NAME $DRBD_SNAP_NODE)
+
+# Assign cloned resource to host.
+$(drbd_deploy_res_on_host $DRBD_CLONE_NAME $DST_HOST)
+
+# Get Device path.
+DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_CLONE_NAME")
+
+# Link DRBD device to datastore location.
+LINK_COMMAND=$(cat <<EOF
+    set -e
+
+    mkdir -p $DST_DIR
+
+    ln -s "$DRBD_DEVICE_PATH" "$DST_PATH"
+EOF
+)
+
+ssh_exec_and_log "$DST_HOST" "$LINK_COMMAND" \
+          "Error: Unable to link $DRBD_CLONE_NAME to $DST_PATH on $DST_HOST"
+
+drbd_log "Ending clone action."
+
+exit 0
