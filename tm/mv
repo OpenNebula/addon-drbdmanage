@@ -63,6 +63,23 @@ if [ -z "$PERSISTENT" ]; then
   DRBD_RES_NAME=$DRBD_RES_NAME-vm${VM_ID}-disk${DISK_ID}
 fi
 
+# Unassign res from source, assign it to dest.
+$(drbd_unassign_res $DRBD_RES_NAME $SRC_HOST)
+$(drbd_deploy_res_on_host $DRBD_RES_NAME $DST_HOST)
+
+# Get device path for DRBD resource and link it to the disk location.
+DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_RES_NAME")
+
+LINK_COMMAND=$(cat <<EOF
+    set -e
+
+    ln -s "$DRBD_DEVICE_PATH" "$DST_PATH"
+EOF
+)
+
+ssh_exec_and_log "$DST_HOST" "$LINK_COMMAND" \
+          "Error: Unable to link $DRBD_RES_NAME to $DST_PATH on $DST_HOST"
+
 drbd_log "Ending mv action."
 
 exit 0
