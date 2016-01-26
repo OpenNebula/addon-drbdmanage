@@ -26,6 +26,7 @@ drbd_log "Begining mv action."
 # Determine the source, host, and the location of the images.
 SRC_HOST=$(arg_host $SRC)
 SRC_PATH=$(arg_path $SRC)
+DISK_ID=$(echo "$SRC"|awk -F. '{print $NF}')
 
 DST_HOST=$(arg_host $DST)
 DST_PATH=$(arg_path $DST)
@@ -44,6 +45,23 @@ ssh_make_path $DST_DIR $DST_DIR
 ssh_exec_and_log "$SRC_HOST" "rm -rf $SRC_PATH" \
   "Error removing $SRC_PATH on $SRC_HOST"
 
+# Get image information
+XPATH="${DRIVER_PATH}/../../datastore/xpath.rb --stdin"
+
+unset i j
+
+while IFS= read -r -d '' element; do
+  XPATH_ELEMENTS[i++]="$element"
+done < <(onevm show -x $VM_ID| $XPATH \
+  /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/SOURCE \
+  /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/PERSISTENT)
+
+DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
+PERSISTENT="${XPATH_ELEMENTS[j++]}"
+
+if [ -z "$PERSISTENT" ]; then
+  DRBD_RES_NAME=$DRBD_RES_NAME-vm${VM_ID}-disk${DISK_ID}
+fi
 
 drbd_log "Ending mv action."
 
