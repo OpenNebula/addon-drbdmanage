@@ -17,23 +17,26 @@ source $TMCOMMON
 DRIVER_PATH=$(dirname $0)
 source ${DRIVER_PATH}/../../datastore/drbdmanage/drbd_common.sh
 
-drbd_log "Begining mv action."
-# Get virtualization host information
-DST_PATH=$(arg_path $DST)
-SRC_PATH=$(arg_path $SRC)
-DST_HOST=$(arg_host $DST)
-DST_DIR=$(dirname $DST_PATH)
-
 drbd_log "src: $SRC"
 drbd_log "dst: $DST"
 drbd_log "vm id: $VM_ID"
 drbd_log "ds is: $DS_ID"
 
+drbd_log "Begining mv action."
+# Determine the source, host, and the location of the images.
+SRC_HOST=$(arg_host $SRC)
+SRC_PATH=$(arg_path $SRC)
 
-drbd_log "dst_path: $DST_PATH"
-drbd_log "src path: $SRC_PATH"
-drbd_log "dst host: $DST_HOST"
-drbd_log "dst dir: $DST_DIR"
+DST_HOST=$(arg_host $DST)
+DST_PATH=$(arg_path $DST)
+DST_DIR=$(dirname $DST_PATH)
+
+# Make a new path for the dst_host, remove the src_host's path.
+ssh_make_path $DST_DIR $DST_DIR
+
+ssh_exec_and_log "$SRC_HOST" "rm -rf $SRC_PATH" \
+  "Error removing $SRC_PATH on $SRC_HOST"
+
 
 drbd_log "Ending mv action."
 
