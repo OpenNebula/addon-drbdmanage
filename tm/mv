@@ -31,6 +31,13 @@ DST_HOST=$(arg_host $DST)
 DST_PATH=$(arg_path $DST)
 DST_DIR=$(dirname $DST_PATH)
 
+# Exit if we're not actually moving anything.
+if [ "$SRC" == "$DST" ]; then
+  drbd_log "$SRC and $DST are the same, exiting."
+
+  exit 0
+fi
+
 # Make a new path for the dst_host, remove the src_host's path.
 ssh_make_path $DST_DIR $DST_DIR
 
