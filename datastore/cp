@@ -10,13 +10,12 @@ fi
 
 . $LIB_LOCATION/sh/scripts_common.sh
 
-drbd_log "Begining cp action."
 
 DRIVER_PATH=$(dirname $0)
 source ${DRIVER_PATH}/../libfs.sh
-source ${DRIVER_PATH}/../drbd.conf
 source ${DRIVER_PATH}/drbd_common.sh
 
+drbd_log "Begining cp action."
 # Get arguments from OpenNebula Core
 
 DRIVER_ACTION=$1
