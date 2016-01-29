@@ -13,7 +13,6 @@ fi
 drbd_log "Begining clone action."
 DRIVER_PATH=$(dirname $0)
 source ${DRIVER_PATH}/../libfs.sh
-source ${DRIVER_PATH}/../drbd.conf
 source ${DRIVER_PATH}/drbd_common.sh
 
 # Get arguments from OpenNebula Core
