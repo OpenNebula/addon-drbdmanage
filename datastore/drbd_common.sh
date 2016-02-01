@@ -3,7 +3,7 @@
 # Defaults in case conf is missing.
 POL_COUNT="${POL_COUNT:-1}"
 POL_RATIO="${POL_RATIO:-''}"
-POL_TIMEOUT="${POL_TIMEOUT:-15}"
+POL_TIMEOUT="${POL_TIMEOUT:-60}"
 
 # Log argument to the syslog.
 drbd_log () {
