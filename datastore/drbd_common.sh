@@ -228,25 +228,24 @@ drbd_build_dbus_dict () {
   snap=$2
 
   # Build dict string with required elements.
-  dict="dict:string:string:\"starttime\",\"`date +%s`\",\"resource\",\"$res\",\"timeout\",\"$POL_TIMEOUT\""
+  dict="dict:string:string:starttime,`date +%s`,resource,$res,timeout,$POL_TIMEOUT"
 
-  # If there is a snapshot, add it to the dict.
+  # If optional elements are present add them to the dict.
   if [ -n "$snap" ]; then
-    dict+=",\"snapshot\",\"$snap\""
+    dict+=",snapshot,$snap"
   fi
 
-  # If the count policy is set, add it to the dict.
   if [ -n "$POL_COUNT" ]; then
-    dict+=",\"count\",\"$POL_COUNT\""
+    dict+=",count,$POL_COUNT"
   fi
 
-  # If the ratio policy is set, add it to the dict.
   if [ -n "$POL_RATIO" ]; then
-    dict+=",\"ratio\",\"$POL_RATIO\""
+    dict+=",ratio,$POL_RATIO"
   fi
 
-  echo "$dict"
+  echo $dict
 }
+
 
 # Returns the result of a dbus query to an external plugin.
 drbd_get_dbus_result () {
