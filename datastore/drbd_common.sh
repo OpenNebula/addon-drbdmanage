@@ -247,3 +247,14 @@ drbd_build_dbus_dict () {
 
   echo "$dict"
 }
+
+# Returns the result of a dbus query to an external plugin.
+drbd_get_dbus_result () {
+  plugin=$1
+  dict=$2
+
+  echo "$(dbus-send --system --print-reply --dest="org.drbd.drbdmanaged" /interface \
+    org.drbd.drbdmanaged.run_external_plugin \
+    string:"drbdmanage.plugins.plugins.wait_for.${plugin}" $dict)"
+}
+
