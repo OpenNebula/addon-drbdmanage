@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Defaults in case conf is missing.
+POL_COUNT="${POL_COUNT:-1}"
+POL_RATIO="${POL_RATIO:-''}"
+POL_TIMEOUT="${POL_TIMEOUT:-15}"
+
 # Log argument to the syslog.
 drbd_log () {
 
@@ -211,4 +216,30 @@ drbd_unassign_res () {
     ((retries--))
     drbd_log "Waiting for resource $res_name to be unassigned from $node. $retries attempts remaining."
   done
+}
+
+# Returns a dbus dict for the wait for resource or snapshot plugin.
+drbd_build_dbus_dict () {
+  res=$1
+  snap=$2
+
+  # Build dict string with required elements.
+  dict="dict:string:string:\"starttime\",\"`date +%s`\",\"resource\",\"$res\",\"timeout\",\"$POL_TIMEOUT\""
+
+  # If there is a snapshot, add it to the dict.
+  if [ -n "$snap" ]; then
+    dict+=",\"snapshot\",\"$snap\""
+  fi
+
+  # If the count policy is set, add it to the dict.
+  if [ -n "$POL_COUNT" ]; then
+    dict+=",\"count\",\"$POL_COUNT\""
+  fi
+
+  # If the ratio policy is set, add it to the dict.
+  if [ -n "$POL_RATIO" ]; then
+    dict+=",\"ratio\",\"$POL_RATIO\""
+  fi
+
+  echo "$dict"
 }
