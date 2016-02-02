@@ -282,9 +282,10 @@ drbd_check_dbus_status () {
   # If there is no result, something went wrong communicating to drbdmanage."
   if [ -z "$result" ]; then
     drbd_log "Error communicating with dbus interface or malformed dictionary."
+    drbd_log "$dbus_data"
 
     echo 1
-    exit 0
+    exit -1
   fi
 
   # Get the rest of the relevant information, now that we know it's there.
