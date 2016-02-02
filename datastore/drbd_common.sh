@@ -318,13 +318,10 @@ drbd_check_dbus_status () {
     exit 0
   elif [ $timeout == '"true"' ]; then
     drbd_log "Resource $resource timed out. Timeout of $POL_TIMEOUT seconds exceeded."
-
-    echo 1
-    exit 0
   else
     drbd_log "Unable to satisfy policy $policy: Resource $resource not deployed."
-
-    echo 1
-    exit 0
   fi
+
+  echo 1
+  exit 0
 }
