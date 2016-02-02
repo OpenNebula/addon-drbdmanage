@@ -222,6 +222,10 @@ drbd_unassign_res () {
   done
 }
 
+#------------------------------------------------------------------------------
+# Helper functions to query dbus results.
+#------------------------------------------------------------------------------
+
 # Returns a dbus dict for the wait for resource or snapshot plugin.
 drbd_build_dbus_dict () {
   res=$1
@@ -245,7 +249,6 @@ drbd_build_dbus_dict () {
 
   echo $dict
 }
-
 
 # Returns the result of a dbus query to an external plugin.
 drbd_get_dbus_result () {
