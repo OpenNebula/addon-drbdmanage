@@ -121,6 +121,7 @@ drbd_deploy_res_on_nodes () {
   $(sudo drbdmanage assign-resource $res_name ${@:2})
 
   # Wait for resource to be deployed according to the WaitForResource plugin.
+  sleep 1
   status=$(drbd_check_dbus_status WaitForResource $res_name)
 
   echo $status
