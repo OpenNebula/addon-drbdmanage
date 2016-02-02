@@ -120,10 +120,10 @@ drbd_deploy_res_on_nodes () {
   drbd_log "Assigning resource $res_name to storage nodes ${@:2}"
   $(sudo drbdmanage assign-resource $res_name ${@:2})
 
-  for node in "${@:2}"
-  do
-    drbd_wait_res_deployed $res_name $node
-  done
+  # Wait for resource to be deployed according to the WaitForResource plugin.
+  status=$(drbd_check_dbus_status WaitForResource $res_name)
+
+  echo $status
 }
 
 # Deploy resource on virtualization host in diskless mode.
