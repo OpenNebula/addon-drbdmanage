@@ -270,7 +270,12 @@ drbd_parse_dbus_data () {
 
 # Return 0 if the dbus data indicates a successful deployment.
 drbd_check_dbus_status () {
-  dbus_data="$1"
+  plugin=$1
+  res=$2
+  snap=$3
+
+  dict=$(drbd_build_dbus_dict $res $snap)
+  dbus_data="$(drbd_get_dbus_result $plugin $dict)"
 
   result=$(drbd_parse_dbus_data "$dbus_data" result)
 
