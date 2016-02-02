@@ -257,3 +257,10 @@ drbd_get_dbus_result () {
     string:"drbdmanage.plugins.plugins.wait_for.${plugin}" $dict)"
 }
 
+# Returns the value of a key for a given dbus output.
+drbd_parse_dbus_data () {
+  dbus_data="$1"
+  key=$2
+
+  echo $(echo "$dbus_data" | sed -e '1,/string "'$key'"/d' | head -n1 | awk '{ print $2}')
+}
