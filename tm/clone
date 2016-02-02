@@ -33,7 +33,10 @@ DRBD_RES_NAME=$SRC_PATH
 DRBD_SNAP_NODE=$(drbd_get_assignment_node $DRBD_RES_NAME)
 
 # Create new resource from DRBD_RES_NAME
-$(drbd_clone_res $DRBD_CLONE_NAME $DRBD_RES_NAME $DRBD_SNAP_NODE)
+if [ $(drbd_clone_res $DRBD_CLONE_NAME $DRBD_RES_NAME $DRBD_SNAP_NODE) -ne 0 ]; then
+  error_message "Error created clone from $DRBD_RES_NAME"
+  exit -1
+fi
 
 # Assign cloned resource to host.
 $(drbd_deploy_res_on_host $DRBD_CLONE_NAME $DST_HOST)
