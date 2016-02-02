@@ -5,9 +5,9 @@ DRIVER_PATH=$(dirname $0)
 source ${DRIVER_PATH}/drbdmanage.conf
 
 # Defaults in case conf is missing.
-POL_COUNT="${POL_COUNT:-1}"
-POL_RATIO="${POL_RATIO:-''}"
-POL_TIMEOUT="${POL_TIMEOUT:-60}"
+POL_COUNT=${POL_COUNT:-1}
+POL_RATIO=${POL_RATIO:-''}
+POL_TIMEOUT=${POL_TIMEOUT:-60}
 
 # Log argument to the syslog.
 drbd_log () {
@@ -255,7 +255,7 @@ drbd_get_dbus_result () {
   plugin=$1
   dict=$2
 
-  echo "$(dbus-send --system --print-reply --dest="org.drbd.drbdmanaged" /interface \
+  echo "$(sudo dbus-send --system --print-reply --dest="org.drbd.drbdmanaged" /interface \
     org.drbd.drbdmanaged.run_external_plugin \
     string:"drbdmanage.plugins.plugins.wait_for.${plugin}" $dict)"
 }
