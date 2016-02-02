@@ -182,7 +182,7 @@ drbd_clone_res () {
 
   # Create and deploy a snapshot of a resource.
   drbd_log "Creating snapshot of $res_name on $nodes."
-  sudo drbdmanage add-snapshot $snap_name $res_name $nodes
+  $(sudo drbdmanage add-snapshot $snap_name $res_name $nodes)
   
   sleep 1
   status=$(drbd_check_dbus_status WaitForSnapshot $res_name $snap_name)
@@ -195,13 +195,13 @@ drbd_clone_res () {
 
   # Create and deploy a new resource and remove snapshot.
   drbd_log "Creating new resource $res_from_snap_name from snapshot of $snap_name."
-  sudo drbdmanage restore-snapshot $res_from_snap_name $res_name $snap_name
+  $(sudo drbdmanage restore-snapshot $res_from_snap_name $res_name $snap_name)
 
   sleep 1
   status=$(drbd_check_dbus_status WaitForResource $res_name)
 
   drbd_log "Removing snapshot taken from $res_name."
-  sudo drbdmanage remove-snapshot $res_name $snap_name
+  $(sudo drbdmanage remove-snapshot $res_name $snap_name)
 
   echo $status
 }
