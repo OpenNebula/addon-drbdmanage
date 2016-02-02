@@ -70,7 +70,10 @@ drbd_log "Creating a new $DRBD_SIZE resource $DRBD_RES_NAME \
   on the following nodes: $BRIDGE_LIST"
 
 $(drbd_add_res $DRBD_RES_NAME $DRBD_SIZE)
-$(drbd_deploy_res_on_nodes $DRBD_RES_NAME "$BRIDGE_LIST")
+if [ $(drbd_deploy_res_on_nodes $DRBD_RES_NAME "$BRIDGE_LIST") -ne 0 ]; then
+  error_message "Unable to deploy $DRBD_RES_NAME"
+  exit -1
+fi
 
 # Get the location of the DRBD device node.
 DRBD_DEVICE_PATH=$(drbd_get_device_for_res $DRBD_RES_NAME)
