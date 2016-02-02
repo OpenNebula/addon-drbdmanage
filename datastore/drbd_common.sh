@@ -264,3 +264,42 @@ drbd_parse_dbus_data () {
 
   echo $(echo "$dbus_data" | sed -e '1,/string "'$key'"/d' | head -n1 | awk '{ print $2}')
 }
+
+# Return 0 if the dbus data indicates a successful deployment.
+drbd_check_dbus_status () {
+  dbus_data="$1"
+
+  result=$(drbd_parse_dbus_data "$dbus_data" result)
+
+  echo $result
+  # If there is no result, something went wrong communicating to drbdmanage."
+  if [ -z "$result" ]; then
+    drbd_log "Error communicating with dbus interface or malformed dictionary."
+
+    echo 1
+    exit 0
+  fi
+
+  # Get the rest of the relevant information, now that we know it's there.
+  policy=$(drbd_parse_dbus_data "$dbus_data" policy)
+  timeout=$(drbd_parse_dbus_data "$dbus_data" timeout)
+  resource=$(drbd_parse_dbus_data "$dbus_data" res)
+
+
+  if [ $result == '"true"' ]; then
+    drbd_log "Resource $resource successfully deployed according to policy $policy"
+
+    echo 0
+    exit 0
+  elif [ $timeout == '"true"' ]; then
+    drbd_log "Resource $resource timed out. Timeout of $POL_TIMEOUT seconds exceeded."
+
+    echo 1
+    exit 0
+  else
+    drbd_log "Unable to satisfy policy $policy: Resource $resource not deployed."
+
+    echo 1
+    exit 0
+  fi
+}
