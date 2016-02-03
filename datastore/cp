@@ -75,10 +75,7 @@ if [ $(drbd_deploy_res_on_nodes $DRBD_RES_NAME "$BRIDGE_LIST") -ne 0 ]; then
   exit -1
 fi
 
-# Get the location of the DRBD device node.
-DRBD_DEVICE_PATH=$(drbd_get_device_for_res $DRBD_RES_NAME)
-
-
+# Cese up copy command.
 DOWNLOADER_ARGS=`set_downloader_args "$MD5" "$SHA1" "$NO_DECOMPRESS" "$LIMIT_TRANSFER_BW" "$SRC" -`
 
 COPY_COMMAND="$DRIVER_PATH/../downloader.sh $DOWNLOADER_ARGS"
@@ -106,8 +103,16 @@ http://*|https://*)
 
 esac
 
+# Get the location of the DRBD device node.
+DRBD_DEVICE_PATH=$(drbd_get_device_for_res $DRBD_RES_NAME)
+
 # Find node with a resource assigned to it.
-RES_HOST=$(drbd_get_assignment_node $DRBD_RES_NAME)
+RES_HOST=$(drbd_get_assignment_node $DRBD_DEVICE_PATH "$BRIDGE_LIST")
+
+if [ -z "$RES_HOST" ]; then
+  error_message "No node in $BRIDGE_LIST ready for IO on $DRBD_DEVICE_PATH"
+  exit -1
+fi
 
 exec_and_log "eval $COPY_COMMAND | $SSH $RES_HOST $SUDO $DD of=$DRBD_DEVICE_PATH bs=2M" \
     "Error dumping $SRC to $RES_HOST:$DRBD_DEVICE_PATH"

@@ -74,9 +74,6 @@ if [ $(drbd_deploy_res_on_nodes $DRBD_RES_NAME "$BRIDGE_LIST") -ne 0 ]; then
   exit -1
 fi
 
-# Get the location of the DRBD device node.
-DRBD_DEVICE_PATH=$(drbd_get_device_for_res $DRBD_RES_NAME)
-
 
 REGISTER_COMMAND=$(cat << EOF
   if [ "$FSTYPE" = "raw" ]; then
@@ -91,8 +88,16 @@ REGISTER_COMMAND=$(cat << EOF
 EOF
 )
 
+# Get the location of the DRBD device node.
+DRBD_DEVICE_PATH=$(drbd_get_device_for_res $DRBD_RES_NAME)
+
 # Find node with a resource assigned to it.
-RES_HOST=$(drbd_get_assignment_node $DRBD_RES_NAME)
+RES_HOST=$(drbd_get_assignment_node $DRBD_DEVICE_PATH "$BRIDGE_LIST")
+
+if [ -z "$RES_HOST" ]; then
+  error_message "No node in $BRIDGE_LIST ready for IO on $DRBD_DEVICE_PATH"
+  exit -1
+fi
 
 ssh_exec_and_log "$RES_HOST" "$REGISTER_CMD" \
    "Error registering $DRBD_RES_NAME on $RES_HOST"
