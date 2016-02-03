@@ -50,7 +50,6 @@ drbd_get_assignment_node () {
   done
 
   drbd_log "No nodes (${@:2}) with usable DRBD device at $device_path"
-  echo 1
 }
 
 # Returns path to device node for a resource.
