@@ -42,27 +42,6 @@ drbd_get_assignment_node () {
   echo $(drbd_get_res_nodes $res_name | head -n 1 )
 }
 
-# Check if resource is in connected and deployed on a single node.
-drbd_is_res_deployed () {
-  res_name=$1
-  node_name=$2
-  client_option=$3
-
-  node_state="$(sudo drbdmanage assignments -m --resources $res_name --nodes $node_name | awk -F',' '{ print $4, $5 }')"
-
-  if [ "$client_option" = "--client" ]; then
-    target_state="connect|deploy|diskless connect|deploy|diskless"
-  else
-    target_state="connect|deploy connect|deploy"
-  fi
-
-  if [ "$node_state" = "$target_state" ]; then
-    echo 0
-  else
-    echo 1
-  fi
-}
-
 # Returns path to device node for a resource.
 drbd_get_device_for_res () {
   res_name=$1
