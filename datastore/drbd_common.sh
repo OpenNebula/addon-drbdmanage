@@ -34,12 +34,23 @@ drbd_get_res_nodes () {
   fi
 }
 
-# Return single node with a resource assigned to it.
+# Return single node ready for IO on the given path from list of nodes.
 drbd_get_assignment_node () {
-  res_name=$1
+  device_path=$1
 
-  drbd_log "Getting assignment for $res_name"
-  echo $(drbd_get_res_nodes $res_name | head -n 1 )
+  for node in "${@:2}"; do
+    drbd_log "Checking $device_path on $node"
+    deployed=$(ssh $node "$(typeset -f drbd_is_dev_ready); drbd_is_dev_ready $device_path")
+    if [ $deployed -eq 0 ]; then
+    drbd_log "$node is ready for IO operations on $device_path"
+      echo $node
+      exit 0
+    fi
+    drbd_log "$node is unable to perform IO operations on $device_path"
+  done
+
+  drbd_log "No nodes (${@:2}) with usable DRBD device at $device_path"
+  echo 1
 }
 
 # Returns path to device node for a resource.
