@@ -63,25 +63,6 @@ drbd_is_res_deployed () {
   fi
 }
 
-# Wait until resource is deployed and connected on a single node.
-drbd_wait_res_deployed () {
-  res_name=$1
-  node_name=$2
-  client_option=$3
-
-  retries=60
-
-  until [ $(drbd_is_res_deployed $res_name $node_name $client_option) -eq 0 ]; do
-    sleep 1
-    if (( retries < 1 )); then
-      drbd_log "Failed to deploy $res_name on $node_name: retries exceeded"
-      exit -1
-    fi
-    ((retries--))
-    drbd_log "Waiting for resource $res_name to be deployed on $node_name. $retries attempts remaining."
-  done
-}
-
 # Returns path to device node for a resource.
 drbd_get_device_for_res () {
   res_name=$1
@@ -134,7 +115,6 @@ drbd_deploy_res_on_host () {
 
     drbd_log "Assigning resource $res_name to client node $node_name"
     $(sudo drbdmanage assign-resource $res_name $node_name --client)
-    drbd_wait_res_deployed $res_name $node_name "--client"
 }
 
 # Determine the size of a resource in mebibytes.
