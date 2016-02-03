@@ -96,20 +96,6 @@ drbd_deploy_res_on_host () {
     $(sudo drbdmanage assign-resource $res_name $node_name --client)
 }
 
-# Determine the size of a resource in mebibytes.
-drbd_get_res_size () {
-  res_name=$1
-
-  size_in_mb=$(sudo drbdmanage volumes -m --resources $res_name | awk -F',' '{ print $4 / 1024 }')
-
-  if [ -n size_in_mb ]; then
-    echo $size_in_mb
-  else
-    drbd_log "Unable to determine size for $res_name"
-    exit -1
-  fi
-}
-
 # Removes a resource, waits for operation to complete on all nodes.
 drbd_remove_res () {
   res_name=$1
