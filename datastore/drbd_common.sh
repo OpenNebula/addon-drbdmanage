@@ -239,6 +239,25 @@ drbd_unassign_res () {
   done
 }
 
+# Polls the path for a block device ready for IO.
+drbd_is_dev_ready () {
+  path=$1
+
+  retries=60
+  for ((i=1;i<$retries;i++)); do
+    sleep 1
+
+    # Is path a block device with read/write permissions?
+    if [ -b $path -a -r $path -a -w $path ]; then
+      echo 0
+      exit 0
+    fi
+  done
+
+  echo 1
+  exit -1
+}
+
 #------------------------------------------------------------------------------
 # Helper functions to query dbus results.
 #------------------------------------------------------------------------------
