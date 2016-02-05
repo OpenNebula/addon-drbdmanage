@@ -273,6 +273,7 @@ drbd_check_dbus_status () {
   # If there is no result, something went wrong communicating to drbdmanage."
   if [ -z "$result" ]; then
     drbd_log "Error communicating with dbus interface or malformed dictionary."
+    drbd_log "Passed plugin $plugin the following dict: $dict"
     drbd_log "$dbus_data"
 
     echo 1
@@ -292,6 +293,9 @@ drbd_check_dbus_status () {
     exit 0
   elif [ $timeout == '"true"' ]; then
     drbd_log "Resource $resource timed out. Timeout of $POL_TIMEOUT seconds exceeded."
+
+    echo 7
+    exit 0
   else
     drbd_log "Unable to satisfy $policy policy. Resource $resource not deployed."
   fi
