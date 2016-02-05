@@ -46,7 +46,13 @@ fi
 DRBD_RES_NAME=OpenNebula-clone-${IMAGE_ID}
 
 # Make a new resource from an exsisting one.
-drbd_clone_res $DRBD_RES_NAME $SRC $BRIDGE_LIST
+if [ $(drbd_clone_res $DRBD_RES_NAME $SRC $BRIDGE_LIST) -ne 0 ]; then
+  error_message "Unable to deploy $DRBD_RES_NAME"
+
+  # Clean up resource.
+  $(drbd_remove_res "$DRBD_RES_NAME")
+  exit -1
+fi
 
 echo $DRBD_RES_NAME
 
