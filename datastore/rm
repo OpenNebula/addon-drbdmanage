@@ -36,9 +36,9 @@ if [ -z "$(drbd_res_exsists $DRBD_RES_NAME)" ]; then
   drbd_log "No resource nammed $DRBD_RES_NAME: cannot remove."
 fi
 
-# Remove resource.
+# Exit with error if removing resource times out.
 if [ $(drbd_remove_res $DRBD_RES_NAME) -ne 0 ]; then
-  error_message "Unable to remove $DRBD_RES_NAME"
+  error_message "Unable to remove $DRBD_RES_NAME: timedout."
   exit -1
 fi
 
