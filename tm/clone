@@ -18,6 +18,7 @@ DRIVER_PATH=$(dirname $0)
 source ${DRIVER_PATH}/../../datastore/drbdmanage/drbd_common.sh
 
 drbd_log "Begining clone action."
+
 # Get virtualization host information
 DST_PATH=$(arg_path $DST)
 SRC_PATH=$(arg_path $SRC)
@@ -25,15 +26,34 @@ DST_HOST=$(arg_host $DST)
 DST_DIR=$(dirname $DST_PATH)
 DISK_ID=$(echo "$DST_PATH" | $AWK -F. '{print $NF}')
 
+# Get the bridge_list 
+XPATH="${DRIVER_PATH}/../../datastore/xpath.rb --stdin"
+
+unset XPATH_ELEMENTS
+
+while IFS= read -r -d '' element; do
+  XPATH_ELEMENTS[0]="$element"
+done < <(onevm show -x $VM_ID| $XPATH /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/DATASTORE_ID)
+
+DATASTORE_ID="${XPATH_ELEMENTS[0]}"
+
+unset XPATH_ELEMENTS
+
+while IFS= read -r -d '' element; do
+  XPATH_ELEMENTS[0]="$element"
+done < <(onevm show -x $DATASTORE_ID| $XPATH /DATASTORE/TEMPLATE/BRIDGE_LIST)
+
+BRIDGE_LIST="${XPATH_ELEMENTS[0]}"
+
 # Get new (cloned) resource name and original resource name.
 DRBD_CLONE_NAME=${SRC_PATH}-vm${VM_ID}-disk${DISK_ID}
 DRBD_RES_NAME=$SRC_PATH
 
-# Node that holds temporary snapshot needed to clone resource.
-DRBD_SNAP_NODE=$(drbd_get_assignment_node $DRBD_RES_NAME)
-
 # Create new resource from DRBD_RES_NAME
-$(drbd_clone_res $DRBD_CLONE_NAME $DRBD_RES_NAME $DRBD_SNAP_NODE)
+if [ $(drbd_clone_res $DRBD_CLONE_NAME $DRBD_RES_NAME $BRIDGE_LIST) -ne 0 ]; then
+  error_message "Error creating clone from $DRBD_RES_NAME"
+  exit -1
+fi
 
 # Assign cloned resource to host.
 $(drbd_deploy_res_on_host $DRBD_CLONE_NAME $DST_HOST)

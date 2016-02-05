@@ -35,29 +35,36 @@ drbd_log "disk id: $DISK_ID"
 
 XPATH="${DRIVER_PATH}/../../datastore/xpath.rb --stdin"
 
-unset i j
+unset i j XPATH_ELEMENTS
 
 while IFS= read -r -d '' element; do
   XPATH_ELEMENTS[i++]="$element"
 done < <(onevm show -x $VM_ID| $XPATH \
   /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/SOURCE \
   /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/SAVE_AS \
+  /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/DATASTORE_ID \
   /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/PERSISTENT)
 
 DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
 DRBD_CLONE_NAME="$DST"
 SAVE_AS="${XPATH_ELEMENTS[j++]}"
+DATASTORE_ID="${XPATH_ELEMENTS[j++]}"
 PERSISTENT="${XPATH_ELEMENTS[j++]}"
 
-  drbd_log "res name: $DRBD_RES_NAME"
-  drbd_log "save as: $SAVE_AS"
-  drbd_log "persistent: $PERSISTENT"
+# Get the bridge_list 
+unset XPATH_ELEMENTS
 
-# Node that holds temporary snapshot needed to clone resource.
-DRBD_SNAP_NODE=$(drbd_get_assignment_node $DRBD_RES_NAME)
+while IFS= read -r -d '' element; do
+  XPATH_ELEMENTS[0]="$element"
+done < <(onevm show -x $DATASTORE_ID| $XPATH /DATASTORE/TEMPLATE/BRIDGE_LIST)
+
+BRIDGE_LIST="${XPATH_ELEMENTS[0]}"
 
 # Create new resource from DRBD_RES_NAME
-$(drbd_clone_res $DRBD_CLONE_NAME $DRBD_RES_NAME $DRBD_SNAP_NODE)
+if [ $(drbd_clone_res $DRBD_CLONE_NAME $DRBD_RES_NAME $BRIDGE_LIST) -ne 0 ]; then
+  error_message "Error creating clone from $DRBD_RES_NAME"
+  exit -1
+fi
 
 drbd_log "Ending cpds action."
 

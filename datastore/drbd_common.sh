@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Load in configuration file.
+DRIVER_PATH=$(dirname $0)
+source ${DRIVER_PATH}/drbdmanage.conf
+
+# Defaults in case conf is missing.
+POL_COUNT=${POL_COUNT:-1}
+POL_RATIO=${POL_RATIO:-''}
+POL_TIMEOUT=${POL_TIMEOUT:-60}
+
 # Log argument to the syslog.
 drbd_log () {
 
@@ -25,52 +34,22 @@ drbd_get_res_nodes () {
   fi
 }
 
-# Return single node with a resource assigned to it.
+# Return single node ready for IO on the given path from list of nodes.
 drbd_get_assignment_node () {
-  res_name=$1
+  device_path=$1
 
-  drbd_log "Getting assignment for $res_name"
-  echo $(drbd_get_res_nodes $res_name | head -n 1 )
-}
-
-# Check if resource is in connected and deployed on a single node.
-drbd_is_res_deployed () {
-  res_name=$1
-  node_name=$2
-  client_option=$3
-
-  node_state="$(sudo drbdmanage assignments -m --resources $res_name --nodes $node_name | awk -F',' '{ print $4, $5 }')"
-
-  if [ "$client_option" = "--client" ]; then
-    target_state="connect|deploy|diskless connect|deploy|diskless"
-  else
-    target_state="connect|deploy connect|deploy"
-  fi
-
-  if [ "$node_state" = "$target_state" ]; then
-    echo 0
-  else
-    echo 1
-  fi
-}
-
-# Wait until resource is deployed and connected on a single node.
-drbd_wait_res_deployed () {
-  res_name=$1
-  node_name=$2
-  client_option=$3
-
-  retries=60
-
-  until [ $(drbd_is_res_deployed $res_name $node_name $client_option) -eq 0 ]; do
-    sleep 1
-    if (( retries < 1 )); then
-      drbd_log "Failed to deploy $res_name on $node_name: retries exceeded"
-      exit -1
+  for node in "${@:2}"; do
+    drbd_log "Checking $device_path on $node"
+    deployed=$(ssh $node "$(typeset -f drbd_is_dev_ready); drbd_is_dev_ready $device_path")
+    if [ $deployed -eq 0 ]; then
+    drbd_log "$node is ready for IO operations on $device_path"
+      echo $node
+      exit 0
     fi
-    ((retries--))
-    drbd_log "Waiting for resource $res_name to be deployed on $node_name. $retries attempts remaining."
+    drbd_log "$node is unable to perform IO operations on $device_path"
   done
+
+  drbd_log "No nodes (${@:2}) with usable DRBD device at $device_path"
 }
 
 # Returns path to device node for a resource.
@@ -109,12 +88,30 @@ drbd_deploy_res_on_nodes () {
   res_name=$1
 
   drbd_log "Assigning resource $res_name to storage nodes ${@:2}"
-  sudo drbdmanage assign-resource $res_name ${@:2}
+  $(sudo drbdmanage assign-resource $res_name ${@:2})
 
-  for node in "${@:2}"
-  do
-    drbd_wait_res_deployed $res_name $node
+  # Wait for resource to be deployed according to the WaitForResource plugin.
+  # Poll Status in case system does not support dbus signals.
+  retries=10
+
+  for ((i=1;i<$retries;i++)); do
+    sleep 1
+
+    status=$(drbd_check_dbus_status WaitForResource $res_name)
+    # If there is a timeout, the system can handle signals and we can exit.
+    if [ "$status" -eq 7 ]; then
+      echo "$status"
+      exit 0
+    fi
+
+    # Exit on successful deployment.
+    if [ "$status" -eq 0]; then
+      echo "$status"
+      exit 0
+    fi
   done
+
+  echo $status
 }
 
 # Deploy resource on virtualization host in diskless mode.
@@ -123,22 +120,7 @@ drbd_deploy_res_on_host () {
     node_name=$2
 
     drbd_log "Assigning resource $res_name to client node $node_name"
-    sudo drbdmanage assign-resource $res_name $node_name --client
-    drbd_wait_res_deployed $res_name $node_name "--client"
-}
-
-# Determine the size of a resource in mebibytes.
-drbd_get_res_size () {
-  res_name=$1
-
-  size_in_mb=$(sudo drbdmanage volumes -m --resources $res_name | awk -F',' '{ print $4 / 1024 }')
-
-  if [ -n size_in_mb ]; then
-    echo $size_in_mb
-  else
-    drbd_log "Unable to determine size for $res_name"
-    exit -1
-  fi
+    $(sudo drbdmanage assign-resource $res_name $node_name --client)
 }
 
 # Removes a resource, waits for operation to complete on all nodes.
@@ -170,14 +152,30 @@ drbd_clone_res () {
   nodes=$3
   snap_name="$res_name"_snap_"$(date +%s)"
 
+  # Create and deploy a snapshot of a resource.
   drbd_log "Creating snapshot of $res_name on $nodes."
-  sudo drbdmanage add-snapshot $snap_name $res_name $nodes
+  $(sudo drbdmanage add-snapshot $snap_name $res_name $nodes)
   
+  sleep 1
+  status=$(drbd_check_dbus_status WaitForSnapshot $res_name $snap_name)
+
+  # Exit with error if snapshot can't be deployed.
+  if [ $status -ne 0 ]; then
+    echo $status
+    exit -1
+  fi
+
+  # Create and deploy a new resource and remove snapshot.
   drbd_log "Creating new resource $res_from_snap_name from snapshot of $snap_name."
-  sudo drbdmanage restore-snapshot $res_from_snap_name $res_name $snap_name
+  $(sudo drbdmanage restore-snapshot $res_from_snap_name $res_name $snap_name)
+
+  sleep 1
+  status=$(drbd_check_dbus_status WaitForResource $res_name)
 
   drbd_log "Removing snapshot taken from $res_name."
-  sudo drbdmanage remove-snapshot $res_name $snap_name
+  $(sudo drbdmanage remove-snapshot $res_name $snap_name)
+
+  echo $status
 }
 
 drbd_monitor () {
@@ -211,4 +209,114 @@ drbd_unassign_res () {
     ((retries--))
     drbd_log "Waiting for resource $res_name to be unassigned from $node. $retries attempts remaining."
   done
+}
+
+# Polls the path for a block device ready for IO.
+drbd_is_dev_ready () {
+  path=$1
+
+  retries=60
+  for ((i=1;i<$retries;i++)); do
+    sleep 1
+
+    # Is path a block device with read/write permissions?
+    if [ -b $path -a -r $path -a -w $path ]; then
+      echo 0
+      exit 0
+    fi
+  done
+
+  echo 1
+  exit -1
+}
+
+#------------------------------------------------------------------------------
+# Helper functions to query dbus results.
+#------------------------------------------------------------------------------
+
+# Returns a dbus dict for the wait for resource or snapshot plugin.
+drbd_build_dbus_dict () {
+  res=$1
+  snap=$2
+
+  # Build dict string with required elements.
+  dict="dict:string:string:starttime,`date +%s`,resource,$res,timeout,$POL_TIMEOUT"
+
+  # If optional elements are present add them to the dict.
+  if [ -n "$snap" ]; then
+    dict+=",snapshot,$snap"
+  fi
+
+  if [ -n "$POL_COUNT" ]; then
+    dict+=",count,$POL_COUNT"
+  fi
+
+  if [ -n "$POL_RATIO" ]; then
+    dict+=",ratio,$POL_RATIO"
+  fi
+
+  echo $dict
+}
+
+# Returns the result of a dbus query to an external plugin.
+drbd_get_dbus_result () {
+  plugin=$1
+  dict=$2
+
+  echo "$(sudo dbus-send --system --print-reply --dest="org.drbd.drbdmanaged" /interface \
+    org.drbd.drbdmanaged.run_external_plugin \
+    string:"drbdmanage.plugins.plugins.wait_for.${plugin}" $dict)"
+}
+
+# Returns the value of a key for a given dbus output.
+drbd_parse_dbus_data () {
+  dbus_data="$1"
+  key=$2
+
+  echo $(echo "$dbus_data" | sed -e '1,/string "'$key'"/d' | head -n1 | awk '{ print $2}')
+}
+
+# Return 0 if the dbus data indicates a successful deployment.
+drbd_check_dbus_status () {
+  plugin=$1
+  res=$2
+  snap=$3
+
+  dict=$(drbd_build_dbus_dict $res $snap)
+  dbus_data="$(drbd_get_dbus_result $plugin $dict)"
+
+  result=$(drbd_parse_dbus_data "$dbus_data" result)
+
+  # If there is no result, something went wrong communicating to drbdmanage."
+  if [ -z "$result" ]; then
+    drbd_log "Error communicating with dbus interface or malformed dictionary."
+    drbd_log "Passed plugin $plugin the following dict: $dict"
+    drbd_log "$dbus_data"
+
+    echo 1
+    exit -1
+  fi
+
+  # Get the rest of the relevant information, now that we know it's there.
+  policy=$(drbd_parse_dbus_data "$dbus_data" policy)
+  timeout=$(drbd_parse_dbus_data "$dbus_data" timeout)
+  resource=$(drbd_parse_dbus_data "$dbus_data" res)
+
+
+  if [ $result == '"true"' ]; then
+    drbd_log "Resource $resource successfully deployed according to policy $policy"
+
+    echo 0
+    exit 0
+  elif [ $timeout == '"true"' ]; then
+    drbd_log "Resource $resource timed out. Timeout of $POL_TIMEOUT seconds exceeded."
+
+    echo 7
+    exit 0
+  else
+    drbd_log "Unable to satisfy $policy policy. Resource $resource not deployed."
+  fi
+
+  echo 1
+  exit 0
 }
