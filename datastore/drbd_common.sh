@@ -91,8 +91,25 @@ drbd_deploy_res_on_nodes () {
   $(sudo drbdmanage assign-resource $res_name ${@:2})
 
   # Wait for resource to be deployed according to the WaitForResource plugin.
-  sleep 1
-  status=$(drbd_check_dbus_status WaitForResource $res_name)
+  # Poll Status in case system does not support dbus signals.
+  retries=10
+
+  for ((i=1;i<$retries;i++)); do
+    sleep 1
+
+    status=$(drbd_check_dbus_status WaitForResource $res_name)
+    # If there is a timeout, the system can handle signals and we can exit.
+    if [ "$status" -eq 7 ]; then
+      echo "$status"
+      exit 0
+    fi
+
+    # Exit on successful deployment.
+    if [ "$status" -eq 0]; then
+      echo "$status"
+      exit 0
+    fi
+  done
 
   echo $status
 }
