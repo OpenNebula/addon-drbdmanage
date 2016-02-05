@@ -62,7 +62,7 @@ BRIDGE_LIST="${XPATH_ELEMENTS[0]}"
 
 # Create new resource from DRBD_RES_NAME
 if [ $(drbd_clone_res $DRBD_CLONE_NAME $DRBD_RES_NAME $BRIDGE_LIST) -ne 0 ]; then
-  error_message "Error created clone from $DRBD_RES_NAME"
+  error_message "Error creating clone from $DRBD_RES_NAME"
   exit -1
 fi
 
