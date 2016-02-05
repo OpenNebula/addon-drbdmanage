@@ -31,13 +31,16 @@ done < <($XPATH /DS_DRIVER_ACTION_DATA/IMAGE/SOURCE)
 
 DRBD_RES_NAME="${XPATH_ELEMENTS[0]}"
 
-# Check if resource is there before it's removed.
+# Log that removing a non-exsisting resource was attempted.
 if [ -z "$(drbd_res_exsists $DRBD_RES_NAME)" ]; then
   drbd_log "No resource nammed $DRBD_RES_NAME: cannot remove."
-  exit -1
 fi
 
-drbd_remove_res $DRBD_RES_NAME
+# Remove resource.
+if [ $(drbd_remove_res $DRBD_RES_NAME) -ne 0 ]; then
+  error_message "Unable to remove $DRBD_RES_NAME"
+  exit -1
+fi
 
 drbd_log "Ending rm action."
 
