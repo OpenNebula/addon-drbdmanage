@@ -96,18 +96,12 @@ drbd_deploy_res_on_nodes () {
 
   for ((i=1;i<$retries;i++)); do
     sleep 1
-
     status=$(drbd_check_dbus_status WaitForResource $res_name)
-    # If there is a timeout, the system can handle signals and we can exit.
-    if [ "$status" -eq 7 ]; then
-      echo "$status"
-      exit 0
-    fi
 
+    # If there is a timeout, the system can handle signals and we can exit.
     # Exit on successful deployment.
-    if [ "$status" -eq 0]; then
-      echo "$status"
-      exit 0
+    if [ "$status" -eq 7 ] || [ "$status" -eq 0 ]; then
+      break
     fi
   done
 
