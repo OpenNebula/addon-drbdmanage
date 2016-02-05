@@ -130,6 +130,7 @@ drbd_remove_res () {
     sleep 1
     if (( retries < 1 )); then
       drbd_log "Failed to remove $res_name: retries exceeded."
+      echo 1
       exit -1
     fi
     ((retries--))
@@ -137,6 +138,7 @@ drbd_remove_res () {
   done
 
   drbd_log "$res_name successfully removed from all nodes."
+  echo 1
 }
 
 # Clones a resource
