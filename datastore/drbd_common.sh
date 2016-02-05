@@ -130,6 +130,7 @@ drbd_remove_res () {
     sleep 1
     if (( retries < 1 )); then
       drbd_log "Failed to remove $res_name: retries exceeded."
+      echo 1
       exit -1
     fi
     ((retries--))
@@ -137,6 +138,7 @@ drbd_remove_res () {
   done
 
   drbd_log "$res_name successfully removed from all nodes."
+  echo 1
 }
 
 # Clones a resource
@@ -150,7 +152,6 @@ drbd_clone_res () {
   drbd_log "Creating snapshot of $res_name on $nodes."
   $(sudo drbdmanage add-snapshot $snap_name $res_name $nodes)
   
-  sleep 1
   status=$(drbd_check_dbus_status WaitForSnapshot $res_name $snap_name)
 
   # Exit with error if snapshot can't be deployed.
@@ -163,7 +164,6 @@ drbd_clone_res () {
   drbd_log "Creating new resource $res_from_snap_name from snapshot of $snap_name."
   $(sudo drbdmanage restore-snapshot $res_from_snap_name $res_name $snap_name)
 
-  sleep 1
   status=$(drbd_check_dbus_status WaitForResource $res_name)
 
   drbd_log "Removing snapshot taken from $res_name."
