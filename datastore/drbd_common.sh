@@ -172,19 +172,6 @@ drbd_clone_res () {
   echo $status
 }
 
-drbd_monitor () {
-  nodes="${@:1}"
-
-  USED_MB=$(sudo drbdmanage v -m | awk -F',' '{ sum+=$4 } END { print sum / 1024 }')
-  TOTAL_MB=$(sudo drbdmanage n -N $nodes -m | \
-    awk -F',' '{ if (!total || $4<total) total=$4 } END { print total / 1024 }')
-  FREE_MB=$(($TOTAL_MB - $USED_MB))
-
-  echo "FREE_MB=$FREE_MB"
-  echo "USED_MB=$USED_MB"
-  echo "TOTAL_MB=$TOTAL_MB"
-}
-
 # Unassign resouce from node.
 drbd_unassign_res () {
   res_name=$1
