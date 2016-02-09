@@ -8,10 +8,13 @@ else
     REMOTES_DIR=$ONE_LOCATION/var/remotes
 fi
 
+# Squash alaises
 CP=/usr/bin/cp
 MKDIR=/usr/bin/mkdir
 CHOWN=/usr/bin/chown
 CHMOD=/usr/bin/chmod
+
+# Defaults
 DATASTORE_ACTIONS="./datastore/*"
 TM_ACTIONS="./tm/*"
 ONE_USER="oneadmin"
@@ -50,5 +53,9 @@ echo "Finished installing driver actions"
 
   # Alert user that they should edit their config.
   if [ -z "$(grep -i drbdmanage /etc/one/oned.conf)" ]; then
-  echo "Be sure to enable the drbdmanage driver in /etc/one/oned.conf"
+    echo ""
+    echo "============================================================="
+    echo "Be sure to enable the drbdmanage driver in /etc/one/oned.conf"
+    echo "============================================================="
+    echo ""
 fi
