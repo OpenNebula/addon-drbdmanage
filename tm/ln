@@ -14,21 +14,21 @@ fi
 
 source "$TMCOMMON"
 
-DRIVER_PATH=$(dirname $0)
-source ${DRIVER_PATH}/../../datastore/drbdmanage/drbd_common.sh
+DRIVER_PATH=$(dirname "$0")
+source "${DRIVER_PATH}"/../../datastore/drbdmanage/drbd_common.sh
 
 drbd_log "Begining ln action."
 
 # Get virtualization host information
-DST_PATH=$(arg_path $DST)
-SRC_PATH=$(arg_path $SRC)
-DST_HOST=$(arg_host $DST)
-DST_DIR=$(dirname $DST_PATH)
+DST_PATH=$(arg_path "$DST")
+SRC_PATH=$(arg_path "$SRC")
+DST_HOST=$(arg_host "$DST")
+DST_DIR=$(dirname "$DST_PATH")
 DISK_ID=$(echo "$DST_PATH" | $AWK -F. '{print $NF}')
 
 # Get resource name and assign it to the host.
 DRBD_RES_NAME=$SRC_PATH
-$(drbd_deploy_res_on_host $DRBD_RES_NAME $DST_HOST)
+drbd_deploy_res_on_host "$DRBD_RES_NAME" "$DST_HOST"
 
 # Get device path for DRBD resource.
 DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_RES_NAME")
