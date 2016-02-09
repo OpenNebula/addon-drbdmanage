@@ -11,6 +11,7 @@ fi
 CP=/usr/bin/cp
 MKDIR=/usr/bin/mkdir
 CHOWN=/usr/bin/chown
+CHMOD=/usr/bin/chmod
 DATASTORE_ACTIONS="./datastore/*"
 TM_ACTIONS="./tm/*"
 ONE_USER="oneadmin"
@@ -26,6 +27,7 @@ for file in $DATASTORE_ACTIONS; do
 done
 
 $CHOWN -Rc "$ONE_USER":"$ONE_USER" "$DATASTORE_LOCATION"
+$CHMOD -Rc 755 "$DATASTORE_LOCATION"
 
 echo "Finished copying datatstore actions."
 
@@ -40,6 +42,7 @@ for file in $TM_ACTIONS; do
 done
 
 $CHOWN -Rc "$ONE_USER":"$ONE_USER" "$TM_LOCATION"
+$CHMOD -Rc 755 "$TM_LOCATION"
 
 echo "Finished copying tm actions."
 
