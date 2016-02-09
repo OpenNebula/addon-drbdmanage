@@ -46,8 +46,8 @@ done < <(onedatastore show -x "$DATASTORE_ID" | $XPATH /DATASTORE/TEMPLATE/BRIDG
 BRIDGE_LIST="${XPATH_ELEMENTS[0]}"
 
 # Get new (cloned) resource name and original resource name.
-DRBD_CLONE_NAME=${SRC_PATH}-vm${VM_ID}-disk${DISK_ID}
-DRBD_RES_NAME=$SRC_PATH
+DRBD_CLONE_NAME="${SRC_PATH}-vm${VM_ID}-disk${DISK_ID}"
+DRBD_RES_NAME="$SRC_PATH"
 
 # Create new resource from DRBD_RES_NAME
 if [ "$(drbd_clone_res "$DRBD_CLONE_NAME" "$DRBD_RES_NAME" "$BRIDGE_LIST")" -ne 0 ]; then
@@ -65,7 +65,7 @@ DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_CLONE_NAME")
 LINK_COMMAND=$(cat <<EOF
     set -e
 
-    mkdir -p $DST_DIR
+    mkdir -p "$DST_DIR"
 
     ln -s "$DRBD_DEVICE_PATH" "$DST_PATH"
 EOF

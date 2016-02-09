@@ -55,7 +55,7 @@ DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
 PERSISTENT="${XPATH_ELEMENTS[j++]}"
 
 if [ -z "$PERSISTENT" ]; then
-  DRBD_RES_NAME=$DRBD_RES_NAME-vm${VM_ID}-disk${DISK_ID}
+  DRBD_RES_NAME="${DRBD_RES_NAME}-vm${VM_ID}-disk${DISK_ID}"
 fi
 
 # Unassign res from source, assign it to dest.
