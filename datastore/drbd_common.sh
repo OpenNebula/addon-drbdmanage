@@ -91,20 +91,7 @@ drbd_deploy_res_on_nodes () {
   sudo drbdmanage assign-resource "$res_name" "${@:2}"
 
   # Wait for resource to be deployed according to the WaitForResource plugin.
-  # Poll Status in case system does not support dbus signals.
-  retries=10
-
-  for ((i=1;i<retries;i++)); do
-    sleep 1
-    status=$(drbd_check_dbus_status WaitForResource "$res_name")
-
-    # If there is a timeout, the system can handle signals and we can exit.
-    # Exit on successful deployment.
-    if [ "$status" -eq 7 ] || [ "$status" -eq 0 ]; then
-      break
-    fi
-  done
-
+  status=$(drbd_poll_dbus WaitForResource "$res_name")
   echo "$status"
 }
 
@@ -152,7 +139,7 @@ drbd_clone_res () {
   drbd_log "Creating snapshot of $res_name on $nodes."
   sudo drbdmanage add-snapshot "$snap_name" "$res_name" "$nodes"
 
-  status=$(drbd_check_dbus_status WaitForSnapshot "$res_name" "$snap_name")
+  status=$(drbd_poll_dbus WaitForSnapshot "$res_name" "$snap_name")
 
   # Exit with error if snapshot can't be deployed.
   if [ "$status" -ne 0 ]; then
@@ -164,7 +151,7 @@ drbd_clone_res () {
   drbd_log "Creating new resource $res_from_snap_name from snapshot of $snap_name."
   sudo drbdmanage restore-snapshot "$res_from_snap_name" "$res_name" "$snap_name"
 
-  status=$(drbd_check_dbus_status WaitForResource "$res_name")
+  status=$(drbd_poll_dbus WaitForResource "$res_name")
 
   drbd_log "Removing snapshot taken from $res_name."
   sudo drbdmanage remove-snapshot "$res_name" "$snap_name"
