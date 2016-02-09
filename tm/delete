@@ -7,10 +7,10 @@ DS_ID=$3
 if [ -z "${ONE_LOCATION}" ]; then
     TMCOMMON=/var/lib/one/remotes/tm/tm_common.sh
 else
-    TMCOMMON=$ONE_LOCATION/var/remotes/tm/tm_common.sh
+    TMCOMMON="${ONE_LOCATION}"/var/remotes/tm/tm_common.sh
 fi
 
-source $TMCOMMON
+source "$TMCOMMON"
 
 DRIVER_PATH=$(dirname $0)
 source ${DRIVER_PATH}/../../datastore/drbdmanage/drbd_common.sh
