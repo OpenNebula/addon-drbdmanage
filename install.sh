@@ -47,5 +47,5 @@ echo "Finished installing driver actions"
 
   # Alert user that they should edit their config.
   if grep -iq drbdmanage /etc/one/oned.conf; then
-  echo "Be sure to enable the drbdmanage in /etc/one/oned.conf"
+  echo "Be sure to enable the drbdmanage driver in /etc/one/oned.conf"
 fi
