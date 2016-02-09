@@ -7,11 +7,11 @@ else
     LIB_LOCATION=$ONE_LOCATION/lib
 fi
 
-source "${LIB_LOCATION}/sh/scripts_common.sh"
+source "${LIB_LOCATION}"/sh/scripts_common.sh
 
 DRIVER_PATH=$(dirname "$0")
-source "${DRIVER_PATH}/../libfs.sh"
-source "${DRIVER_PATH}/drbd_common.sh"
+source "${DRIVER_PATH}"/../libfs.sh
+source "${DRIVER_PATH}"/drbd_common.sh
 
 drbd_log "Begining clone action."
 
