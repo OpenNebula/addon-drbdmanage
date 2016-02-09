@@ -18,11 +18,12 @@ CHMOD=/usr/bin/chmod
 DATASTORE_ACTIONS="./datastore/*"
 TM_ACTIONS="./tm/*"
 ONE_USER="oneadmin"
+DRIVER_NAME="drbdmanage"
 
 # Copy datastore actions to remotes
 echo "Copying datatstore actions."
 
-DATASTORE_LOCATION="${REMOTES_DIR}"/datastore/drbdmanage/
+DATASTORE_LOCATION=${REMOTES_DIR}/datastore/${DRIVER_NAME}/
 $MKDIR -vp "$DATASTORE_LOCATION"
 
 for file in $DATASTORE_ACTIONS; do
@@ -37,7 +38,7 @@ echo "Finished copying datatstore actions."
 # Copy tm actions to remotes
 echo "Copying tm actions."
 
-TM_LOCATION="${REMOTES_DIR}"/tm/drbdmanage/
+TM_LOCATION=${REMOTES_DIR}/tm/${DRIVER_NAME}/
 $MKDIR -vp "$TM_LOCATION"
 
 for file in $TM_ACTIONS; do
@@ -52,10 +53,11 @@ echo "Finished copying tm actions."
 echo "Finished installing driver actions"
 
   # Alert user that they should edit their config.
-  if [ -z "$(grep -i drbdmanage /etc/one/oned.conf)" ]; then
+  if [ -z "$(grep -i $DRIVER_NAME /etc/one/oned.conf)" ]; then
     echo ""
     echo "============================================================="
-    echo "Be sure to enable the drbdmanage driver in /etc/one/oned.conf"
+    echo "$DRIVER_NAME not found in /etc/one/oned.conf"
+    echo "Be sure to enable the $DRIVER_NAME driver in /etc/one/oned.conf"
     echo "============================================================="
     echo ""
 fi
