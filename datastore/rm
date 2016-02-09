@@ -1,25 +1,22 @@
 #!/bin/bash
 
 # Set up environment
-
 if [ -z "${ONE_LOCATION}" ]; then
     LIB_LOCATION=/usr/lib/one
 else
     LIB_LOCATION=$ONE_LOCATION/lib
 fi
 
-. $LIB_LOCATION/sh/scripts_common.sh
+source "$LIB_LOCATION"/sh/scripts_common.sh
 
-DRIVER_PATH=$(dirname $0)
-source ${DRIVER_PATH}/../libfs.sh
-source ${DRIVER_PATH}/drbd_common.sh
+DRIVER_PATH=$(dirname "$0")
+source "${DRIVER_PATH}"/../libfs.sh
+source "${DRIVER_PATH}"/drbd_common.sh
 
 drbd_log "Begining rm action."
 
 # Get arguments from OpenNebula Core
-
 DRIVER_ACTION=$1
-IMAGE_ID=$2
 
 XPATH="${DRIVER_PATH}/../xpath.rb -b $DRIVER_ACTION"
 
@@ -32,12 +29,12 @@ done < <($XPATH /DS_DRIVER_ACTION_DATA/IMAGE/SOURCE)
 DRBD_RES_NAME="${XPATH_ELEMENTS[0]}"
 
 # Log that removing a non-exsisting resource was attempted.
-if [ -z "$(drbd_res_exsists $DRBD_RES_NAME)" ]; then
+if [ -z "$(drbd_res_exsists "$DRBD_RES_NAME")" ]; then
   drbd_log "No resource nammed $DRBD_RES_NAME: cannot remove."
 fi
 
 # Exit with error if removing resource times out.
-if [ $(drbd_remove_res $DRBD_RES_NAME) -ne 0 ]; then
+if [ "$(drbd_remove_res "$DRBD_RES_NAME")" -ne 0 ]; then
   error_message "Unable to remove $DRBD_RES_NAME: timedout."
   exit -1
 fi
