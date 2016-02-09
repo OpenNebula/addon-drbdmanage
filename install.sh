@@ -25,7 +25,7 @@ for file in $DATASTORE_ACTIONS; do
   $CP -uv "$file" "$DATASTORE_LOCATION"
 done
 
-$CHOWN -Rv "$ONE_USER":"$ONE_USER" "$DATASTORE_LOCATION"
+$CHOWN -Rc "$ONE_USER":"$ONE_USER" "$DATASTORE_LOCATION"
 
 echo "Finished copying datatstore actions."
 
@@ -39,7 +39,7 @@ for file in $TM_ACTIONS; do
   $CP -uv "$file" "$TM_LOCATION"
 done
 
-$CHOWN -Rv "$ONE_USER":"$ONE_USER" "$TM_LOCATION"
+$CHOWN -Rc "$ONE_USER":"$ONE_USER" "$TM_LOCATION"
 
 echo "Finished copying tm actions."
 
