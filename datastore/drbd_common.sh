@@ -301,3 +301,25 @@ drbd_check_dbus_status () {
   echo 1
   exit 0
 }
+
+# Poll dbus in case system can't handle dbus signals.
+drbd_poll_dbus () {
+  plugin=$1
+  res_name=$2
+  snap_name=$3
+
+  retries=10
+
+  for ((i=1;i<retries;i++)); do
+    sleep 1
+    status=$(drbd_check_dbus_status "$plugin" "$res_name" "$snap_name")
+
+    # If there is a timeout, the system can handle signals and we can exit.
+    # Exit on successful deployment.
+    if [ "$status" -eq 7 ] || [ "$status" -eq 0 ]; then
+      break
+    fi
+  done
+
+  echo "$status"
+}
