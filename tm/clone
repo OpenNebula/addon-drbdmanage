@@ -33,15 +33,7 @@ unset XPATH_ELEMENTS
 
 while IFS= read -r -d '' element; do
   XPATH_ELEMENTS[0]="$element"
-done < <(onevm show -x "$VM_ID" | $XPATH /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/DATASTORE_ID)
-
-DATASTORE_ID="${XPATH_ELEMENTS[0]}"
-
-unset XPATH_ELEMENTS
-
-while IFS= read -r -d '' element; do
-  XPATH_ELEMENTS[0]="$element"
-done < <(onedatastore show -x "$DATASTORE_ID" | $XPATH /DATASTORE/TEMPLATE/BRIDGE_LIST)
+done < <(onedatastore show -x "$DS_ID" | $XPATH /DATASTORE/TEMPLATE/BRIDGE_LIST)
 
 BRIDGE_LIST="${XPATH_ELEMENTS[0]}"
 
