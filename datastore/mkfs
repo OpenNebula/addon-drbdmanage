@@ -81,7 +81,7 @@ REGISTER_COMMAND=$(cat << EOF
 
   set -e
 
-  mkfs_command $DRBD_DEVICE_PATH $FSTYPE $SIZE
+  $(mkfs_command "$DRBD_DEVICE_PATH" "$FSTYPE" "$SIZE")
 
 EOF
 )
