@@ -75,11 +75,6 @@ fi
 
 
 REGISTER_COMMAND=$(cat << EOF
-  if [ "$FSTYPE" = "raw" ]; then
-
-    drbd_log "$DRBD_RES_NAME created with device $DRBD_DEVICE_PATH"
-
-  else
 
     drbd_log "Creating $FSTYPE filesystem for $DRBD_RES_NAME on device $DRBD_DEVICE_PATH"
     mkfs_command $DRBD_DEVICE_PATH $FSTYPE $SIZE
