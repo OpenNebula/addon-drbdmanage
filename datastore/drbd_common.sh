@@ -34,13 +34,20 @@ drbd_get_res_nodes () {
   fi
 }
 
+# See if a DRBD device is present and ready for IO on a single node.
+drbd_is_node_ready () {
+  node=$1
+  device_path=$2
+
+  ssh "$node" "$(typeset -f drbd_is_dev_ready); drbd_is_dev_ready $device_path"
+}
 # Return single node ready for IO on the given path from list of nodes.
 drbd_get_assignment_node () {
   device_path=$1
 
   for node in "${@:2}"; do
     drbd_log "Checking $device_path on $node"
-    deployed=$(ssh "$node" "$(typeset -f drbd_is_dev_ready); drbd_is_dev_ready $device_path")
+    deployed=$(drbd_is_node_ready "$node" "$device_path")
     if [ "$deployed" -eq 0 ]; then
     drbd_log "$node is ready for IO operations on $device_path"
       echo "$node"

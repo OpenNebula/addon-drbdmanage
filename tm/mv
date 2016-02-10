@@ -62,9 +62,15 @@ fi
 drbd_unassign_res "$DRBD_RES_NAME" "$SRC_HOST"
 drbd_deploy_res_on_host "$DRBD_RES_NAME" "$DST_HOST"
 
-# Get device path for DRBD resource and link it to the disk location.
+# Get Device path and make sure it's ready for IO.
 DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_RES_NAME")
 
+if [ "$(drbd_is_node_ready "$DST_HOST" "$DRBD_DEVICE_PATH")" -ne 0 ]; then
+  error_message "DRBD device at $DRBD_DEVICE_PATH not ready for IO on $DST_HOST"
+  exit -1
+fi
+
+# Link DRBD device to datastore location.
 LINK_COMMAND=$(cat <<EOF
     set -e
 
