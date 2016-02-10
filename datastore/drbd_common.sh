@@ -111,7 +111,7 @@ drbd_remove_res () {
   drbd_log "Removing $res_name from DRBD storage cluster."
   sudo drbdmanage remove-resource -q "$res_name"
 
-  retries=10
+  retries="$POL_TIMEOUT"
 
   until [ -z "$(drbd_res_exsists "$res_name")" ]; do
     sleep 1
@@ -166,7 +166,7 @@ drbd_unassign_res () {
 
   sudo drbdmanage unassign-resource -q "$res_name" "$node"
   # Wait until resource is unassigned.
-  retries=10
+  retries="$POL_TIMEOUT"
 
   until [ -z "$(sudo drbdmanage list-assignments --resources "$res_name" --nodes "$node" -m)" ]; do
     sleep 1
@@ -183,7 +183,7 @@ drbd_unassign_res () {
 drbd_is_dev_ready () {
   path=$1
 
-  retries=60
+  retries="$POL_TIMEOUT"
   for ((i=1;i<retries;i++)); do
     sleep 1
 
@@ -295,7 +295,7 @@ drbd_poll_dbus () {
   res_name=$2
   snap_name=$3
 
-  retries=10
+  retries="$POL_TIMEOUT"
 
   for ((i=1;i<retries;i++)); do
     sleep 1
