@@ -101,7 +101,7 @@ if [ -z "$RES_HOST" ]; then
   exit -1
 fi
 
-ssh_exec_and_log "$RES_HOST" "$REGISTER_CMD" \
+ssh_exec_and_log "$RES_HOST" "$REGISTER_COMMAND" \
    "Error registering $DRBD_RES_NAME on $RES_HOST"
 
 drbd_log "Created $DRBD_RES_NAME on $RES_HOST"
