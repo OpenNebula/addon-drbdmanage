@@ -73,17 +73,18 @@ if [ "$(drbd_deploy_res_on_nodes "$DRBD_RES_NAME" "$BRIDGE_LIST")" -ne 0 ]; then
   exit -1
 fi
 
+# Get the location of the DRBD device node.
+DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_RES_NAME")
 
+# Create filesystem on drbd device.
 REGISTER_COMMAND=$(cat << EOF
 
-    drbd_log "Creating $FSTYPE filesystem for $DRBD_RES_NAME on device $DRBD_DEVICE_PATH"
-    mkfs_command $DRBD_DEVICE_PATH $FSTYPE $SIZE
+  set -e
+
+  mkfs_command $DRBD_DEVICE_PATH $FSTYPE $SIZE
 
 EOF
 )
-
-# Get the location of the DRBD device node.
-DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_RES_NAME")
 
 # Find node with a resource assigned to it.
 RES_HOST=$(drbd_get_assignment_node "$DRBD_DEVICE_PATH" "$BRIDGE_LIST")
