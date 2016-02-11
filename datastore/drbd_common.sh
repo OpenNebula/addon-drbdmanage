@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# Load in configuration file.
-DRIVER_PATH=$(dirname "$0")
-source "${DRIVER_PATH}/drbdmanage.conf"
-
 # Defaults in case conf is missing.
 POL_COUNT=${POL_COUNT:-1}
 POL_RATIO=${POL_RATIO:-''}
