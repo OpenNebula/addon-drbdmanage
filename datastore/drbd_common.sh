@@ -39,7 +39,7 @@ drbd_is_node_ready () {
   node=$1
   device_path=$2
 
-  ssh "$node" "$(typeset -f drbd_is_dev_ready); drbd_is_dev_ready $device_path"
+  echo "$(ssh "$node" "$(typeset -f drbd_is_dev_ready); drbd_is_dev_ready $device_path $POL_TIMEOUT")"
 }
 # Return single node ready for IO on the given path from list of nodes.
 drbd_get_assignment_node () {
@@ -189,8 +189,9 @@ drbd_unassign_res () {
 # Polls the path for a block device ready for IO.
 drbd_is_dev_ready () {
   path=$1
+  timeout=$2
 
-  retries="$POL_TIMEOUT"
+  retries="$timeout"
   for ((i=1;i<retries;i++)); do
     sleep 1
 
