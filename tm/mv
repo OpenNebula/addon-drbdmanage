@@ -59,8 +59,7 @@ if [ -z "$PERSISTENT" ]; then
   DRBD_RES_NAME="${DRBD_RES_NAME}-vm${VM_ID}-disk${DISK_ID}"
 fi
 
-# Unassign res from source, assign it to dest.
-drbd_unassign_res "$DRBD_RES_NAME" "$SRC_HOST"
+# assign res to dest.
 drbd_deploy_res_on_host "$DRBD_RES_NAME" "$DST_HOST"
 
 # Get Device path and make sure it's ready for IO.
@@ -70,6 +69,9 @@ if [ "$(drbd_is_node_ready "$DST_HOST" "$DRBD_DEVICE_PATH")" -ne 0 ]; then
   error_message "DRBD device at $DRBD_DEVICE_PATH not ready for IO on $DST_HOST"
   exit -1
 fi
+
+# Unassign res from source.
+drbd_unassign_res "$DRBD_RES_NAME" "$SRC_HOST"
 
 # Link DRBD device to datastore location.
 LINK_COMMAND=$(cat <<EOF
