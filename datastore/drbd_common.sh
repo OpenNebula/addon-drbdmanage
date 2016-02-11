@@ -39,7 +39,7 @@ drbd_is_node_ready () {
   node=$1
   device_path=$2
 
-  echo "$(ssh "$node" "$(typeset -f drbd_is_dev_ready); drbd_is_dev_ready $device_path $POL_TIMEOUT")"
+  ssh "$node" "$(typeset -f drbd_is_dev_ready); drbd_is_dev_ready $device_path $POL_TIMEOUT"
 }
 # Return single node ready for IO on the given path from list of nodes.
 drbd_get_assignment_node () {
@@ -72,7 +72,7 @@ drbd_get_device_for_res () {
 drbd_res_exsists () {
   res_name=$1
 
-  echo "$(sudo drbdmanage list-resources --resources "$res_name" -m | awk -F',' '{ print $1 }')"
+  sudo drbdmanage list-resources --resources "$res_name" -m | awk -F',' '{ print $1 }'
 }
 
 # Add a resource to drbd with a given size.
@@ -239,9 +239,9 @@ drbd_get_dbus_result () {
   plugin=$1
   dict=$2
 
-  echo "$(sudo dbus-send --system --print-reply --dest="org.drbd.drbdmanaged" /interface \
+  sudo dbus-send --system --print-reply --dest="org.drbd.drbdmanaged" /interface \
     org.drbd.drbdmanaged.run_external_plugin \
-    string:"drbdmanage.plugins.plugins.wait_for.${plugin}" "$dict")"
+    string:"drbdmanage.plugins.plugins.wait_for.${plugin}" "$dict"
 }
 
 # Returns the value of a key for a given dbus output.
@@ -249,7 +249,7 @@ drbd_parse_dbus_data () {
   dbus_data="$1"
   key=$2
 
-  echo "$(echo "$dbus_data" | sed -e '1,/string "'"$key"'"/d' | head -n1 | awk '{ print $2}')"
+  echo "$dbus_data" | sed -e '1,/string "'"$key"'"/d' | head -n1 | awk '{ print $2}'
 }
 
 # Return 0 if the dbus data indicates a successful deployment.
