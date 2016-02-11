@@ -184,6 +184,8 @@ drbd_unassign_res () {
     ((retries--))
     drbd_log "Waiting for resource $res_name to be unassigned from $node. $retries attempts remaining."
   done
+
+  drbd_log "Unassigned $res_name from $node"
 }
 
 # Polls the path for a block device ready for IO.
