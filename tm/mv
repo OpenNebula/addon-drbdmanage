@@ -77,7 +77,7 @@ drbd_unassign_res "$DRBD_RES_NAME" "$SRC_HOST"
 LINK_COMMAND=$(cat <<EOF
     set -e
 
-    ln -s "$DRBD_DEVICE_PATH" "$DST_PATH"
+    ln -fs "$DRBD_DEVICE_PATH" "$DST_PATH"
 EOF
 )
 

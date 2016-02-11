@@ -65,7 +65,7 @@ LINK_COMMAND=$(cat <<EOF
 
     mkdir -p "$DST_DIR"
 
-    ln -s "$DRBD_DEVICE_PATH" "$DST_PATH"
+    ln -fs "$DRBD_DEVICE_PATH" "$DST_PATH"
 EOF
 )
 
