@@ -128,7 +128,6 @@ drbd_remove_res () {
   done
 
   drbd_log "$res_name successfully removed from all nodes."
-  echo 1
 }
 
 # Clones a resource

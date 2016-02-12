@@ -43,10 +43,8 @@ DRBD_CLONE_NAME="${SRC_PATH}-vm${VM_ID}-disk${DISK_ID}"
 DRBD_RES_NAME="$SRC_PATH"
 
 # Create new resource from DRBD_RES_NAME
-if [ "$(drbd_clone_res "$DRBD_CLONE_NAME" "$DRBD_RES_NAME" "$BRIDGE_LIST")" -ne 0 ]; then
-  error_message "Error creating clone from $DRBD_RES_NAME"
-  exit -1
-fi
+exec_and_log "$(drbd_clone_res "$DRBD_CLONE_NAME" "$DRBD_RES_NAME" "$BRIDGE_LIST")"
+  "Error creating clone from $DRBD_RES_NAME"
 
 # Assign cloned resource to host.
 drbd_deploy_res_on_host "$DRBD_CLONE_NAME" "$DST_HOST"
@@ -54,10 +52,8 @@ drbd_deploy_res_on_host "$DRBD_CLONE_NAME" "$DST_HOST"
 # Get Device path and make sure it's ready for IO.
 DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_CLONE_NAME")
 
-if [ "$(drbd_is_node_ready "$DST_HOST" "$DRBD_DEVICE_PATH")" -ne 0 ]; then
-  error_message "DRBD device at $DRBD_DEVICE_PATH not ready for IO on $DST_HOST"
-  exit -1
-fi
+exec_and_log "$(drbd_is_node_ready "$DST_HOST" "$DRBD_DEVICE_PATH")"
+  "DRBD device at $DRBD_DEVICE_PATH not ready for IO on $DST_HOST"
 
 # Link DRBD device to datastore location.
 LINK_COMMAND=$(cat <<EOF
