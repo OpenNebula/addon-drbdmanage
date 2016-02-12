@@ -9,29 +9,32 @@ DS_ID=$4
 if [ -z "${ONE_LOCATION}" ]; then
     TMCOMMON=/var/lib/one/remotes/tm/tm_common.sh
 else
-    TMCOMMON=$ONE_LOCATION/var/remotes/tm/tm_common.sh
+    TMCOMMON="${ONE_LOCATION}"/var/remotes/tm/tm_common.sh
 fi
 
-source $TMCOMMON
+source "$TMCOMMON"
 
-DRIVER_PATH=$(dirname $0)
-source ${DRIVER_PATH}/../../datastore/drbdmanage/drbd_common.sh
+DRIVER_PATH=$(dirname "$0")
+source "${DRIVER_PATH}"/../../datastore/drbdmanage/drbd_common.sh
+source "${DRIVER_PATH}"/../../datastore/drbdmanage/drbdmanage.conf
 
-drbd_log "Begining ln action."
+drbd_log "Beginning ln action."
 
-# Get virtualization host information
-DST_PATH=$(arg_path $DST)
-SRC_PATH=$(arg_path $SRC)
-DST_HOST=$(arg_host $DST)
-DST_DIR=$(dirname $DST_PATH)
-DISK_ID=$(echo "$DST_PATH" | $AWK -F. '{print $NF}')
+# Get host information
+DST_PATH=$(arg_path "$DST")
+SRC_PATH=$(arg_path "$SRC")
+DST_HOST=$(arg_host "$DST")
+DST_DIR=$(dirname "$DST_PATH")
 
 # Get resource name and assign it to the host.
 DRBD_RES_NAME=$SRC_PATH
-$(drbd_deploy_res_on_host $DRBD_RES_NAME $DST_HOST)
+drbd_deploy_res_on_host "$DRBD_RES_NAME" "$DST_HOST"
 
-# Get device path for DRBD resource.
+# Get Device path and make sure it's ready for IO.
 DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_RES_NAME")
+
+exec_and_log "drbd_is_node_ready $DST_HOST $DRBD_DEVICE_PATH"
+  "DRBD device at $DRBD_DEVICE_PATH not ready for IO on $DST_HOST"
 
 # Link DRBD device to datastore location.
 LINK_COMMAND=$(cat <<EOF
@@ -39,7 +42,7 @@ LINK_COMMAND=$(cat <<EOF
 
     mkdir -p $DST_DIR
 
-    ln -s "$DRBD_DEVICE_PATH" "$DST_PATH"
+    ln -fs "$DRBD_DEVICE_PATH" "$DST_PATH"
 EOF
 )
 

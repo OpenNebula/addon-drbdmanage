@@ -1,23 +1,22 @@
 #!/bin/bash
 
 # Set up environment
-
 if [ -z "${ONE_LOCATION}" ]; then
     LIB_LOCATION=/usr/lib/one
 else
     LIB_LOCATION=$ONE_LOCATION/lib
 fi
 
-. $LIB_LOCATION/sh/scripts_common.sh
+source "$LIB_LOCATION"/sh/scripts_common.sh
 
+DRIVER_PATH=$(dirname "$0")
+source "${DRIVER_PATH}"/../libfs.sh
+source "${DRIVER_PATH}"/drbd_common.sh
+source "${DRIVER_PATH}"/drbdmanage.conf
 
-DRIVER_PATH=$(dirname $0)
-source ${DRIVER_PATH}/../libfs.sh
-source ${DRIVER_PATH}/drbd_common.sh
+drbd_log "Beginning cp action."
 
-drbd_log "Begining cp action."
 # Get arguments from OpenNebula Core
-
 DRIVER_ACTION=$1
 IMAGE_ID=$2
 
@@ -31,8 +30,6 @@ done < <($XPATH     /DS_DRIVER_ACTION_DATA/DATASTORE/BASE_PATH \
                     /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/RESTRICTED_DIRS \
                     /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/SAFE_DIRS \
                     /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/BRIDGE_LIST \
-                    /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/DRBD_REDUNDANCY \
-                    /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/DRBD_MINOR_PREFIX \
                     /DS_DRIVER_ACTION_DATA/IMAGE/PATH \
                     /DS_DRIVER_ACTION_DATA/IMAGE/SIZE \
                     /DS_DRIVER_ACTION_DATA/IMAGE/TEMPLATE/MD5 \
@@ -44,8 +41,6 @@ BASE_PATH="${XPATH_ELEMENTS[j++]}"
 RESTRICTED_DIRS="${XPATH_ELEMENTS[j++]}"
 SAFE_DIRS="${XPATH_ELEMENTS[j++]}"
 BRIDGE_LIST="${XPATH_ELEMENTS[j++]}"
-DRBD_REDUNDANCY="${XPATH_ELEMENTS[j++]:-$DRBD_REDUNDANCY}"
-DRBD_MINOR_PREFIX="${XPATH_ELEMENTS[j++]:-$DRBD_MINOR_PREFIX}"
 SRC="${XPATH_ELEMENTS[j++]}"
 SIZE="${XPATH_ELEMENTS[j++]:-0}"
 MD5="${XPATH_ELEMENTS[j++]}"
@@ -53,7 +48,7 @@ SHA1="${XPATH_ELEMENTS[j++]}"
 NO_DECOMPRESS="${XPATH_ELEMENTS[j++]}"
 LIMIT_TRANSFER_BW="${XPATH_ELEMENTS[j++]}"
 
-DST_HOST=`get_destination_host $IMAGE_ID`
+DST_HOST=$(get_destination_host "$IMAGE_ID")
 
 if [ -z "$DST_HOST" ]; then
     error_message "Datastore template missing 'BRIDGE_LIST' attribute."
@@ -62,21 +57,25 @@ fi
 
 set_up_datastore "$BASE_PATH" "$RESTRICTED_DIRS" "$SAFE_DIRS"
 
-# Create new resource in drbd.
+# Create new resource in DRBD.
 DRBD_SIZE="${SIZE}M"
 DRBD_RES_NAME="OpenNebula-image-${IMAGE_ID}"
 
 drbd_log "Creating a new $DRBD_SIZE resource $DRBD_RES_NAME \
   on the following nodes: $BRIDGE_LIST"
 
-$(drbd_add_res $DRBD_RES_NAME $DRBD_SIZE)
-if [ $(drbd_deploy_res_on_nodes $DRBD_RES_NAME "$BRIDGE_LIST") -ne 0 ]; then
+drbd_add_res "$DRBD_RES_NAME" "$DRBD_SIZE"
+
+if [ "$(drbd_deploy_res_on_nodes "$DRBD_RES_NAME" "$BRIDGE_LIST")" -ne 0 ]; then
   error_message "Unable to deploy $DRBD_RES_NAME"
+
+  # Clean up resource.
+  drbd_remove_res "$DRBD_RES_NAME"
   exit -1
 fi
 
 # Set up copy command.
-DOWNLOADER_ARGS=`set_downloader_args "$MD5" "$SHA1" "$NO_DECOMPRESS" "$LIMIT_TRANSFER_BW" "$SRC" -`
+DOWNLOADER_ARGS=$(set_downloader_args "$MD5" "$SHA1" "$NO_DECOMPRESS" "$LIMIT_TRANSFER_BW" "$SRC" -)
 
 COPY_COMMAND="$DRIVER_PATH/../downloader.sh $DOWNLOADER_ARGS"
 
@@ -89,10 +88,13 @@ http://*|https://*)
 
 *)
 
-    if [ `check_restricted $SRC` -eq 1 ]; then
+    if [ "$(check_restricted "$SRC")" -eq 1 ]; then
 
         log_error "Not allowed to copy images from $RESTRICTED_DIRS"
         error_message "Not allowed to copy image file $SRC"
+
+        # Clean up resource.
+        drbd_remove_res "$DRBD_RES_NAME"
         exit -1
 
     fi
@@ -104,13 +106,16 @@ http://*|https://*)
 esac
 
 # Get the location of the DRBD device node.
-DRBD_DEVICE_PATH=$(drbd_get_device_for_res $DRBD_RES_NAME)
+DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_RES_NAME")
 
 # Find node with a resource assigned to it.
-RES_HOST=$(drbd_get_assignment_node $DRBD_DEVICE_PATH "$BRIDGE_LIST")
+RES_HOST=$(drbd_get_assignment_node "$DRBD_DEVICE_PATH" "$BRIDGE_LIST")
 
 if [ -z "$RES_HOST" ]; then
   error_message "No node in $BRIDGE_LIST ready for IO on $DRBD_DEVICE_PATH"
+
+  # Clean up resource.
+  drbd_remove_res "$DRBD_RES_NAME"
   exit -1
 fi
 

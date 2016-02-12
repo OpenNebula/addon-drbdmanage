@@ -1,25 +1,24 @@
 #!/bin/bash
 
 # Set up environment
-
 if [ -z "${ONE_LOCATION}" ]; then
     LIB_LOCATION=/usr/lib/one
 else
     LIB_LOCATION=$ONE_LOCATION/lib
 fi
 
-. $LIB_LOCATION/sh/scripts_common.sh
+source "$LIB_LOCATION"/sh/scripts_common.sh
 
-DRIVER_PATH=$(dirname $0)
-source ${DRIVER_PATH}/drbd_common.sh
-source ${DRIVER_PATH}/../libfs.sh
+DRIVER_PATH=$(dirname "$0")
+source "${DRIVER_PATH}"/../libfs.sh
+source "${DRIVER_PATH}"/drbd_common.sh
+source "${DRIVER_PATH}"/drbdmanage.conf
 
-drbd_log "Begining stat action."
+drbd_log "Beginning stat action."
 
 # Get arguments from OpenNebula Core
 
 DRIVER_ACTION=$1
-IMAGE_ID=$2
 
 XPATH="${DRIVER_PATH}/../xpath.rb -b $DRIVER_ACTION"
 
@@ -32,7 +31,7 @@ done < <($XPATH /DS_DRIVER_ACTION_DATA/IMAGE/PATH)
 SRC="${XPATH_ELEMENTS[0]}"
 
 # Determine resource size.
-SIZE=$(fs_size $SRC)
+SIZE=$(fs_size "$SRC")
 
 if [ "$SIZE" = "0" ]; then
   log_error "Cannot determine size for $SRC"
@@ -41,4 +40,4 @@ fi
 
 drbd_log "Ending stat action."
 
-echo $SIZE
+echo "$SIZE"

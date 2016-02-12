@@ -1,21 +1,20 @@
 #!/bin/bash
 
 # Set up environment
-
 if [ -z "${ONE_LOCATION}" ]; then
     LIB_LOCATION=/usr/lib/one
 else
     LIB_LOCATION=$ONE_LOCATION/lib
 fi
 
-. $LIB_LOCATION/sh/scripts_common.sh
+source "$LIB_LOCATION"/sh/scripts_common.sh
 
-DRIVER_PATH=$(dirname $0)
-source ${DRIVER_PATH}/../libfs.sh
-source ${DRIVER_PATH}/drbd_common.sh
+DRIVER_PATH=$(dirname "$0")
+source "${DRIVER_PATH}"/../libfs.sh
+source "${DRIVER_PATH}"/drbd_common.sh
+source "${DRIVER_PATH}"/drbdmanage.conf
 
 # Get arguments from OpenNebula Core
-
 DRIVER_ACTION=$1
 IMAGE_ID=$2
 
@@ -29,11 +28,21 @@ done < <($XPATH     /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/BRIDGE_LIST )
 
 BRIDGE_LIST="${XPATH_ELEMENTS[j++]}"
 
-DST_HOST=`get_destination_host $IMAGE_ID`
+DST_HOST=$(get_destination_host "$IMAGE_ID")
 
 if [ -z "$DST_HOST" ]; then
     error_message "Datastore template missing 'BRIDGE_LIST' attribute."
     exit -1
 fi
 
-drbd_monitor $BRIDGE_LIST
+# Monitor pool space.
+# Use the smallest pool sizes among the nodes in the bridge list.
+TOTAL_MB=$(sudo drbdmanage n -N "$BRIDGE_LIST" -m | \
+  awk -F',' '{ if (!total || $4<total) total=$4 } END { print total / 1024 }')
+FREE_MB=$(sudo drbdmanage n -N "$BRIDGE_LIST" -m | \
+  awk -F',' '{ if (!total || $5<total) total=$5 } END { print total / 1024 }')
+USED_MB=$((TOTAL_MB - FREE_MB))
+
+echo "FREE_MB=$FREE_MB"
+echo "USED_MB=$USED_MB"
+echo "TOTAL_MB=$TOTAL_MB"
