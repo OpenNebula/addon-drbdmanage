@@ -19,18 +19,7 @@ source "$TMCOMMON"
 source "${DRIVER_PATH}"/../../datastore/drbdmanage/drbd_common.sh
 source "${DRIVER_PATH}"/../../datastore/drbdmanage/drbdmanage.conf
 
-drbd_log "Begining cpds action."
-
-drbd_log "src: $1"
-drbd_log "dst: $2"
-drbd_log "vm id: $3"
-drbd_log "ds id: $4"
-
-SRC_HOST=$(arg_host "$SRC")
-
-DISK_ID=$(echo "$SRC" | awk -F. '{print $NF}')
-
-drbd_log "disk id: $DISK_ID"
+drbd_log "Beginning cpds action."
 
 # Get image information
 

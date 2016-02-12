@@ -18,7 +18,7 @@ DRIVER_PATH=$(dirname "$0")
 source "${DRIVER_PATH}"/../../datastore/drbdmanage/drbd_common.sh
 source "${DRIVER_PATH}"/../../datastore/drbdmanage/drbdmanage.conf
 
-drbd_log "Begining mv action."
+drbd_log "Beginning mv action."
 # Determine the source, host, and the location of the images.
 SRC_HOST=$(arg_host "$SRC")
 SRC_PATH=$(arg_path "$SRC")
@@ -59,7 +59,7 @@ if [ -z "$PERSISTENT" ]; then
   DRBD_RES_NAME="${DRBD_RES_NAME}-vm${VM_ID}-disk${DISK_ID}"
 fi
 
-# assign res to dest.
+# Assign res to dest.
 drbd_deploy_res_on_host "$DRBD_RES_NAME" "$DST_HOST"
 
 # Get Device path and make sure it's ready for IO.

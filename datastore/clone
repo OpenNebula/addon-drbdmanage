@@ -14,7 +14,7 @@ source "${DRIVER_PATH}"/../libfs.sh
 source "${DRIVER_PATH}"/drbd_common.sh
 source "${DRIVER_PATH}"/drbdmanage.conf
 
-drbd_log "Begining clone action."
+drbd_log "Beginning clone action."
 
 # Get arguments from OpenNebula Core
 DRIVER_ACTION=$1
@@ -41,7 +41,7 @@ fi
 
 DRBD_CLONE_NAME=OpenNebula-clone-${IMAGE_ID}
 
-# Make a new resource from an exsisting one.
+# Make a new resource from an existing one.
 if [ "$(drbd_clone_res "$DRBD_CLONE_NAME" "$DRBD_RES_NAME" "$BRIDGE_LIST")" -ne 0 ]; then
   error_message "Unable to deploy $DRBD_CLONE_NAME"
 

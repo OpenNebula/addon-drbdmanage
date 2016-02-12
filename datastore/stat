@@ -14,7 +14,7 @@ source "${DRIVER_PATH}"/../libfs.sh
 source "${DRIVER_PATH}"/drbd_common.sh
 source "${DRIVER_PATH}"/drbdmanage.conf
 
-drbd_log "Begining stat action."
+drbd_log "Beginning stat action."
 
 # Get arguments from OpenNebula Core
 

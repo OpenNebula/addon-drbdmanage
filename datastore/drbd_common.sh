@@ -71,7 +71,7 @@ drbd_res_exsists () {
   sudo drbdmanage list-resources --resources "$res_name" -m | awk -F',' '{ print $1 }'
 }
 
-# Add a resource to drbd with a given size.
+# Add a resource to DRBD with a given size.
 drbd_add_res () {
   res_name=$1
   size=$2
@@ -161,7 +161,7 @@ drbd_clone_res () {
   echo "$status"
 }
 
-# Unassign resouce from node.
+# Unassign resource from node.
 drbd_unassign_res () {
   res_name=$1
   node=$2
@@ -260,7 +260,7 @@ drbd_check_dbus_status () {
 
   result=$(drbd_parse_dbus_data "$dbus_data" result)
 
-  # If there is no result, something went wrong communicating to drbdmanage."
+  # If there is no result, something went wrong communicating to DRBDmanage."
   if [ -z "$result" ]; then
     drbd_log "Error communicating with dbus interface or malformed dictionary."
     drbd_log "Passed plugin $plugin the following dict: $dict"

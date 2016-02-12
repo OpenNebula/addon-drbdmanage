@@ -14,7 +14,7 @@ source "${DRIVER_PATH}"/../libfs.sh
 source "${DRIVER_PATH}"/drbd_common.sh
 source "${DRIVER_PATH}"/drbdmanage.conf
 
-drbd_log "Begining cp action."
+drbd_log "Beginning cp action."
 
 # Get arguments from OpenNebula Core
 DRIVER_ACTION=$1
@@ -57,7 +57,7 @@ fi
 
 set_up_datastore "$BASE_PATH" "$RESTRICTED_DIRS" "$SAFE_DIRS"
 
-# Create new resource in drbd.
+# Create new resource in DRBD.
 DRBD_SIZE="${SIZE}M"
 DRBD_RES_NAME="OpenNebula-image-${IMAGE_ID}"
 

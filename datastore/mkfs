@@ -14,7 +14,7 @@ source "${DRIVER_PATH}"/../libfs.sh
 source "${DRIVER_PATH}"/drbd_common.sh
 source "${DRIVER_PATH}"/drbdmanage.conf
 
-drbd_log "Begining mkfs action."
+drbd_log "Beginning mkfs action."
 
 # Get arguments from OpenNebula Core
 DRIVER_ACTION=$1
@@ -42,11 +42,11 @@ SIZE="${XPATH_ELEMENTS[j++]:-0}"
 
 DST_HOST=$(get_destination_host "$IMAGE_ID")
 
-# Get the name and size for a drbd resource.
+# Get the name and size for a DRBD resource.
 DRBD_SIZE="${SIZE}M"
 DRBD_RES_NAME="OpenNebula-image-${IMAGE_ID}"
 
-# Do not make a new resrouce for save as, just return the name.
+# Do not make a new resource for save as, just return the name.
 if [  "$FSTYPE" = "save_as" ]; then
     drbd_log "No need to create new image, exiting."
 
@@ -61,7 +61,7 @@ fi
 
 set_up_datastore "$BASE_PATH" "$RESTRICTED_DIRS" "$SAFE_DIRS"
 
-# Create new resource in drbd.
+# Create new resource in DRBD.
 drbd_log "Creating a new $DRBD_SIZE resource $DRBD_RES_NAME \
   on the following nodes: $BRIDGE_LIST"
 
@@ -77,7 +77,7 @@ fi
 # Get the location of the DRBD device node.
 DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_RES_NAME")
 
-# Create filesystem on drbd device.
+# Create filesystem on DRBD device.
 REGISTER_COMMAND=$(cat << EOF
 
   set -e

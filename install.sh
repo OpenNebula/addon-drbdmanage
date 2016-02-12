@@ -8,7 +8,7 @@ else
     REMOTES_DIR=$ONE_LOCATION/var/remotes
 fi
 
-# Squash alaises
+# Squash aliases
 CP=/usr/bin/cp
 MKDIR=/usr/bin/mkdir
 CHOWN=/usr/bin/chown
