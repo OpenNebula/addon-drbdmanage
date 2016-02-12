@@ -30,7 +30,7 @@ done < <($XPATH     /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/BRIDGE_LIST \
                     /DS_DRIVER_ACTION_DATA/IMAGE/PATH)
 
 BRIDGE_LIST="${XPATH_ELEMENTS[j++]}"
-SRC="${XPATH_ELEMENTS[j++]}"
+DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
 
 DST_HOST=$(get_destination_host "$IMAGE_ID")
 
@@ -39,18 +39,18 @@ if [ -z "$DST_HOST" ]; then
     exit -1
 fi
 
-DRBD_RES_NAME=OpenNebula-clone-${IMAGE_ID}
+DRBD_CLONE_NAME=OpenNebula-clone-${IMAGE_ID}
 
 # Make a new resource from an exsisting one.
-if [ "$(drbd_clone_res "$DRBD_RES_NAME" "$SRC" "$BRIDGE_LIST")" -ne 0 ]; then
-  error_message "Unable to deploy $DRBD_RES_NAME"
+if [ "$(drbd_clone_res "$DRBD_CLONE_NAME" "$DRBD_RES_NAME" "$BRIDGE_LIST")" -ne 0 ]; then
+  error_message "Unable to deploy $DRBD_CLONE_NAME"
 
   # Clean up resource.
-  drbd_remove_res "$DRBD_RES_NAME"
+  drbd_remove_res "$DRBD_CLONE_NAME"
   exit -1
 fi
 
-echo "$DRBD_RES_NAME"
+echo "$DRBD_CLONE_NAME"
 
 drbd_log "Ending clone action."
 
