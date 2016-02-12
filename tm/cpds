@@ -2,7 +2,7 @@
 
 SRC=$1
 DST=$2
-
+SNAP_ID=$1
 VM_ID=$3
 DS_ID=$4
 
@@ -22,7 +22,6 @@ source "${DRIVER_PATH}"/../../datastore/drbdmanage/drbdmanage.conf
 drbd_log "Beginning cpds action."
 
 # Get image information
-SRC_HOST=$(arg_host "$SRC")
 DISK_ID=$(echo "$SRC" | awk -F. '{print $NF}')
 
 XPATH="${DRIVER_PATH}/../../datastore/xpath.rb --stdin"
@@ -37,9 +36,14 @@ done < <(onevm show -x "$VM_ID" | $XPATH \
   /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/PERSISTENT)
 
 DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
-DRBD_CLONE_NAME="$DST"
 SAVE_AS="${XPATH_ELEMENTS[j++]}"
 PERSISTENT="${XPATH_ELEMENTS[j++]}"
+
+# Set the name of the new resource.
+DRBD_CLONE_NAME="$DST"
+if [ -z "$PERSISTENT" ]; then
+  DRBD_RES_NAME="${DRBD_CLONE_NAME}-vm${VM_ID}-disk${DISK_ID}"
+fi
 
 # Get the bridge_list 
 unset XPATH_ELEMENTS
