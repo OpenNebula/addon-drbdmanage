@@ -42,7 +42,7 @@ PERSISTENT="${XPATH_ELEMENTS[j++]}"
 # Set the name of the new resource.
 DRBD_CLONE_NAME="$DST"
 if [ -z "$PERSISTENT" ]; then
-  DRBD_RES_NAME="${DRBD_CLONE_NAME}-vm${VM_ID}-disk${DISK_ID}"
+  DRBD_RES_NAME="${DRBD_RES_NAME}-vm${VM_ID}-disk${DISK_ID}"
 fi
 
 # Get the bridge_list 
