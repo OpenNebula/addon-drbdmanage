@@ -2,9 +2,9 @@
 
 SRC=$1
 DST=$2
-SNAP_ID=$1
-VM_ID=$3
-DS_ID=$4
+SNAP_ID=$3
+VM_ID=$4
+DS_ID=$5
 
 if [ -z "${ONE_LOCATION}" ]; then
     TMCOMMON=/var/lib/one/remotes/tm/tm_common.sh
