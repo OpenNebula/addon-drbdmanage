@@ -22,6 +22,8 @@ source "${DRIVER_PATH}"/../../datastore/drbdmanage/drbdmanage.conf
 drbd_log "Beginning cpds action."
 
 # Get image information
+SRC_HOST=$(arg_host "$SRC")
+DISK_ID=$(echo "$SRC" | awk -F. '{print $NF}')
 
 XPATH="${DRIVER_PATH}/../../datastore/xpath.rb --stdin"
 

@@ -21,6 +21,8 @@ drbd_log "Beginning delete action."
 # Get virtualization host information
 DST_PATH=$(arg_path "$DST")
 DST_HOST=$(arg_host "$DST")
+DST_DIR=$(dirname "$DST_PATH")
+DISK_ID=$(echo "$DST_PATH" | $AWK -F. '{print $NF}')
 
 XPATH="${DRIVER_PATH}/../../datastore/xpath.rb --stdin"
 
