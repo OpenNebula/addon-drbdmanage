@@ -9,28 +9,24 @@ DS_ID=$4
 if [ -z "${ONE_LOCATION}" ]; then
     TMCOMMON=/var/lib/one/remotes/tm/tm_common.sh
 else
-    TMCOMMON=$ONE_LOCATION/var/remotes/tm/tm_common.sh
+    TMCOMMON="${ONE_LOCATION}"/var/remotes/tm/tm_common.sh
 fi
 
-source $TMCOMMON
+source "$TMCOMMON"
 
-DRIVER_PATH=$(dirname $0)
-source ${DRIVER_PATH}/../../datastore/drbdmanage/drbd_common.sh
+DRIVER_PATH=$(dirname "$0")
+source "${DRIVER_PATH}"/../../datastore/drbdmanage/drbd_common.sh
+source "${DRIVER_PATH}"/../../datastore/drbdmanage/drbdmanage.conf
 
-drbd_log "src: $SRC"
-drbd_log "dst: $DST"
-drbd_log "vm id: $VM_ID"
-drbd_log "ds is: $DS_ID"
-
-drbd_log "Begining mv action."
+drbd_log "Beginning mv action."
 # Determine the source, host, and the location of the images.
-SRC_HOST=$(arg_host $SRC)
-SRC_PATH=$(arg_path $SRC)
+SRC_HOST=$(arg_host "$SRC")
+SRC_PATH=$(arg_path "$SRC")
 DISK_ID=$(echo "$SRC"|awk -F. '{print $NF}')
 
-DST_HOST=$(arg_host $DST)
-DST_PATH=$(arg_path $DST)
-DST_DIR=$(dirname $DST_PATH)
+DST_HOST=$(arg_host "$DST")
+DST_PATH=$(arg_path "$DST")
+DST_DIR=$(dirname "$DST_PATH")
 
 # Exit if we're not actually moving anything.
 if [ "$SRC" == "$DST" ]; then
@@ -40,7 +36,7 @@ if [ "$SRC" == "$DST" ]; then
 fi
 
 # Make a new path for the dst_host, remove the src_host's path.
-ssh_make_path $DST_HOST $DST_DIR
+ssh_make_path "$DST_HOST" "$DST_DIR"
 
 ssh_exec_and_log "$SRC_HOST" "rm -rf $SRC_PATH" \
   "Error removing $SRC_PATH on $SRC_HOST"
@@ -48,11 +44,11 @@ ssh_exec_and_log "$SRC_HOST" "rm -rf $SRC_PATH" \
 # Get image information
 XPATH="${DRIVER_PATH}/../../datastore/xpath.rb --stdin"
 
-unset i j
+unset i j XPATH_ELEMENTS
 
 while IFS= read -r -d '' element; do
   XPATH_ELEMENTS[i++]="$element"
-done < <(onevm show -x $VM_ID| $XPATH \
+done < <(onevm show -x "$VM_ID" | $XPATH \
   /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/SOURCE \
   /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/PERSISTENT)
 
@@ -60,20 +56,26 @@ DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
 PERSISTENT="${XPATH_ELEMENTS[j++]}"
 
 if [ -z "$PERSISTENT" ]; then
-  DRBD_RES_NAME=$DRBD_RES_NAME-vm${VM_ID}-disk${DISK_ID}
+  DRBD_RES_NAME="${DRBD_RES_NAME}-vm${VM_ID}-disk${DISK_ID}"
 fi
 
-# Unassign res from source, assign it to dest.
-$(drbd_unassign_res $DRBD_RES_NAME $SRC_HOST)
-$(drbd_deploy_res_on_host $DRBD_RES_NAME $DST_HOST)
+# Assign res to dest.
+drbd_deploy_res_on_host "$DRBD_RES_NAME" "$DST_HOST"
 
-# Get device path for DRBD resource and link it to the disk location.
+# Get Device path and make sure it's ready for IO.
 DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_RES_NAME")
 
+exec_and_log "$(drbd_is_node_ready "$DST_HOST" "$DRBD_DEVICE_PATH")"
+  "DRBD device at $DRBD_DEVICE_PATH not ready for IO on $DST_HOST"
+
+# Unassign res from source.
+drbd_unassign_res "$DRBD_RES_NAME" "$SRC_HOST"
+
+# Link DRBD device to datastore location.
 LINK_COMMAND=$(cat <<EOF
     set -e
 
-    ln -s "$DRBD_DEVICE_PATH" "$DST_PATH"
+    ln -fs "$DRBD_DEVICE_PATH" "$DST_PATH"
 EOF
 )
 

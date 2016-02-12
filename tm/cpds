@@ -9,27 +9,17 @@ VM_ID=$4
 if [ -z "${ONE_LOCATION}" ]; then
     TMCOMMON=/var/lib/one/remotes/tm/tm_common.sh
 else
-    TMCOMMON=$ONE_LOCATION/var/remotes/tm/tm_common.sh
+    TMCOMMON="${ONE_LOCATION}"/var/remotes/tm/tm_common.sh
 fi
 
-DRIVER_PATH=$(dirname $0)
+DRIVER_PATH=$(dirname "$0")
 
-source $TMCOMMON
+source "$TMCOMMON"
 
-source ${DRIVER_PATH}/../../datastore/drbdmanage/drbd_common.sh
+source "${DRIVER_PATH}"/../../datastore/drbdmanage/drbd_common.sh
+source "${DRIVER_PATH}"/../../datastore/drbdmanage/drbdmanage.conf
 
-drbd_log "Begining cpds action."
-
-drbd_log "src: $1"
-drbd_log "dst: $2"
-drbd_log "vm id: $3"
-drbd_log "ds id: $4"
-
-SRC_HOST=`arg_host $SRC`
-
-DISK_ID=$(echo "$SRC"|awk -F. '{print $NF}')
-
-drbd_log "disk id: $DISK_ID"
+drbd_log "Beginning cpds action."
 
 # Get image information
 
@@ -39,16 +29,14 @@ unset i j XPATH_ELEMENTS
 
 while IFS= read -r -d '' element; do
   XPATH_ELEMENTS[i++]="$element"
-done < <(onevm show -x $VM_ID| $XPATH \
+done < <(onevm show -x "$VM_ID" | $XPATH \
   /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/SOURCE \
   /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/SAVE_AS \
-  /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/DATASTORE_ID \
   /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/PERSISTENT)
 
 DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
 DRBD_CLONE_NAME="$DST"
 SAVE_AS="${XPATH_ELEMENTS[j++]}"
-DATASTORE_ID="${XPATH_ELEMENTS[j++]}"
 PERSISTENT="${XPATH_ELEMENTS[j++]}"
 
 # Get the bridge_list 
@@ -56,15 +44,13 @@ unset XPATH_ELEMENTS
 
 while IFS= read -r -d '' element; do
   XPATH_ELEMENTS[0]="$element"
-done < <(onedatastore show -x $DATASTORE_ID| $XPATH /DATASTORE/TEMPLATE/BRIDGE_LIST)
+done < <(onedatastore show -x "$DS_ID" | $XPATH /DATASTORE/TEMPLATE/BRIDGE_LIST)
 
 BRIDGE_LIST="${XPATH_ELEMENTS[0]}"
 
 # Create new resource from DRBD_RES_NAME
-if [ $(drbd_clone_res $DRBD_CLONE_NAME $DRBD_RES_NAME $BRIDGE_LIST) -ne 0 ]; then
-  error_message "Error creating clone from $DRBD_RES_NAME"
-  exit -1
-fi
+exec_and_log "$(drbd_clone_res "$DRBD_CLONE_NAME" "$DRBD_RES_NAME" "$BRIDGE_LIST")"
+  "Error creating clone from $DRBD_RES_NAME"
 
 drbd_log "Ending cpds action."
 
