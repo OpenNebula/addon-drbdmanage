@@ -103,8 +103,11 @@ drbd_deploy_res_on_host () {
     res_name=$1
     node_name=$2
 
-    drbd_log "Assigning resource $res_name to client node $node_name"
-    sudo drbdmanage assign-resource "$res_name" "$node_name" --client
+    # Don't try to assign resources if they are already present on a node.
+    if [ -z "$(sudo drbdmanage list-assignments --resources "$res_name" --nodes "$node_name" -m)" ]; then
+      drbd_log "Assigning resource $res_name to client node $node_name"
+      sudo drbdmanage assign-resource "$res_name" "$node_name" --client
+    fi
 }
 
 # Removes a resource, waits for operation to complete on all nodes.
