@@ -276,21 +276,21 @@ drbd_check_dbus_status () {
   # Get the rest of the relevant information, now that we know it's there.
   policy=$(drbd_parse_dbus_data "$dbus_data" policy)
   timeout=$(drbd_parse_dbus_data "$dbus_data" timeout)
-  resource=$(drbd_parse_dbus_data "$dbus_data" res)
 
+  res_or_snap=${snap:-$res}
 
   if [ "$result" == '"true"' ]; then
-    drbd_log "Resource $resource successfully deployed according to policy $policy"
+    drbd_log "$res_or_snap successfully deployed according to policy $policy"
 
     echo 0
     exit 0
   elif [ "$timeout" == '"true"' ]; then
-    drbd_log "Resource $resource timed out. Timeout of $POL_TIMEOUT seconds exceeded."
+    drbd_log "$res_or_snap timed out. Timeout of $POL_TIMEOUT seconds exceeded."
 
     echo 7
     exit 0
   else
-    drbd_log "Unable to satisfy $policy policy. Resource $resource not deployed."
+    drbd_log "Unable to satisfy $policy policy. $res_or_snap not deployed."
   fi
 
   echo 1
