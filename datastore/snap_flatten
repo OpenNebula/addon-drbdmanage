@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Set up environment
+if [ -z "${ONE_LOCATION}" ]; then
+    LIB_LOCATION=/usr/lib/one
+else
+    LIB_LOCATION=$ONE_LOCATION/lib
+fi
+
+source "$LIB_LOCATION"/sh/scripts_common.sh
+
+DRIVER_PATH=$(dirname "$0")
+source "${DRIVER_PATH}"/../libfs.sh
+source "${DRIVER_PATH}"/drbd_common.sh
+source "${DRIVER_PATH}"/drbdmanage.conf
+
+drbd_log "Beginning snap_flatten action."
+
+# Get arguments from OpenNebula Core
+DRIVER_ACTION=$1
+IMAGE_ID=$2
+
+XPATH="${DRIVER_PATH}/../xpath.rb -b $DRIVER_ACTION"
+
+unset i j XPATH_ELEMENTS
+
+while IFS= read -r -d '' element; do
+    XPATH_ELEMENTS[i++]="$element"
+done < <($XPATH     /DS_DRIVER_ACTION_DATA/DATASTORE/BASE_PATH \
+                    /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/RESTRICTED_DIRS \
+                    /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/SAFE_DIRS \
+                    /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/BRIDGE_LIST \
+                    /DS_DRIVER_ACTION_DATA/IMAGE/FSTYPE \
+                    /DS_DRIVER_ACTION_DATA/IMAGE/SIZE)
+
+drbd_log "IMAGE_ID: $IMAGE_ID"
+drbd_log "$XPATH"
+
+drbd_log "Ending snap_flatten action."
+
