@@ -206,6 +206,22 @@ drbd_is_dev_ready () {
   exit -1
 }
 
+# Determine if a node is present in a list of nodes.
+drbd_is_node_in_list () {
+  target=$1
+  node_list=${*:2}
+
+  for node in $node_list; do
+    if [ "$node" = "$target" ]; then
+      echo "0"
+      exit 0
+    fi
+  done
+
+  echo "1"
+  exit -1
+}
+
 #------------------------------------------------------------------------------
 # Helper functions to query dbus results.
 #------------------------------------------------------------------------------
