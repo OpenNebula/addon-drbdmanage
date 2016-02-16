@@ -40,8 +40,9 @@ drbd_is_node_ready () {
 # Return single node ready for IO on the given path from list of nodes.
 drbd_get_assignment_node () {
   device_path=$1
+  node_list=${*:2}
 
-  for node in "${@:2}"; do
+  for node in $node_list; do
     drbd_log "Checking $device_path on $node"
     deployed=$(drbd_is_node_ready "$node" "$device_path")
     if [ "$deployed" -eq 0 ]; then
@@ -52,7 +53,7 @@ drbd_get_assignment_node () {
     drbd_log "$node is unable to perform IO operations on $device_path"
   done
 
-  drbd_log "No nodes (${*:2}) with usable DRBD device at $device_path"
+  drbd_log "No nodes in ($node_list) with usable DRBD device at $device_path"
 }
 
 # Returns path to device node for a resource.
@@ -89,9 +90,10 @@ drbd_add_res () {
 # Deploy resource on a list of nodes, wait for res to be deployed on each node.
 drbd_deploy_res_on_nodes () {
   res_name=$1
+  node_list=${*:2}
 
-  drbd_log "Assigning resource $res_name to storage nodes ${*:2}"
-  sudo drbdmanage assign-resource "$res_name" "${@:2}"
+  drbd_log "Assigning resource $res_name to storage nodes $node_list"
+  sudo drbdmanage assign-resource "$res_name" $node_list
 
   # Wait for resource to be deployed according to the WaitForResource plugin.
   status=$(drbd_poll_dbus WaitForResource "$res_name")
