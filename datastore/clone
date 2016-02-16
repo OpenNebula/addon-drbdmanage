@@ -42,7 +42,7 @@ fi
 DRBD_CLONE_NAME=OpenNebula-clone-${IMAGE_ID}
 
 # Make a new resource from an existing one.
-if [ "$(drbd_clone_res "$DRBD_CLONE_NAME" "$DRBD_RES_NAME" "$BRIDGE_LIST")" -ne 0 ]; then
+if [ "$(drbd_clone_res "$DRBD_CLONE_NAME" "$DRBD_RES_NAME" $BRIDGE_LIST)" -ne 0 ]; then
   error_message "Unable to deploy $DRBD_CLONE_NAME"
 
   # Clean up resource.
