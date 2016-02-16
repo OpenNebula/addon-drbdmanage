@@ -78,7 +78,7 @@ exec_and_log "drbd_is_node_ready $DST_HOST $DRBD_DEVICE_PATH"
   "DRBD device at $DRBD_DEVICE_PATH not ready for IO on $DST_HOST"
 
 # Unassign res from source, unless the source is a storage node.
-if [ "$(drbd_is_node_in_list "$SRC_HOST" "$BRIDGE_LIST")" -ne 0 ]; then
+if [ "$(drbd_is_node_in_list "$SRC_HOST" $BRIDGE_LIST)" -ne 0 ]; then
   drbd_unassign_res "$DRBD_RES_NAME" "$SRC_HOST"
 fi
 
