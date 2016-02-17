@@ -6,6 +6,8 @@ driver_name=$(basename "$driver_path")
 
 script_name="${0##*/}"
 
+source "${addon_path}"/../../scripts_common.sh
+
 error_message "$driver_name-$script_name: Operation not supported"
 
 exit 1
