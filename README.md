@@ -91,6 +91,12 @@ group, even if you do not plan to use this node for DRBD storage.
 
 The Host nodes may be configured as pure Client nodes without a local control volume.
 
+The Storage nodes must use one of the thinly-provisioned storage plugins. The merits of
+the different plugins are dicussed in the [User's Guide](http://drbd.linbit.com/users-guide-9.0/s-drbdmanage-storage-plugins.html).
+
+Instructions on how to configure DRBDmange to use a storage plugin can be found in the
+cluster configuration section of the [User's Guide](http://drbd.linbit.com/users-guide-9.0/s-dm-set-config.html).
+
 ### Permissions for oneadmin
 
 The oneadmin user must have passwordless sudo access to the `drbdmanage` program on the
