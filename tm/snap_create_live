@@ -1,29 +1,11 @@
 #!/bin/bash
 
-SRC=$1
-SNAP_ID=$2
-VM_ID=$3
-DS_ID=$4
+addon_path=$(dirname "$0")
+driver_path=$(dirname "$addon_path")
+driver_name=$(basename "$driver_path")
 
-if [ -z "${ONE_LOCATION}" ]; then
-    TMCOMMON=/var/lib/one/remotes/tm/tm_common.sh
-else
-    TMCOMMON="${ONE_LOCATION}"/var/remotes/tm/tm_common.sh
-fi
+script_name="${0##*/}"
 
-source "$TMCOMMON"
+error_message "$driver_name-$script_name: Operation not supported"
 
-DRIVER_PATH=$(dirname "$0")
-source "${DRIVER_PATH}"/../../datastore/drbdmanage/drbd_common.sh
-source "${DRIVER_PATH}"/../../datastore/drbdmanage/drbdmanage.conf
-
-drbd_log "Beginning snap_create_live action."
-
-drbd_log "src: $SRC"
-drbd_log "snap_id: $SNAP_ID"
-drbd_log "VM_ID: $VM_ID"
-drbd_log "DS_ID: $DS_ID"
-
-drbd_log "Ending snap_create_live action."
-
-exit 0
+exit 1
