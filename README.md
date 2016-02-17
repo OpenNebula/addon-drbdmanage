@@ -13,8 +13,8 @@ Hayley Swimelar[<hayley@linbit.com>](hayley@linbit.com)
 ## Compatibility
 
 * OpenNebula 4.14
-* DRBD9 9.0.0
-* DRBDmanage pull from git HEAD
+* DRBD9 9.0.0+
+* DRBDmanage 0.92.1+
 
 ## Features
 
@@ -76,6 +76,7 @@ TM_MAD_CONF = [
     name = "drbdmanage", ln_target = "NONE", clone_target = "SELF", shared = "yes"
 ]
 ```
+
 ### Configuring the Nodes
 
 All nodes must have DRBD9 and DRBDmanage installed. This process is detailed in the
@@ -96,6 +97,12 @@ the different plugins are dicussed in the [User's Guide](http://drbd.linbit.com/
 
 Instructions on how to configure DRBDmange to use a storage plugin can be found in the
 cluster configuration section of the [User's Guide](http://drbd.linbit.com/users-guide-9.0/s-dm-set-config.html).
+
+### Additonal Driver Configuration
+
+Additional configuration for the driver can be found in the `datastore/drbdmanage.conf`
+file in the driver director or in the install path, normally
+`/var/lib/one/remotes/datastore/drbdmanage/drbdmanage.conf`
 
 ### Permissions for oneadmin
 
