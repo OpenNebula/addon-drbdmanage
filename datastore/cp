@@ -119,7 +119,7 @@ if [ -z "$RES_HOST" ]; then
   exit -1
 fi
 
-exec_and_log "eval $COPY_COMMAND | $SSH $RES_HOST $SUDO $DD of=$DRBD_DEVICE_PATH bs=2M" \
+exec_and_log "eval $COPY_COMMAND | $SSH $RES_HOST $DD of=$DRBD_DEVICE_PATH bs=2M" \
     "Error dumping $SRC to $RES_HOST:$DRBD_DEVICE_PATH"
 
 drbd_log "Ending cp action."

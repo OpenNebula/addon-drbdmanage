@@ -257,7 +257,7 @@ drbd_get_dbus_result () {
   plugin=$1
   dict=$2
 
-  sudo dbus-send --system --print-reply --dest="org.drbd.drbdmanaged" /interface \
+  dbus-send --system --print-reply --dest="org.drbd.drbdmanaged" /interface \
     org.drbd.drbdmanaged.run_external_plugin \
     string:"drbdmanage.plugins.plugins.wait_for.${plugin}" "$dict"
 }
