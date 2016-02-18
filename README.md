@@ -107,7 +107,7 @@ file in the driver director or in the install path, normally
 ### Permissions for oneadmin
 
 The oneadmin user must have passwordless sudo access to the `drbdmanage` program on the
-Front-End node.
+Front-End node and the `mkfs` command on the Storage nodes.
 
 A policy section for the oneadmin user must also be added in
 `/etc/dbus-1/system.d/org.drbd.drbdmanaged.conf` on the Front-End node. Be sure to
