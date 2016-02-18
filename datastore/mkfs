@@ -115,8 +115,18 @@ if [ -z "$RES_HOST" ]; then
   exit -1
 fi
 
-ssh_exec_and_log "$RES_HOST" "$REGISTER_COMMAND" \
-   "Error registering $DRBD_RES_NAME on $RES_HOST"
+# Create a filesytem on a resource.
+$(ssh_exec_and_log "$RES_HOST" "$REGISTER_COMMAND" \
+  "Error registering $DRBD_RES_NAME on $RES_HOST")
+
+
+# Clean up resources on failure.
+REGISTER_RC=$?
+
+if [ "$REGISTER_RC" -ne 0 ]; then
+  drbd_remove_res "$DRBD_RES_NAME"
+  exit -1
+fi
 
 drbd_log "Created $DRBD_RES_NAME on $RES_HOST"
 drbd_log "Ending mkfs action."
