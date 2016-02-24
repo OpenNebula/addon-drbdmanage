@@ -34,14 +34,14 @@ Follow all of these steps on the Front-End node only
 ### Clone the repository:
 
 ```bash
-git://git.linbit.com/addon-drbdmanage.git
+git clone git://git.linbit.com/addon-drbdmanage.git
 ```
 
 ### Install the driver components using the install script.
 
 ```bash
-# cd addon-drbdmanage
-# ./install.sh
+cd addon-drbdmanage
+./install.sh
 ```
 
 ### Upgrading
@@ -145,12 +145,13 @@ DRBD devices where images are held.
 Create a datastore configuration file named ds.conf and use the `onedatastore` tool
 to create a new datastore based on that configuration:
 
-```
-# cat ds.conf
+```bash
+cat >ds.conf <<EOI
 NAME = drbdmanage_datastore
 DS_MAD = drbdmanage
 TM_MAD = drbdmanage
 BRIDGE_LIST = "alice bob"
+EOI
 
 onedatastore create ds.conf
 ```
