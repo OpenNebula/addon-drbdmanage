@@ -101,8 +101,8 @@ if "DEPLOY_MIN_COUNT" in config:
 
     if not 0 <= count <= len(storage_nodes):
         valid_config = False
-        print("DEPLOY_MIN_COUNT must be between 0 and \
-                the number of storage nodes.")
+        print("DEPLOY_MIN_COUNT must be between 0 and "
+              "the number of storage nodes.")
 
 # Altert user if config is valid or not.
 
