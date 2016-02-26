@@ -12,10 +12,6 @@ with open(config_file) as file:
         config[key.strip()] = value.strip()
 
 valid_config = True
-
-print(config)
-
-
 quotes = "'\""
 
 # Cast config values to proper types.
