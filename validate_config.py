@@ -62,8 +62,8 @@ if deployment_nodes:
 if redundancy_level:
     if not 0 <= redundancy_level <= len(storage_nodes):
         valid_config = False
-        print("DEPLOY_REDUNDANCY must be a positive integer that is less",
-              "than or equal to the number of nodes in BRIDGE_LIST")
+        print("DEPLOY_REDUNDANCY must be a positive integer that is "
+              "less than or equal to the number of nodes in BRIDGE_LIST")
 
 # Checks for optional attributes.
 
