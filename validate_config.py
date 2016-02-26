@@ -27,4 +27,22 @@ storage_nodes = config["BRIDGE_LIST"].strip("'").split()
 deployment_nodes = config["DEPLOY_HOSTS"].strip("'").split()
 redundancy_level = int(config["DEPLOY_REDUNDANCY"])
 
-# Check that deployment_nodes are subset of the bridge_list.
+# Check that deployment_nodes are a subset of, or equal to, all storeage nodes.
+if deployment_nodes:
+    for node in deployment_nodes:
+        if node not in storage_nodes:
+            config = False
+            print("%s not found in bridge list!" % node)
+            print("Nodes in DEPLOY_HOSTS must be included in BRIDGE_LIST.")
+
+    if len(deployment_nodes) > len(storage_nodes):
+        valid_config = False
+        print("DEPLOY_HOSTS contains more nodes than BRIDGE LIST.")
+        print("BRIDGE list must contain all storage nodes.")
+
+# Check that redundancy level is not out of bounds.
+if redundancy_level:
+    if not 0 <= redundancy_level <= len(storage_nodes):
+        valid_config = False
+        print("DEPLOY_REDUNDANCY must be a positive integer that is less than \
+                or equal to the number of nodes in BRIDGE_LIST")
