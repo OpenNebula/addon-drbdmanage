@@ -61,7 +61,7 @@ if not bool(deployment_nodes) ^ bool(redundancy_level):
     print("DEPLOY_HOSTS")
     print("DEPLOY_REDUNDANCY")
 
-# Check that deployment_nodes are a subset of, or equal to, all storeage nodes.
+# Check that deployment_nodes are a subset of, or equal to, all storage nodes.
 if deployment_nodes:
     for node in deployment_nodes:
         if node not in storage_nodes:
