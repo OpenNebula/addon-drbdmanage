@@ -14,10 +14,17 @@ def report_validity():
 
 # Convert configuration file into dict.
 config = {}
-with open(config_file) as file:
-    for line in file:
-        key, value = line.split("=")
-        config[key.strip()] = value.strip()
+
+try:
+    with open(config_file) as file:
+        for line in file:
+            key, value = line.split("=")
+            config[key.strip()] = value.strip()
+except IOError as e:
+    print("Error opening file: %s" % config_file)
+    valid_config = False
+    report_validity()
+    sys.exit(e)
 
 quotes = "'\""
 
