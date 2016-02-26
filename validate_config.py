@@ -48,3 +48,16 @@ if redundancy_level:
         valid_config = False
         print("DEPLOY_REDUNDANCY must be a positive integer that is less than \
                 or equal to the number of nodes in BRIDGE_LIST")
+
+# Checks for optional attributes.
+if config["DEPLOY_TIMEOUT"]:
+    try:
+        timeout = int(config["DEPLOY_TIMEOUT"])
+    except TypeError as e:
+        valid_config = False
+        print("DEPLOY_TIMEOUT is a number of seconds")
+        print(e)
+
+    if timeout < 1:
+        valid_config = False
+        print("DEPLOY_TIMEOUT must be a positive integer.")
