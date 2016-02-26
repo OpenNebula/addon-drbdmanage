@@ -94,10 +94,10 @@ if "DEPLOY_MIN_RATIO" in config:
 if "DEPLOY_MIN_COUNT" in config:
     try:
         count = int(config["DEPLOY_MIN_COUNT"])
-    except TypeError as e:
+    except ValueError as e:
         valid_config = False
         print("DEPLOY_MIN_COUNT must be an integer.")
-        print(e)
+        sys.exit(e)
 
     if not 0 <= count <= len(storage_nodes):
         valid_config = False
