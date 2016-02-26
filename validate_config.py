@@ -50,6 +50,7 @@ if redundancy_level:
                 or equal to the number of nodes in BRIDGE_LIST")
 
 # Checks for optional attributes.
+
 if config["DEPLOY_TIMEOUT"]:
     try:
         timeout = int(config["DEPLOY_TIMEOUT"])
@@ -61,3 +62,14 @@ if config["DEPLOY_TIMEOUT"]:
     if timeout < 1:
         valid_config = False
         print("DEPLOY_TIMEOUT must be a positive integer.")
+
+if config["DEPLOY_MIN_RATIO"]:
+    try:
+        ratio = float(config["DEPLOY_MIN_RATIO"])
+    except TypeError as e:
+        valid_config = False
+        print("DEPLOY_MIN_RATIO must be a decimal number.")
+
+    if not 0.0 <= ratio <= 1.0:
+        valid_config = False
+        print("DEPLOY_MIN_RATIO must be between 0.0 and 1.0.")
