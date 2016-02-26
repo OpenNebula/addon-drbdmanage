@@ -49,7 +49,7 @@ if not bool(deployment_nodes) ^ bool(redundancy_level):
 if deployment_nodes:
     for node in deployment_nodes:
         if node not in storage_nodes:
-            config = False
+            valid_config = False
             print("%s not found in bridge list!" % node)
             print("Nodes in DEPLOY_HOSTS must be included in BRIDGE_LIST.")
 
