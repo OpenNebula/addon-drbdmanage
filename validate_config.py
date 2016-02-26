@@ -86,3 +86,9 @@ if config["DEPLOY_MIN_COUNT"]:
         valid_config = False
         print("DEPLOY_MIN_COUNT must be between 0 and \
                 the number of storage nodes.")
+
+# Altert user if config is valid or not.
+
+validity = "valid" if valid_config else "not valid"
+
+print("\nYour configuration is %s.\n" % validity)
