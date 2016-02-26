@@ -16,7 +16,7 @@ valid_config = True
 print(config)
 
 # Check that only one deployment option is configured.
-if bool(config["DEPLOY_HOSTS"]) ^ bool(config["DEPOY_REDUNDANCY"]):
+if bool(config["DEPLOY_HOSTS"]) ^ bool(config["DEPLOY_REDUNDANCY"]):
     valid_config = False
     print("You must have one and only one of the following configured!")
     print("DEPLOY_HOSTS")
