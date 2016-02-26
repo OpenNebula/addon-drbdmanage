@@ -39,8 +39,8 @@ if deployment_nodes:
 
     if len(deployment_nodes) > len(storage_nodes):
         valid_config = False
-        print("DEPLOY_HOSTS contains more nodes than BRIDGE LIST.")
-        print("BRIDGE list must contain all storage nodes.")
+        print("DEPLOY_HOSTS contains more nodes than BRIDGE_LIST.")
+        print("BRIDGE_LIST must contain all storage nodes.")
 
 # Check that redundancy level is not out of bounds.
 if redundancy_level:
