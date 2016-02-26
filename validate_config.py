@@ -20,7 +20,7 @@ try:
 except KeyError as e:
     valid_config = False
     print("BRIDGE_LIST must be present in configuration")
-    print(e)
+    sys.exit(1)
 
 try:
     deployment_nodes = config["DEPLOY_HOSTS"].strip(quotes).split()
