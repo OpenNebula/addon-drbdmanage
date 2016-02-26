@@ -15,19 +15,39 @@ valid_config = True
 
 print(config)
 
-# Check that only one deployment option is configured.
-if not bool(config["DEPLOY_HOSTS"]) ^ bool(config["DEPLOY_REDUNDANCY"]):
-    valid_config = False
-    print("You must have one and only one of the following configured!")
-    print("DEPLOY_HOSTS")
-    print("DEPLOY_REDUNDANCY")
 
 quotes = "'\""
 
 # Cast config values to proper types.
-storage_nodes = config["BRIDGE_LIST"].strip(quotes).split()
-deployment_nodes = config["DEPLOY_HOSTS"].strip(quotes).split()
-redundancy_level = int(config["DEPLOY_REDUNDANCY"])
+try:
+    storage_nodes = config["BRIDGE_LIST"].strip(quotes).split()
+except KeyError as e:
+    valid_config = False
+    print("BRIDGE_LIST must be present in configuration")
+    print(e)
+
+try:
+    deployment_nodes = config["DEPLOY_HOSTS"].strip(quotes).split()
+except KeyError:
+    deployment_nodes = False
+    pass
+
+try:
+    redundancy_level = int(config["DEPLOY_REDUNDANCY"])
+except TypeError as e:
+    valid_config = False
+    print ("DEPLOY_REDUNDANCY must be an integer.")
+    print (e)
+except KeyError:
+    redundancy_level = False
+    pass
+
+# Check that only one deployment option is configured.
+if not bool(deployment_nodes) ^ bool(redundancy_level):
+    valid_config = False
+    print("You must have one and only one of the following configured!")
+    print("DEPLOY_HOSTS")
+    print("DEPLOY_REDUNDANCY")
 
 # Check that deployment_nodes are a subset of, or equal to, all storeage nodes.
 if deployment_nodes:
@@ -51,7 +71,7 @@ if redundancy_level:
 
 # Checks for optional attributes.
 
-if config["DEPLOY_TIMEOUT"]:
+if "DEPLOY_TIMEOUT" in config:
     try:
         timeout = int(config["DEPLOY_TIMEOUT"])
     except TypeError as e:
@@ -63,7 +83,7 @@ if config["DEPLOY_TIMEOUT"]:
         valid_config = False
         print("DEPLOY_TIMEOUT must be a positive integer.")
 
-if config["DEPLOY_MIN_RATIO"]:
+if "DEPLOY_MIN_RATIO" in config:
     try:
         ratio = float(config["DEPLOY_MIN_RATIO"])
     except TypeError as e:
@@ -74,7 +94,7 @@ if config["DEPLOY_MIN_RATIO"]:
         valid_config = False
         print("DEPLOY_MIN_RATIO must be between 0.0 and 1.0.")
 
-if config["DEPLOY_MIN_COUNT"]:
+if "DEPLOY_MIN_COUNT" in config:
     try:
         count = int(config["DEPLOY_MIN_COUNT"])
     except TypeError as e:
