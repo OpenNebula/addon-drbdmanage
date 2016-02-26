@@ -73,3 +73,16 @@ if config["DEPLOY_MIN_RATIO"]:
     if not 0.0 <= ratio <= 1.0:
         valid_config = False
         print("DEPLOY_MIN_RATIO must be between 0.0 and 1.0.")
+
+if config["DEPLOY_MIN_COUNT"]:
+    try:
+        count = int(config["DEPLOY_MIN_COUNT"])
+    except TypeError as e:
+        valid_config = False
+        print("DEPLOY_MIN_COUNT must be an integer.")
+        print(e)
+
+    if not 0 <= count <= len(storage_nodes):
+        valid_config = False
+        print("DEPLOY_MIN_COUNT must be between 0 and \
+                the number of storage nodes.")
