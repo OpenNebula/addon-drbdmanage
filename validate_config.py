@@ -4,6 +4,14 @@ import sys
 
 config_file = sys.argv[1]
 
+valid_config = True
+
+
+def report_validity():
+    """Prints the whether the config file is valid or not."""
+    validity = "valid" if valid_config else "not valid"
+    print("\nYour configuration is %s.\n" % validity)
+
 # Convert configuration file into dict.
 config = {}
 with open(config_file) as file:
@@ -11,7 +19,6 @@ with open(config_file) as file:
         key, value = line.split("=")
         config[key.strip()] = value.strip()
 
-valid_config = True
 quotes = "'\""
 
 # Cast config values to proper types.
@@ -20,6 +27,7 @@ try:
 except KeyError as e:
     valid_config = False
     print("BRIDGE_LIST must be present in configuration")
+    report_validity()
     sys.exit(1)
 
 try:
@@ -33,6 +41,7 @@ try:
 except ValueError as e:
     valid_config = False
     print ("DEPLOY_REDUNDANCY must be an integer.")
+    report_validity()
     sys.exit(1)
 except KeyError:
     redundancy_level = False
@@ -73,6 +82,7 @@ if "DEPLOY_TIMEOUT" in config:
     except ValueError as e:
         valid_config = False
         print("DEPLOY_TIMEOUT is a number of seconds")
+        report_validity()
         sys.exit(e)
 
     if timeout < 1:
@@ -85,6 +95,7 @@ if "DEPLOY_MIN_RATIO" in config:
     except ValueError as e:
         valid_config = False
         print("DEPLOY_MIN_RATIO must be a decimal number.")
+        report_validity()
         sys.exit(e)
 
     if not 0.0 <= ratio <= 1.0:
@@ -97,6 +108,7 @@ if "DEPLOY_MIN_COUNT" in config:
     except ValueError as e:
         valid_config = False
         print("DEPLOY_MIN_COUNT must be an integer.")
+        report_validity()
         sys.exit(e)
 
     if not 0 <= count <= len(storage_nodes):
@@ -104,8 +116,4 @@ if "DEPLOY_MIN_COUNT" in config:
         print("DEPLOY_MIN_COUNT must be between 0 and "
               "the number of storage nodes.")
 
-# Altert user if config is valid or not.
-
-validity = "valid" if valid_config else "not valid"
-
-print("\nYour configuration is %s.\n" % validity)
+report_validity()
