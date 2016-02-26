@@ -22,9 +22,11 @@ if not bool(config["DEPLOY_HOSTS"]) ^ bool(config["DEPLOY_REDUNDANCY"]):
     print("DEPLOY_HOSTS")
     print("DEPLOY_REDUNDANCY")
 
+quotes = "'\""
+
 # Cast config values to proper types.
-storage_nodes = config["BRIDGE_LIST"].strip("'").split()
-deployment_nodes = config["DEPLOY_HOSTS"].strip("'").split()
+storage_nodes = config["BRIDGE_LIST"].strip(quotes).split()
+deployment_nodes = config["DEPLOY_HOSTS"].strip(quotes).split()
 redundancy_level = int(config["DEPLOY_REDUNDANCY"])
 
 # Check that deployment_nodes are a subset of, or equal to, all storeage nodes.
