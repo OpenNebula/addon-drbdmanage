@@ -82,9 +82,10 @@ if "DEPLOY_TIMEOUT" in config:
 if "DEPLOY_MIN_RATIO" in config:
     try:
         ratio = float(config["DEPLOY_MIN_RATIO"])
-    except TypeError as e:
+    except ValueError as e:
         valid_config = False
         print("DEPLOY_MIN_RATIO must be a decimal number.")
+        sys.exit(e)
 
     if not 0.0 <= ratio <= 1.0:
         valid_config = False
