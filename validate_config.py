@@ -30,10 +30,10 @@ except KeyError:
 
 try:
     redundancy_level = int(config["DEPLOY_REDUNDANCY"])
-except TypeError as e:
+except ValueError as e:
     valid_config = False
     print ("DEPLOY_REDUNDANCY must be an integer.")
-    print (e)
+    sys.exit(1)
 except KeyError:
     redundancy_level = False
     pass
