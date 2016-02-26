@@ -70,10 +70,10 @@ if redundancy_level:
 if "DEPLOY_TIMEOUT" in config:
     try:
         timeout = int(config["DEPLOY_TIMEOUT"])
-    except TypeError as e:
+    except ValueError as e:
         valid_config = False
         print("DEPLOY_TIMEOUT is a number of seconds")
-        print(e)
+        sys.exit(e)
 
     if timeout < 1:
         valid_config = False
