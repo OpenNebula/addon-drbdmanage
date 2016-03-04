@@ -106,10 +106,16 @@ drbd_add_res () {
 # Deploy resource on a list of nodes, wait for res to be deployed on each node.
 drbd_deploy_res_on_nodes () {
   res_name=$1
-  node_list=${*:2}
 
-  drbd_log "Assigning resource $res_name to storage nodes $node_list"
-  sudo drbdmanage assign-resource "$res_name" $node_list
+  # If deployment nodes are set, deploy to those nodes manualy."
+  if [ -n "$DRBD_DEPLOYMENT_NODES" ]; then
+    drbd_log "Assigning resource $res_name to storage nodes $DRBD_DEPLOYMENT_NODES"
+    sudo drbdmanage assign-resource "$res_name" $DRBD_DEPLOYMENT_NODES
+  # Otherwise deploy to a redundancy level.
+  else
+    drbd_log "Deploying resource $res_name with $DRBD_REDUNDANCY-way redundancy."
+    sudo drbdmanage deploy-resource "$res_name" "$DRBD_REDUNDANCY"
+  fi
 
   # Wait for resource to be deployed according to the WaitForResource plugin.
   status=$(drbd_poll_dbus WaitForResource "$res_name")
