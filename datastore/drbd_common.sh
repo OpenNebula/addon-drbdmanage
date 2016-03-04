@@ -103,6 +103,20 @@ drbd_add_res () {
   fi
 }
 
+# Check if deployment options are acceptable.
+drbd_deploy_options_check () {
+  is_redundancy=$([ -n "$DRBD_REDUNDANCY" ]; echo $?)
+  is_deploy_nodes=$([ -n "$DRBD_DEPLOYMENT_NODES" ]; echo $?)
+
+  # One and only one of these option must be set.
+  if ! ((is_redundancy ^ is_deploy_nodes)); then
+    drbd_log "Invalid config! Set only one of the following in this datatore's template:"
+    drbd_log "DRBD_REDUNDANCY"
+    drbd_log "DRBD_DEPLOYMENT_NODES"
+    exit -1
+  fi
+}
+
 # Deploy resource on a list of nodes, wait for res to be deployed on each node.
 drbd_deploy_res_on_nodes () {
   res_name=$1
