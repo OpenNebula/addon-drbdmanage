@@ -86,7 +86,7 @@ drbd_log "Creating a new $DRBD_SIZE resource $DRBD_RES_NAME \
 
 drbd_add_res "$DRBD_RES_NAME" "$DRBD_SIZE"
 
-if [ "$(drbd_deploy_res_on_nodes "$DRBD_RES_NAME" $BRIDGE_LIST)" -ne 0 ]; then
+if [ "$(drbd_deploy_res_on_nodes "$DRBD_RES_NAME")" -ne 0 ]; then
   error_message "Unable to deploy $DRBD_RES_NAME"
 
   # Clean up resource.
