@@ -117,7 +117,7 @@ drbd_deploy_options_check () {
   fi
 }
 
-# Deploy resource on a list of nodes, wait for res to be deployed on each node.
+# Deploy resource based on deployment options, wait for res to be deployed on each node.
 drbd_deploy_res_on_nodes () {
   res_name=$1
 
