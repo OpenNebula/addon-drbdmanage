@@ -77,7 +77,8 @@ fi
 
 # Check for valid configuration.
 exec_and_log "drbd_deploy_options_check" \
-  "You must have only one of the following: DRBD_REDUNDANCY DRBD_DEPLOYMENT_NODES"
+  "You must have only one of the following in the template \
+  for your datastore: DRBD_REDUNDANCY DRBD_DEPLOYMENT_NODES"
 
 set_up_datastore "$BASE_PATH" "$RESTRICTED_DIRS" "$SAFE_DIRS"
 
