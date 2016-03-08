@@ -38,16 +38,16 @@ except KeyError as e:
     sys.exit(1)
 
 try:
-    deployment_nodes = config["DEPLOY_HOSTS"].strip(quotes).split()
+    deployment_nodes = config["DRBD_DEPLOYMENT_NODES"].strip(quotes).split()
 except KeyError:
     deployment_nodes = False
     pass
 
 try:
-    redundancy_level = int(config["DEPLOY_REDUNDANCY"])
+    redundancy_level = int(config["DRBD_REDUDANCY"])
 except ValueError as e:
     valid_config = False
-    print ("DEPLOY_REDUNDANCY must be an integer.")
+    print ("DRBD_REDUDANCY must be an integer.")
     report_validity()
     sys.exit(1)
 except KeyError:
@@ -58,8 +58,8 @@ except KeyError:
 if not bool(deployment_nodes) ^ bool(redundancy_level):
     valid_config = False
     print("You must have one and only one of the following configured!")
-    print("DEPLOY_HOSTS")
-    print("DEPLOY_REDUNDANCY")
+    print("DRBD_DEPLOYMENT_NODES")
+    print("DRBD_REDUDANCY")
 
 # Check that deployment_nodes are a subset of, or equal to, all storage nodes.
 if deployment_nodes:
@@ -67,18 +67,19 @@ if deployment_nodes:
         if node not in storage_nodes:
             valid_config = False
             print("%s not found in bridge list!" % node)
-            print("Nodes in DEPLOY_HOSTS must be included in BRIDGE_LIST.")
+            print("Nodes in DRBD_DEPLOYMENT_NODES"
+                  " must be included in BRIDGE_LIST.")
 
     if len(deployment_nodes) > len(storage_nodes):
         valid_config = False
-        print("DEPLOY_HOSTS contains more nodes than BRIDGE_LIST.")
+        print("DRBD_DEPLOYMENT_NODES contains more nodes than BRIDGE_LIST.")
         print("BRIDGE_LIST must contain all storage nodes.")
 
 # Check that redundancy level is not out of bounds.
 if redundancy_level:
     if not 0 <= redundancy_level <= len(storage_nodes):
         valid_config = False
-        print("DEPLOY_REDUNDANCY must be a positive integer that is "
+        print("DRBD_REDUDANCY must be a positive integer that is "
               "less than or equal to the number of nodes in BRIDGE_LIST")
 
 # Checks for optional attributes.

@@ -46,6 +46,8 @@ done < <($XPATH     /DS_DRIVER_ACTION_DATA/DATASTORE/BASE_PATH \
                     /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/RESTRICTED_DIRS \
                     /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/SAFE_DIRS \
                     /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/BRIDGE_LIST \
+                    /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/DRBD_REDUNDANCY \
+                    /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/DRBD_DEPLOYMENT_NODES \
                     /DS_DRIVER_ACTION_DATA/IMAGE/PATH \
                     /DS_DRIVER_ACTION_DATA/IMAGE/SIZE \
                     /DS_DRIVER_ACTION_DATA/IMAGE/TEMPLATE/MD5 \
@@ -57,6 +59,8 @@ BASE_PATH="${XPATH_ELEMENTS[j++]}"
 RESTRICTED_DIRS="${XPATH_ELEMENTS[j++]}"
 SAFE_DIRS="${XPATH_ELEMENTS[j++]}"
 BRIDGE_LIST="${XPATH_ELEMENTS[j++]}"
+DRBD_REDUNDANCY="${XPATH_ELEMENTS[j++]}"
+DRBD_DEPLOYMENT_NODES="${XPATH_ELEMENTS[j++]}"
 SRC="${XPATH_ELEMENTS[j++]}"
 SIZE="${XPATH_ELEMENTS[j++]:-0}"
 MD5="${XPATH_ELEMENTS[j++]}"
@@ -71,18 +75,21 @@ if [ -z "$DST_HOST" ]; then
     exit -1
 fi
 
+# Check for valid configuration.
+exec_and_log "drbd_deploy_options_check" \
+  "You must have only one of the following: DRBD_REDUNDANCY DRBD_DEPLOYMENT_NODES"
+
 set_up_datastore "$BASE_PATH" "$RESTRICTED_DIRS" "$SAFE_DIRS"
 
 # Create new resource in DRBD.
 DRBD_SIZE="${SIZE}M"
 DRBD_RES_NAME="OpenNebula-image-${IMAGE_ID}"
 
-drbd_log "Creating a new $DRBD_SIZE resource $DRBD_RES_NAME \
-  on the following nodes: $BRIDGE_LIST"
+drbd_log "Creating a new $DRBD_SIZE resource $DRBD_RES_NAME"
 
 drbd_add_res "$DRBD_RES_NAME" "$DRBD_SIZE"
 
-if [ "$(drbd_deploy_res_on_nodes "$DRBD_RES_NAME" $BRIDGE_LIST)" -ne 0 ]; then
+if [ "$(drbd_deploy_res_on_nodes "$DRBD_RES_NAME")" -ne 0 ]; then
   error_message "Unable to deploy $DRBD_RES_NAME"
 
   # Clean up resource.
@@ -125,10 +132,11 @@ esac
 DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_RES_NAME")
 
 # Find node with a resource assigned to it.
-RES_HOST=$(drbd_get_assignment_node "$DRBD_DEVICE_PATH" $BRIDGE_LIST)
+RES_NODES=$(drbd_get_res_nodes)
+RES_HOST=$(drbd_get_assignment_node "$DRBD_DEVICE_PATH" $RES_NODES)
 
 if [ -z "$RES_HOST" ]; then
-  error_message "No node in $BRIDGE_LIST ready for IO on $DRBD_DEVICE_PATH"
+  error_message "No nodes in $RES_NODES ready for IO on $DRBD_DEVICE_PATH"
 
   # Clean up resource.
   drbd_remove_res "$DRBD_RES_NAME"
