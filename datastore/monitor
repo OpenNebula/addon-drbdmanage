@@ -64,9 +64,11 @@ if [ -n "$DRBD_DEPLOYMENT_NODES" ]; then
     awk -F',' '{ if (!total || $5<total) total=$5 } END { print total / 1024 }')
   USED_MB=$((TOTAL_MB - FREE_MB))
 else
-  TOTAL_MB=1
-  FREE_MB=1
-  USED_MB=1
+  TOTAL_MB=$(sudo drbdmanage free-space "$DRBD_REDUNDANCY" -m | \
+    awk -F',' '{print $2 / 1024 }')
+  FREE_MB=$(sudo drbdmanage free-space "$DRBD_REDUNDANCY" -m | \
+    awk -F',' '{print $1 / 1024 }')
+  USED_MB=$((TOTAL_MB - FREE_MB))
 fi
 
 echo "FREE_MB=$FREE_MB"
