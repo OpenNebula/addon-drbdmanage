@@ -55,13 +55,19 @@ if [ -z "$DST_HOST" ]; then
     exit -1
 fi
 
-# Monitor pool space.
-# Use the smallest pool sizes among the nodes in the bridge list.
-TOTAL_MB=$(sudo drbdmanage n -N $BRIDGE_LIST -m | \
-  awk -F',' '{ if (!total || $4<total) total=$4 } END { print total / 1024 }')
-FREE_MB=$(sudo drbdmanage n -N $BRIDGE_LIST -m | \
-  awk -F',' '{ if (!total || $5<total) total=$5 } END { print total / 1024 }')
-USED_MB=$((TOTAL_MB - FREE_MB))
+if [ -n "$DRBD_DEPLOYMENT_NODES" ]; then
+  # Monitor pool space.
+  # Use the smallest pool sizes among the nodes in the bridge list.
+  TOTAL_MB=$(sudo drbdmanage n -N $DRBD_DEPLOYMENT_NODES -m | \
+    awk -F',' '{ if (!total || $4<total) total=$4 } END { print total / 1024 }')
+  FREE_MB=$(sudo drbdmanage n -N $DRBD_DEPLOYMENT_NODES -m | \
+    awk -F',' '{ if (!total || $5<total) total=$5 } END { print total / 1024 }')
+  USED_MB=$((TOTAL_MB - FREE_MB))
+else
+  TOTAL_MB=1
+  FREE_MB=1
+  USED_MB=1
+fi
 
 echo "FREE_MB=$FREE_MB"
 echo "USED_MB=$USED_MB"
