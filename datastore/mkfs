@@ -107,6 +107,9 @@ REGISTER_COMMAND=$(cat << EOF
 
   export PATH=/usr/sbin:/sbin:\$PATH
 
+  if [ -z "$FSTYPE" ] || [ "$FSTYPE" == "raw" ]; then
+    exit 0
+  fi
   $SUDO $(mkfs_command "$DRBD_DEVICE_PATH" "$FSTYPE" "$SIZE")
 
 EOF
