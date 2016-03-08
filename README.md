@@ -136,7 +136,7 @@ leave the original policy section intact!
 #### Groups
 
 Be sure to consider the groups that oneadmin should be added to in order to gain access
-to the devices and programs need to access storage and instantiate VMs. For this addon,
+to the devices and programs needed to access storage and instantiate VMs. For this addon,
 the oneadmin user must belong to the `disk` group on all nodes in order to access the
 DRBD devices where images are held.
 
