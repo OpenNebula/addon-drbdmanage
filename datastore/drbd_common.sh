@@ -176,7 +176,8 @@ drbd_remove_res () {
 drbd_clone_res () {
   res_from_snap_name=$1
   res_name=$2
-  nodes=$3
+
+  nodes="$(drbd_get_res_nodes "$res_name")"
   snap_name="$res_name"_snap_"$(date +%s)"
 
   # Create and deploy a snapshot of a resource.

@@ -71,7 +71,7 @@ done < <(onedatastore show -x "$DS_ID" | $XPATH /DATASTORE/TEMPLATE/BRIDGE_LIST)
 BRIDGE_LIST="${XPATH_ELEMENTS[0]}"
 
 # Create new resource from DRBD_RES_NAME
-exec_and_log "drbd_clone_res $DRBD_CLONE_NAME $DRBD_RES_NAME $BRIDGE_LIST"
+exec_and_log "drbd_clone_res $DRBD_CLONE_NAME $DRBD_RES_NAME"
   "Error creating clone from $DRBD_RES_NAME"
 
 drbd_log "Ending cpds action."
