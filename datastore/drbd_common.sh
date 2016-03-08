@@ -33,11 +33,12 @@ script_name="${0##*/}"
 logger -t "addon-drbdmanage: $driver_name-$script_name: [$$]" "$1"
 }
 
-# Return newline separated list of nodes that are assigned to a resource.
+# Returns a newline delimited list of storage nodes with a resource assigned to them.
 drbd_get_res_nodes () {
   res_name=$1
 
-  res_nodes="$(sudo drbdmanage assignments -m --resources "$res_name" | awk -F',' '{ print $1 }')"
+  res_nodes="$(sudo drbdmanage assignments -m --resources "$res_name" | \
+    awk -F',' '{ if ($4$5 == "connect|deployconnect|deploy") print $1 }')"
 
   if [ -n "$res_nodes" ]; then
     echo "$res_nodes"
