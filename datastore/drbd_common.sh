@@ -182,7 +182,7 @@ drbd_clone_res () {
 
   # Create and deploy a snapshot of a resource.
   drbd_log "Creating snapshot of $res_name on $nodes."
-  sudo drbdmanage add-snapshot "$snap_name" "$res_name" "$nodes"
+  sudo drbdmanage add-snapshot "$snap_name" "$res_name" $nodes
 
   status=$(drbd_poll_dbus WaitForSnapshot "$res_name" "$snap_name")
 
