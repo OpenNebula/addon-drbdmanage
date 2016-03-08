@@ -86,8 +86,7 @@ fi
 set_up_datastore "$BASE_PATH" "$RESTRICTED_DIRS" "$SAFE_DIRS"
 
 # Create new resource in DRBD.
-drbd_log "Creating a new $DRBD_SIZE resource $DRBD_RES_NAME \
-  on the following nodes: $BRIDGE_LIST"
+drbd_log "Creating a new $DRBD_SIZE resource $DRBD_RES_NAME" 
 
 drbd_add_res "$DRBD_RES_NAME" "$DRBD_SIZE"
 if [ "$(drbd_deploy_res_on_nodes "$DRBD_RES_NAME")" -ne 0 ]; then
@@ -117,10 +116,11 @@ EOF
 )
 
 # Find node with a resource assigned to it.
-RES_HOST=$(drbd_get_assignment_node "$DRBD_DEVICE_PATH" $BRIDGE_LIST)
+RES_NODES=$(drbd_get_res_nodes)
+RES_HOST=$(drbd_get_assignment_node "$DRBD_DEVICE_PATH" $RES_NODES)
 
 if [ -z "$RES_HOST" ]; then
-  error_message "No node in $BRIDGE_LIST ready for IO on $DRBD_DEVICE_PATH"
+  error_message "No node in $RES_NODES ready for IO on $DRBD_DEVICE_PATH"
 
   # Clean up resource.
   drbd_remove_res "$DRBD_RES_NAME"
