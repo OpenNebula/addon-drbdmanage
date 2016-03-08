@@ -61,15 +61,6 @@ if [ -z "$PERSISTENT" ]; then
   DRBD_RES_NAME="${DRBD_RES_NAME}-vm${VM_ID}-disk${DISK_ID}"
 fi
 
-# Get the bridge_list 
-unset XPATH_ELEMENTS
-
-while IFS= read -r -d '' element; do
-  XPATH_ELEMENTS[0]="$element"
-done < <(onedatastore show -x "$DS_ID" | $XPATH /DATASTORE/TEMPLATE/BRIDGE_LIST)
-
-BRIDGE_LIST="${XPATH_ELEMENTS[0]}"
-
 # Create new resource from DRBD_RES_NAME
 exec_and_log "drbd_clone_res $DRBD_CLONE_NAME $DRBD_RES_NAME"
   "Error creating clone from $DRBD_RES_NAME"
