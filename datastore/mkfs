@@ -118,7 +118,7 @@ EOF
 )
 
 # Find node with a resource assigned to it.
-RES_NODES=$(drbd_get_res_nodes)
+RES_NODES=$(drbd_get_res_nodes "$DRBD_RES_NAME")
 RES_HOST=$(drbd_get_assignment_node "$DRBD_DEVICE_PATH" $RES_NODES)
 
 if [ -z "$RES_HOST" ]; then
