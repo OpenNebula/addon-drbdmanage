@@ -55,15 +55,16 @@ if [ -z "$DST_HOST" ]; then
     exit -1
 fi
 
+# Monitor pool space.
 if [ -n "$DRBD_DEPLOYMENT_NODES" ]; then
-  # Monitor pool space.
-  # Use the smallest pool sizes among the nodes in the bridge list.
+  # Use the smallest pool sizes among the deployment nodes.
   TOTAL_MB=$(sudo drbdmanage n -N $DRBD_DEPLOYMENT_NODES -m | \
     awk -F',' '{ if (!total || $4<total) total=$4 } END { print total / 1024 }')
   FREE_MB=$(sudo drbdmanage n -N $DRBD_DEPLOYMENT_NODES -m | \
     awk -F',' '{ if (!total || $5<total) total=$5 } END { print total / 1024 }')
   USED_MB=$((TOTAL_MB - FREE_MB))
 else
+  # Calculate how much space is left for redundant volumes.
   TOTAL_MB=$(sudo drbdmanage free-space "$DRBD_REDUNDANCY" -m | \
     awk -F',' '{print $2 / 1024 }')
   FREE_MB=$(sudo drbdmanage free-space "$DRBD_REDUNDANCY" -m | \
