@@ -84,19 +84,6 @@ if redundancy_level:
 
 # Checks for optional attributes.
 
-if "DEPLOY_TIMEOUT" in config:
-    try:
-        timeout = int(config["DEPLOY_TIMEOUT"])
-    except ValueError as e:
-        valid_config = False
-        print("DEPLOY_TIMEOUT is a number of seconds")
-        report_validity()
-        sys.exit(e)
-
-    if timeout < 1:
-        valid_config = False
-        print("DEPLOY_TIMEOUT must be a positive integer.")
-
 if "DEPLOY_MIN_RATIO" in config:
     try:
         ratio = float(config["DEPLOY_MIN_RATIO"])
