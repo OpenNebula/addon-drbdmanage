@@ -66,9 +66,9 @@ if [ -n "$DRBD_DEPLOYMENT_NODES" ]; then
 else
   # Calculate how much space is left for redundant volumes.
   TOTAL_MB=$(sudo drbdmanage free-space "$DRBD_REDUNDANCY" -m | \
-    awk -F',' '{print $2 / 1024 }')
-  FREE_MB=$(sudo drbdmanage free-space "$DRBD_REDUNDANCY" -m | \
-    awk -F',' '{print $1 / 1024 }')
+    awk -F',' -v redundancy="$DRBD_REDUNDANCY" '{print $2 / 1024 / redundancy}')
+  FREE_MB=$(sudo drbdmanage n -N $BRIDGE_LIST -m | \
+    awk -F',' -v redundancy="$DRBD_REDUNDANCY" 'BEGIN { total=$5 } { total += $5 } END { print total / 1024 / redundancy }')
   USED_MB=$((TOTAL_MB - FREE_MB))
 fi
 
