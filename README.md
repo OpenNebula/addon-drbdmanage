@@ -215,6 +215,20 @@ EOI
 
 onedatastore create ds.conf
 ```
+#### Optional Attributes
+
+There are two additional attributes that you may add to a datastore's template.
+
+DRBD_MIN_COUNT is the minimum number of nodes that a resource must be deployed on for
+the deployment of a new resource to be considered a success. This should be an integer
+between 0 and the total number of storage nodes in your DRBDmanage cluster.
+
+DRBD_MIN_RATIO is the ratio of nodes a resource must be deployed on for the deployment
+of a new resource to be considered a success. This should be a decimal number between 0.0
+and 1.0.
+
+More information on these policies can be found in the [Policy Plugin](http://drbd.linbit.com/users-guide-9.0/s-drbdmanage-deployment-policy.html)
+section of the [DRBD9 User's Guide](http://drbd.linbit.com/users-guide-9.0/drbd-users-guide.html).
 
 #### Validating a Datastore Configuration
 
