@@ -29,18 +29,15 @@ Hayley Swimelar[<hayley@linbit.com>](hayley@linbit.com)
 
 ## Installation
 
-Follow all of these steps on the Front-End node only
+Follow these steps on the Front-End node only.
 
-### Clone the repository:
+### Clone the repository and run the install script.
 
-```bash
-git clone git://git.linbit.com/addon-drbdmanage.git
-```
-
-### Install the driver components using the install script.
+Run the following commands as either oneadmin or root:
 
 ```bash
-cd addon-drbdmanage
+git clone git://git.linbit.com/addon-drbdmanage.git && cd addon-drbdmanage
+chmod u+x install.sh
 ./install.sh
 ```
 
@@ -79,21 +76,56 @@ TM_MAD_CONF = [
 
 ### Configuring the Nodes
 
+#### Overview of node roles
+
+The Front-End node issues commands to the Storage and Host nodes via DRBDmanage
+
+Storage nodes hold disk images of VM locally.
+
+Host nodes are responsible for running instantiated VMs and typically have the storage for
+the images they need attached across the network via DRBDmanage diskless mode.
+
 All nodes must have DRBD9 and DRBDmanage installed. This process is detailed in the
 [User's Guide for DRBD9](http://drbd.linbit.com/users-guide-9.0/ch-admin-drbdmanage.html)
 
-Only the Front-End and Host nodes require OpenNebula to be installed, but the oneadmin
-user must be able to passwordlessly access access them. Refer to the OpenNebula install
-guide for your distribution on how to manually configure this account.
+It is possible to have Front-End and Host nodes act as storage nodes in addition to their primary
+role as long as they the meet all the requirements for both roles.
+
+If you do not intend for the Front-End or Host nodes to be used as storage nodes in addition to
+their primary role, they should be added to the DRBDmanage cluster as
+[pure controller nodes](http://drbd.linbit.com/users-guide-9.0/s-dm-add-node.html#_adding_a_pure_controller_node).
+
+#### Front-End Configuration
 
 The Front-End node must be a control node with it's own copy of the control volume,
-this means that you must provide a small, approximately 1Gb, volume for the drbdpool volume
+this means that you must provide a small, approximately 2Gb, volume for the drbdpool volume
 group, even if you do not plan to use this node for DRBD storage.
 
-The Host nodes may be configured as pure Client nodes without a local control volume.
+#### Host Configuration
+
+The Host nodes may also be configured as [pure client nodes](http://drbd.linbit.com/users-guide-9.0/s-dm-add-node.html#_adding_a_pure_client_node)
+without a local control volume by adding the `--satellite` option. This allows hosts
+to be added to the DRBDmanage cluster without preparing local storage for DRBD.
+
+#### Storage Node Configuration
+
+Only the Front-End and Host nodes require OpenNebula to be installed, but the oneadmin
+user must be able to passwordlessly access storage nodes. Refer to the OpenNebula install
+guide for your distribution on how to manually configure the oneadmin user account.
 
 The Storage nodes must use one of the thinly-provisioned storage plugins. The merits of
 the different plugins are dicussed in the [User's Guide](http://drbd.linbit.com/users-guide-9.0/s-drbdmanage-storage-plugins.html).
+
+To prepare thinly-provisioned storage for DRBDmanage you must create a volume group
+and thinLV using LVM on each storage node.
+
+Example of this process using the default names for the volume group and thinpool:
+
+```bash
+pvcreate /dev/sdb
+vgcreate drbdpool /dev/sdb
+lvcreate -n drbdthinpool -T -l 95%VG /dev/drbdpool
+```
 
 Instructions on how to configure DRBDmange to use a storage plugin can be found in the
 cluster configuration section of the [User's Guide](http://drbd.linbit.com/users-guide-9.0/s-dm-set-config.html).
@@ -136,7 +168,7 @@ leave the original policy section intact!
 #### Groups
 
 Be sure to consider the groups that oneadmin should be added to in order to gain access
-to the devices and programs need to access storage and instantiate VMs. For this addon,
+to the devices and programs needed to access storage and instantiate VMs. For this addon,
 the oneadmin user must belong to the `disk` group on all nodes in order to access the
 DRBD devices where images are held.
 
