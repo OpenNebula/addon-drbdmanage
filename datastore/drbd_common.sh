@@ -118,6 +118,16 @@ drbd_deploy_options_check () {
   fi
 }
 
+# Determine if a new image exceeds the maximum size for a given redundancy level.
+drbd_size_check () {
+  size=$1
+  size_limit=$(drbdmanage free-space -m "$DRBD_REDUNDANCY" | awk -F ',' '{ print $1 / 1024 }')
+
+  if [ "$size" -gt "$size_limit" ]; then
+    exit -1
+  fi
+}
+
 # Deploy resource based on deployment options, wait for res to be deployed on each node.
 drbd_deploy_res_on_nodes () {
   res_name=$1

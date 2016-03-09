@@ -67,10 +67,16 @@ exec_and_log "drbd_deploy_options_check" \
   "You must have only one of the following in the template \
   for your datastore: DRBD_REDUNDANCY DRBD_DEPLOYMENT_NODES"
 
-
 # Get the name and size for a DRBD resource.
 DRBD_SIZE="${SIZE}M"
 DRBD_RES_NAME="OpenNebula-image-${IMAGE_ID}"
+
+# Check size of the new resource for redundant deployments.
+if [ -n "$DRBD_REDUNDANCY" ]; then
+  exec_and_log "drbd_size_check $SIZE" \
+    "Unable to find $DRBD_REDUNDANCY storage nodes with enough \
+    free space to hold a new $DRBD_SIZE volume."
+fi
 
 # Do not make a new resource for save as, just return the name.
 if [  "$FSTYPE" = "save_as" ]; then

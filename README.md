@@ -14,7 +14,7 @@ Hayley Swimelar[<hayley@linbit.com>](hayley@linbit.com)
 
 * OpenNebula 4.14
 * DRBD9 9.0.0+
-* DRBDmanage 0.92.1+
+* DRBDmanage 0.93+
 
 ## Features
 
@@ -143,19 +143,46 @@ DRBD devices where images are held.
 ### Creating a new DRBDmanage datastore
 
 Create a datastore configuration file named ds.conf and use the `onedatastore` tool
-to create a new datastore based on that configuration:
+to create a new datastore based on that configuration. There are two mutually exclusive
+deployment options: DRBD_REDUNDANCY and DRBD_DEPLOYMENT_NODES. For both of these options,
+BRIDGE_LIST must be a space separated list of all storage nodes in the drbdmanage cluster.
+
+#### Deploying to a redundancy level
+
+The DRBD_REDUNDANCY option takes a level of redundancy witch is a number between one and
+the total number of storage nodes. Resources are assigned to storage nodes automatically
+based on the level of redundancy and drbdmanage's deployment policy. The following example
+shows a cluster with three storage nodes that will deploy new resources to two of the nodes
+in the BRIDGE_LIST based on the free space available on the storage nodes.
 
 ```bash
 cat >ds.conf <<EOI
-NAME = drbdmanage_datastore
+NAME = drbdmanage_redundant
 DS_MAD = drbdmanage
 TM_MAD = drbdmanage
-BRIDGE_LIST = "alice bob"
+DRBD_REDUNDANCY = 2
+BRIDGE_LIST = "alice bob charlie"
 EOI
 
 onedatastore create ds.conf
 ```
+#### Deploying to a list of nodes
 
+Using the DRBD_DEPLOYMENT_NODES allows you to select a group of nodes that resources will
+always be assigned to. In the following example, new resources will always be assigned to
+the nodes alice and charlie.
+
+```bash
+cat >ds.conf <<EOI
+NAME = drbdmanage_nodes
+DS_MAD = drbdmanage
+TM_MAD = drbdmanage
+DRBD_DEPLOYMENT_NODES = "alice charlie"
+BRIDGE_LIST = "alice bob charlie"
+EOI
+
+onedatastore create ds.conf
+```
 ## Usage
 
 This driver will use DRBDmanage to create new images and transfer them to Hosts.
