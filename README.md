@@ -217,7 +217,8 @@ onedatastore create ds.conf
 ```
 #### Optional Attributes
 
-There are two additional attributes that you may add to a datastore's template.
+There are two additional attributes that you may add to a datastore's template. These
+can be used to overwrite the options of the same name in the `datastore/drbdmanage.conf` file.
 
 DRBD_MIN_COUNT is the minimum number of nodes that a resource must be deployed on for
 the deployment of a new resource to be considered a success. This should be an integer
