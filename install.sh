@@ -9,10 +9,10 @@ else
 fi
 
 # Squash aliases
-CP=/usr/bin/cp
-MKDIR=/usr/bin/mkdir
-CHOWN=/usr/bin/chown
-CHMOD=/usr/bin/chmod
+CP=/bin/cp
+MKDIR=/bin/mkdir
+CHOWN=/bin/chown
+CHMOD=/bin/chmod
 
 # Defaults
 DATASTORE_ACTIONS="./datastore/*"
