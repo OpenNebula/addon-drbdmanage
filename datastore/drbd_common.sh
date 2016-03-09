@@ -17,9 +17,9 @@
 #==========================================================================
 
 # Defaults in case conf is missing.
-POL_COUNT=${POL_COUNT:-1}
-POL_RATIO=${POL_RATIO:-''}
-POL_TIMEOUT=${POL_TIMEOUT:-20}
+DRBD_MIN_COUNT=${DRBD_MIN_COUNT:-1}
+DRBD_MIN_RATIO=${DRBD_MIN_RATIO:-''}
+DRBD_TIMEOUT=${DRBD_TIMEOUT:-20}
 
 # Log argument to the syslog.
 drbd_log () {
@@ -52,7 +52,7 @@ drbd_is_node_ready () {
   node=$1
   device_path=$2
 
-  ssh "$node" "$(typeset -f drbd_is_dev_ready); drbd_is_dev_ready $device_path $POL_TIMEOUT"
+  ssh "$node" "$(typeset -f drbd_is_dev_ready); drbd_is_dev_ready $device_path $DRBD_TIMEOUT"
 }
 # Return single node ready for IO on the given path from list of nodes.
 drbd_get_assignment_node () {
@@ -166,7 +166,7 @@ drbd_remove_res () {
   drbd_log "Removing $res_name from DRBD storage cluster."
   sudo drbdmanage remove-resource -q "$res_name"
 
-  retries="$POL_TIMEOUT"
+  retries="$DRBD_TIMEOUT"
 
   until [ -z "$(drbd_res_exsists "$res_name")" ]; do
     sleep 1
@@ -221,7 +221,7 @@ drbd_unassign_res () {
 
   sudo drbdmanage unassign-resource -q "$res_name" "$node"
   # Wait until resource is unassigned.
-  retries="$POL_TIMEOUT"
+  retries="$DRBD_TIMEOUT"
 
   until [ -z "$(sudo drbdmanage list-assignments --resources "$res_name" --nodes "$node" -m)" ]; do
     sleep 1
@@ -282,19 +282,19 @@ drbd_build_dbus_dict () {
   snap=$2
 
   # Build dict string with required elements.
-  dict="dict:string:string:starttime,$(date +%s),resource,$res,timeout,$POL_TIMEOUT"
+  dict="dict:string:string:starttime,$(date +%s),resource,$res,timeout,$DRBD_TIMEOUT"
 
   # If optional elements are present add them to the dict.
   if [ -n "$snap" ]; then
     dict+=",snapshot,$snap"
   fi
 
-  if [ -n "$POL_COUNT" ]; then
-    dict+=",count,$POL_COUNT"
+  if [ -n "$DRBD_MIN_COUNT" ]; then
+    dict+=",count,$DRBD_MIN_COUNT"
   fi
 
-  if [ -n "$POL_RATIO" ]; then
-    dict+=",ratio,$POL_RATIO"
+  if [ -n "$DRBD_MIN_RATIO" ]; then
+    dict+=",ratio,$DRBD_MIN_RATIO"
   fi
 
   echo "$dict"
@@ -351,7 +351,7 @@ drbd_check_dbus_status () {
     echo 0
     exit 0
   elif [ "$timeout" == '"true"' ]; then
-    drbd_log "$res_or_snap timed out. Timeout of $POL_TIMEOUT seconds exceeded."
+    drbd_log "$res_or_snap timed out. Timeout of $DRBD_TIMEOUT seconds exceeded."
 
     echo 7
     exit 0
@@ -369,7 +369,7 @@ drbd_poll_dbus () {
   res_name=$2
   snap_name=$3
 
-  retries="$POL_TIMEOUT"
+  retries="$DRBD_TIMEOUT"
 
   for ((i=1;i<retries;i++)); do
     sleep 1
