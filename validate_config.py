@@ -83,45 +83,31 @@ if redundancy_level:
               "less than or equal to the number of nodes in BRIDGE_LIST")
 
 # Checks for optional attributes.
-
-if "DEPLOY_TIMEOUT" in config:
+if "DRBD_MIN_RATIO" in config:
     try:
-        timeout = int(config["DEPLOY_TIMEOUT"])
+        ratio = float(config["DRBD_MIN_RATIO"])
     except ValueError as e:
         valid_config = False
-        print("DEPLOY_TIMEOUT is a number of seconds")
-        report_validity()
-        sys.exit(e)
-
-    if timeout < 1:
-        valid_config = False
-        print("DEPLOY_TIMEOUT must be a positive integer.")
-
-if "DEPLOY_MIN_RATIO" in config:
-    try:
-        ratio = float(config["DEPLOY_MIN_RATIO"])
-    except ValueError as e:
-        valid_config = False
-        print("DEPLOY_MIN_RATIO must be a decimal number.")
+        print("DRBD_MIN_RATIO must be a decimal number.")
         report_validity()
         sys.exit(e)
 
     if not 0.0 <= ratio <= 1.0:
         valid_config = False
-        print("DEPLOY_MIN_RATIO must be between 0.0 and 1.0.")
+        print("DRBD_MIN_RATIO must be between 0.0 and 1.0.")
 
-if "DEPLOY_MIN_COUNT" in config:
+if "DRBD_MIN_COUNT" in config:
     try:
-        count = int(config["DEPLOY_MIN_COUNT"])
+        count = int(config["DRBD_MIN_COUNT"])
     except ValueError as e:
         valid_config = False
-        print("DEPLOY_MIN_COUNT must be an integer.")
+        print("DRBD_MIN_COUNT must be an integer.")
         report_validity()
         sys.exit(e)
 
     if not 0 <= count <= len(storage_nodes):
         valid_config = False
-        print("DEPLOY_MIN_COUNT must be between 0 and "
+        print("DRBD_MIN_COUNT must be between 0 and "
               "the number of storage nodes.")
 
 report_validity()

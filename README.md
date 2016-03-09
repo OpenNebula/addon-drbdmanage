@@ -31,7 +31,7 @@ Hayley Swimelar[<hayley@linbit.com>](hayley@linbit.com)
 
 Follow these steps on the Front-End node only.
 
-### Clone the repository and run the install script.
+### Clone the Repository and Run the Install Script.
 
 Run the following commands as either oneadmin or root:
 
@@ -47,7 +47,7 @@ To upgrade the driver, simply run the installation script again.
 
 ## Configuration
 
-### Configure the driver in OpenNebula
+### Configure the Driver in OpenNebula
 
 Modify the following sections of `/etc/one/oned.conf`
 
@@ -76,7 +76,7 @@ TM_MAD_CONF = [
 
 ### Configuring the Nodes
 
-#### Overview of node roles
+#### Overview of node Roles
 
 The Front-End node issues commands to the Storage and Host nodes via DRBDmanage
 
@@ -136,7 +136,7 @@ Additional configuration for the driver can be found in the `datastore/drbdmanag
 file in the driver director or in the install path, normally
 `/var/lib/one/remotes/datastore/drbdmanage/drbdmanage.conf`
 
-### Permissions for oneadmin
+### Permissions for Oneadmin
 
 The oneadmin user must have passwordless sudo access to the `drbdmanage` program on the
 Front-End node and the `mkfs` command on the Storage nodes.
@@ -172,14 +172,14 @@ to the devices and programs needed to access storage and instantiate VMs. For th
 the oneadmin user must belong to the `disk` group on all nodes in order to access the
 DRBD devices where images are held.
 
-### Creating a new DRBDmanage datastore
+### Creating a New DRBDmanage Datastore
 
 Create a datastore configuration file named ds.conf and use the `onedatastore` tool
 to create a new datastore based on that configuration. There are two mutually exclusive
 deployment options: DRBD_REDUNDANCY and DRBD_DEPLOYMENT_NODES. For both of these options,
 BRIDGE_LIST must be a space separated list of all storage nodes in the drbdmanage cluster.
 
-#### Deploying to a redundancy level
+#### Deploying to a Redundancy Level
 
 The DRBD_REDUNDANCY option takes a level of redundancy witch is a number between one and
 the total number of storage nodes. Resources are assigned to storage nodes automatically
@@ -198,7 +198,7 @@ EOI
 
 onedatastore create ds.conf
 ```
-#### Deploying to a list of nodes
+#### Deploying to a List of Nodes
 
 Using the DRBD_DEPLOYMENT_NODES allows you to select a group of nodes that resources will
 always be assigned to. In the following example, new resources will always be assigned to
@@ -215,6 +215,20 @@ EOI
 
 onedatastore create ds.conf
 ```
+#### Optional Attributes
+
+There are two additional attributes that you may add to a datastore's template.
+
+DRBD_MIN_COUNT is the minimum number of nodes that a resource must be deployed on for
+the deployment of a new resource to be considered a success. This should be an integer
+between 0 and the total number of storage nodes in your DRBDmanage cluster.
+
+DRBD_MIN_RATIO is the ratio of nodes a resource must be deployed on for the deployment
+of a new resource to be considered a success. This should be a decimal number between 0.0
+and 1.0.
+
+More information on these policies can be found in the [Policy Plugin](http://drbd.linbit.com/users-guide-9.0/s-drbdmanage-deployment-policy.html)
+section of the [DRBD9 User's Guide](http://drbd.linbit.com/users-guide-9.0/drbd-users-guide.html).
 
 #### Validating a Datastore Configuration
 
@@ -228,8 +242,8 @@ configuration file you wish to validate as an argument.
 ## Usage
 
 This driver will use DRBDmanage to create new images and transfer them to Hosts.
-Images are attached accross the network using diskless mode. Images are replicated
-on each node in the BRIDGE_LIST.
+Images are attached to host accross the network using diskless mode. Images are replicated
+according to the deployment policy set in the datastore template.
 
 ## License
 
