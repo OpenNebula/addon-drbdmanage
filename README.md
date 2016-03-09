@@ -14,7 +14,7 @@ Hayley Swimelar[<hayley@linbit.com>](hayley@linbit.com)
 
 * OpenNebula 4.14
 * DRBD9 9.0.0+
-* DRBDmanage 0.92.1+
+* DRBDmanage 0.93+
 
 ## Features
 
