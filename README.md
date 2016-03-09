@@ -29,18 +29,15 @@ Hayley Swimelar[<hayley@linbit.com>](hayley@linbit.com)
 
 ## Installation
 
-Follow all of these steps on the Front-End node only
+Follow these steps on the Front-End node only.
 
-### Clone the repository:
+### Clone the repository and run the install script.
 
-```bash
-git clone git://git.linbit.com/addon-drbdmanage.git
-```
-
-### Install the driver components using the install script.
+Run the following commands as either oneadmin or root:
 
 ```bash
-cd addon-drbdmanage
+git clone git://git.linbit.com/addon-drbdmanage.git && cd addon-drbdmanage
+chmod u+x install.sh
 ./install.sh
 ```
 
