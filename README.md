@@ -228,8 +228,8 @@ configuration file you wish to validate as an argument.
 ## Usage
 
 This driver will use DRBDmanage to create new images and transfer them to Hosts.
-Images are attached accross the network using diskless mode. Images are replicated
-on each node in the BRIDGE_LIST.
+Images are attached to host accross the network using diskless mode. Images are replicated
+according to the deployment policy set in the datastore template.
 
 ## License
 
