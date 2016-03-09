@@ -40,9 +40,13 @@ unset i j XPATH_ELEMENTS
 
 while IFS= read -r -d '' element; do
     XPATH_ELEMENTS[i++]="$element"
-done < <($XPATH     /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/BRIDGE_LIST )
+done < <($XPATH     /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/BRIDGE_LIST \
+                    /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/DRBD_REDUNDANCY \
+                    /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/DRBD_DEPLOYMENT_NODES )
 
 BRIDGE_LIST="${XPATH_ELEMENTS[j++]}"
+DRBD_REDUNDANCY="${XPATH_ELEMENTS[j++]}"
+DRBD_DEPLOYMENT_NODES="${XPATH_ELEMENTS[j++]}"
 
 DST_HOST=$(get_destination_host "$IMAGE_ID")
 
@@ -52,11 +56,20 @@ if [ -z "$DST_HOST" ]; then
 fi
 
 # Monitor pool space.
-# Use the smallest pool sizes among the nodes in the bridge list.
-TOTAL_MB=$(sudo drbdmanage n -N $BRIDGE_LIST -m | \
-  awk -F',' '{ if (!total || $4<total) total=$4 } END { print total / 1024 }')
-FREE_MB=$(sudo drbdmanage n -N $BRIDGE_LIST -m | \
-  awk -F',' '{ if (!total || $5<total) total=$5 } END { print total / 1024 }')
+if [ -n "$DRBD_DEPLOYMENT_NODES" ]; then
+  # Use the smallest pool sizes among the deployment nodes.
+  TOTAL_MB=$(sudo drbdmanage n -N $DRBD_DEPLOYMENT_NODES -m | \
+    awk -F',' '{ if (!total || $4<total) total=$4 } END { print total / 1024 }')
+  FREE_MB=$(sudo drbdmanage n -N $DRBD_DEPLOYMENT_NODES -m | \
+    awk -F',' '{ if (!total || $5<total) total=$5 } END { print total / 1024 }')
+else
+  # Calculate how much space is left for redundant volumes.
+  TOTAL_MB=$(sudo drbdmanage free-space "$DRBD_REDUNDANCY" -m | \
+    awk -F',' -v redundancy="$DRBD_REDUNDANCY" '{print $2 / 1024 / redundancy}')
+  FREE_MB=$(sudo drbdmanage n -N $BRIDGE_LIST -m | \
+    awk -F',' -v redundancy="$DRBD_REDUNDANCY" 'BEGIN { total=$5 } { total += $5 } END { print total / 1024 / redundancy }')
+fi
+
 USED_MB=$((TOTAL_MB - FREE_MB))
 
 echo "FREE_MB=$FREE_MB"

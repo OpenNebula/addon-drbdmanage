@@ -6,9 +6,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,11 +33,12 @@ script_name="${0##*/}"
 logger -t "addon-drbdmanage: $driver_name-$script_name: [$$]" "$1"
 }
 
-# Return newline separated list of nodes that are assigned to a resource.
+# Returns a space delimited list of storage nodes with a resource assigned to them.
 drbd_get_res_nodes () {
   res_name=$1
 
-  res_nodes="$(sudo drbdmanage assignments -m --resources "$res_name" | awk -F',' '{ print $1 }')"
+  res_nodes="$(sudo drbdmanage assignments -m --resources "$res_name" | \
+    awk -F',' 'BEGIN { ORS = " " } { if ($4$5 == "connect|deployconnect|deploy") print $1 }')"
 
   if [ -n "$res_nodes" ]; then
     echo "$res_nodes"
@@ -103,13 +104,43 @@ drbd_add_res () {
   fi
 }
 
-# Deploy resource on a list of nodes, wait for res to be deployed on each node.
+# Check if deployment options are acceptable.
+drbd_deploy_options_check () {
+  is_redundancy=$([ -n "$DRBD_REDUNDANCY" ]; echo $?)
+  is_deploy_nodes=$([ -n "$DRBD_DEPLOYMENT_NODES" ]; echo $?)
+
+  # One and only one of these option must be set.
+  if ! ((is_redundancy ^ is_deploy_nodes)); then
+    drbd_log "Invalid config! Set only one of the following in this datatore's template:"
+    drbd_log "DRBD_REDUNDANCY"
+    drbd_log "DRBD_DEPLOYMENT_NODES"
+    exit -1
+  fi
+}
+
+# Determine if a new image exceeds the maximum size for a given redundancy level.
+drbd_size_check () {
+  size=$1
+  size_limit=$(drbdmanage free-space -m "$DRBD_REDUNDANCY" | awk -F ',' '{ print $1 / 1024 }')
+
+  if [ "$size" -gt "$size_limit" ]; then
+    exit -1
+  fi
+}
+
+# Deploy resource based on deployment options, wait for res to be deployed on each node.
 drbd_deploy_res_on_nodes () {
   res_name=$1
-  node_list=${*:2}
 
-  drbd_log "Assigning resource $res_name to storage nodes $node_list"
-  sudo drbdmanage assign-resource "$res_name" $node_list
+  # If deployment nodes are set, deploy to those nodes manualy."
+  if [ -n "$DRBD_DEPLOYMENT_NODES" ]; then
+    drbd_log "Assigning resource $res_name to storage nodes $DRBD_DEPLOYMENT_NODES"
+    sudo drbdmanage assign-resource "$res_name" $DRBD_DEPLOYMENT_NODES
+  # Otherwise deploy to a redundancy level.
+  else
+    drbd_log "Deploying resource $res_name with $DRBD_REDUNDANCY-way redundancy."
+    sudo drbdmanage deploy-resource "$res_name" "$DRBD_REDUNDANCY"
+  fi
 
   # Wait for resource to be deployed according to the WaitForResource plugin.
   status=$(drbd_poll_dbus WaitForResource "$res_name")
@@ -155,12 +186,13 @@ drbd_remove_res () {
 drbd_clone_res () {
   res_from_snap_name=$1
   res_name=$2
-  nodes=$3
+
+  nodes="$(drbd_get_res_nodes "$res_name")"
   snap_name="$res_name"_snap_"$(date +%s)"
 
   # Create and deploy a snapshot of a resource.
   drbd_log "Creating snapshot of $res_name on $nodes."
-  sudo drbdmanage add-snapshot "$snap_name" "$res_name" "$nodes"
+  sudo drbdmanage add-snapshot "$snap_name" "$res_name" $nodes
 
   status=$(drbd_poll_dbus WaitForSnapshot "$res_name" "$snap_name")
 
