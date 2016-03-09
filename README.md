@@ -215,6 +215,16 @@ EOI
 
 onedatastore create ds.conf
 ```
+
+#### Validating a Datastore Configuration
+
+It is recommended to validate your configuration using the validation tool provided with
+the driver. The tool will report any errors it finds in your configuration. Simply pass the
+configuration file you wish to validate as an argument.
+
+```bash
+./validate_config.py ds.conf
+```
 ## Usage
 
 This driver will use DRBDmanage to create new images and transfer them to Hosts.
