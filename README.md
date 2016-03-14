@@ -6,6 +6,10 @@ This driver allows for highly available storage using DRBD9 + DRBD Manage in Ope
 
 ## Development
 
+To contribute bug patches or new features, you can use the github Pull Request
+model. It is assumed that code and documentation are contributed under the
+Apache License 2.0.
+
 ## Authors
 
 Hayley Swimelar[<hayley@linbit.com>](hayley@linbit.com)
