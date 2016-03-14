@@ -16,7 +16,10 @@ Hayley Swimelar[<hayley@linbit.com>](hayley@linbit.com)
 
 ## Compatibility
 
-* OpenNebula 4.14
+* This addon is compatable with OpenNebula 4.14
+
+## Requirements
+
 * DRBD9 9.0.0+
 * DRBD Manage 0.93+
 
