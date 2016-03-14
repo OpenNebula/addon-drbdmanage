@@ -329,7 +329,7 @@ drbd_check_dbus_status () {
 
   result=$(drbd_parse_dbus_data "$dbus_data" result)
 
-  # If there is no result, something went wrong communicating to DRBDmanage."
+  # If there is no result, something went wrong communicating to DRBD Manage."
   if [ -z "$result" ]; then
     drbd_log "Error communicating with dbus interface or malformed dictionary."
     drbd_log "Passed plugin $plugin the following dict: $dict"

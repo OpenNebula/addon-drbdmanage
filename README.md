@@ -1,8 +1,8 @@
-# DRBDmanage Storage Driver
+# DRBD Manage Storage Driver
 
 ## Description
 
-This driver allows for highly available storage using DRBD9 + DRBDmanage in OpenNebula.
+This driver allows for highly available storage using DRBD9 + DRBD Manage in OpenNebula.
 
 ## Development
 
@@ -14,7 +14,7 @@ Hayley Swimelar[<hayley@linbit.com>](hayley@linbit.com)
 
 * OpenNebula 4.14
 * DRBD9 9.0.0+
-* DRBDmanage 0.93+
+* DRBD Manage 0.93+
 
 ## Features
 
@@ -78,21 +78,21 @@ TM_MAD_CONF = [
 
 #### Overview of node Roles
 
-The Front-End node issues commands to the Storage and Host nodes via DRBDmanage
+The Front-End node issues commands to the Storage and Host nodes via DRBD Manage
 
 Storage nodes hold disk images of VM locally.
 
 Host nodes are responsible for running instantiated VMs and typically have the storage for
-the images they need attached across the network via DRBDmanage diskless mode.
+the images they need attached across the network via DRBD Manage diskless mode.
 
-All nodes must have DRBD9 and DRBDmanage installed. This process is detailed in the
+All nodes must have DRBD9 and DRBD Manage installed. This process is detailed in the
 [User's Guide for DRBD9](http://drbd.linbit.com/users-guide-9.0/ch-admin-drbdmanage.html)
 
 It is possible to have Front-End and Host nodes act as storage nodes in addition to their primary
 role as long as they the meet all the requirements for both roles.
 
 If you do not intend for the Front-End or Host nodes to be used as storage nodes in addition to
-their primary role, they should be added to the DRBDmanage cluster as
+their primary role, they should be added to the DRBD Manage cluster as
 [pure controller nodes](http://drbd.linbit.com/users-guide-9.0/s-dm-add-node.html#_adding_a_pure_controller_node).
 
 #### Front-End Configuration
@@ -105,7 +105,7 @@ group, even if you do not plan to use this node for DRBD storage.
 
 The Host nodes may also be configured as [pure client nodes](http://drbd.linbit.com/users-guide-9.0/s-dm-add-node.html#_adding_a_pure_client_node)
 without a local control volume by adding the `--satellite` option. This allows hosts
-to be added to the DRBDmanage cluster without preparing local storage for DRBD.
+to be added to the DRBD Manage cluster without preparing local storage for DRBD.
 
 #### Storage Node Configuration
 
@@ -116,7 +116,7 @@ guide for your distribution on how to manually configure the oneadmin user accou
 The Storage nodes must use one of the thinly-provisioned storage plugins. The merits of
 the different plugins are dicussed in the [User's Guide](http://drbd.linbit.com/users-guide-9.0/s-drbdmanage-storage-plugins.html).
 
-To prepare thinly-provisioned storage for DRBDmanage you must create a volume group
+To prepare thinly-provisioned storage for DRBD Manage you must create a volume group
 and thinLV using LVM on each storage node.
 
 Example of this process using the default names for the volume group and thinpool:
@@ -172,7 +172,7 @@ to the devices and programs needed to access storage and instantiate VMs. For th
 the oneadmin user must belong to the `disk` group on all nodes in order to access the
 DRBD devices where images are held.
 
-### Creating a New DRBDmanage Datastore
+### Creating a New DRBD Manage Datastore
 
 Create a datastore configuration file named ds.conf and use the `onedatastore` tool
 to create a new datastore based on that configuration. There are two mutually exclusive
@@ -222,7 +222,7 @@ can be used to overwrite the options of the same name in the `datastore/drbdmana
 
 DRBD_MIN_COUNT is the minimum number of nodes that a resource must be deployed on for
 the deployment of a new resource to be considered a success. This should be an integer
-between 0 and the total number of storage nodes in your DRBDmanage cluster.
+between 0 and the total number of storage nodes in your DRBD Manage cluster.
 
 DRBD_MIN_RATIO is the ratio of nodes a resource must be deployed on for the deployment
 of a new resource to be considered a success. This should be a decimal number between 0.0
@@ -242,7 +242,7 @@ configuration file you wish to validate as an argument.
 ```
 ## Usage
 
-This driver will use DRBDmanage to create new images and transfer them to Hosts.
+This driver will use DRBD Manage to create new images and transfer them to Hosts.
 Images are attached to host accross the network using diskless mode. Images are replicated
 according to the deployment policy set in the datastore template.
 
@@ -250,8 +250,8 @@ according to the deployment policy set in the datastore template.
 
 Apache 2.0
 
-##DRBD9 and DRBDmanage User's Guide
+##DRBD9 and DRBD Manage User's Guide
 
 If you have any questions about setting up, tuning, or administrating DRBD9 or
-DRBDmanage, be sure to checkout in the formation provided in the
+DRBD Manage, be sure to checkout in the formation provided in the
 [User's Guide](http://drbd.linbit.com/users-guide-9.0/drbd-users-guide.html)
