@@ -80,6 +80,7 @@ TM_MAD_CONF = [
     name = "drbdmanage", ln_target = "NONE", clone_target = "SELF", shared = "yes"
 ]
 ```
+After making these changes, restart the opennebula service.
 
 ### Configuring the Nodes
 
