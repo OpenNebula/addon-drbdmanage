@@ -10,6 +10,10 @@ To contribute bug patches or new features, you can use the github Pull Request
 model. It is assumed that code and documentation are contributed under the
 Apache License 2.0.
 
+Support for this addon can be found at the * Support:
+[OpenNebula user forum](https://forum.opennebula.org/c/support) or the
+[DRBD-User](http://lists.linbit.com/listinfo/drbd-user) mailing list.
+
 ## Authors
 
 Hayley Swimelar[<hayley@linbit.com>](hayley@linbit.com)
@@ -80,6 +84,7 @@ TM_MAD_CONF = [
     name = "drbdmanage", ln_target = "NONE", clone_target = "SELF", shared = "yes"
 ]
 ```
+After making these changes, restart the opennebula service.
 
 ### Configuring the Nodes
 

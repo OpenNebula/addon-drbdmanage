@@ -187,7 +187,12 @@ drbd_clone_res () {
   res_from_snap_name=$1
   res_name=$2
 
-  nodes="$(drbd_get_res_nodes "$res_name")"
+  if ! nodes="$(drbd_get_res_nodes "$res_name")"; then
+    drbd_log "Unable to find any storage nodes to hold temporary snapshot of \
+      $res_name needed to create new resource $res_from_snap_name"
+    exit -1
+  fi
+
   snap_name="$res_name"_snap_"$(date +%s)"
 
   # Create and deploy a snapshot of a resource.
