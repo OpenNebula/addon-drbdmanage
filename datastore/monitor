@@ -27,8 +27,8 @@ source "$LIB_LOCATION"/sh/scripts_common.sh
 
 DRIVER_PATH=$(dirname "$0")
 source "${DRIVER_PATH}"/../libfs.sh
-source "${DRIVER_PATH}"/drbd_common.sh
 source "${DRIVER_PATH}"/drbdmanage.conf
+source "${DRIVER_PATH}"/drbd_common.sh
 
 # Get arguments from OpenNebula Core
 DRIVER_ACTION=$1

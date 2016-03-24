@@ -31,8 +31,8 @@ fi
 source "$TMCOMMON"
 
 DRIVER_PATH=$(dirname "$0")
-source "${DRIVER_PATH}"/../../datastore/drbdmanage/drbd_common.sh
 source "${DRIVER_PATH}"/../../datastore/drbdmanage/drbdmanage.conf
+source "${DRIVER_PATH}"/../../datastore/drbdmanage/drbd_common.sh
 
 drbd_log "Beginning mv action."
 # Determine the source, host, and the location of the images.
