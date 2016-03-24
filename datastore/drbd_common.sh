@@ -16,10 +16,6 @@
 # limitations under the License.
 #==========================================================================
 
-# Defaults in case conf is missing.
-DRBD_MIN_COUNT=${DRBD_MIN_COUNT:-1}
-DRBD_MIN_RATIO=${DRBD_MIN_RATIO:-''}
-DRBD_TIMEOUT=${DRBD_TIMEOUT:-20}
 
 # Log argument to the syslog.
 drbd_log () {
@@ -285,6 +281,14 @@ drbd_is_node_in_list () {
 drbd_build_dbus_dict () {
   res=$1
   snap=$2
+
+# Set the min count to one if there are no policies
+if [ -z "$DRBD_MIN_COUNT" ] && [ -z "$DRBD_MIN_RATIO" ]; then
+  DRBD_MIN_COUNT=1
+fi
+
+# Set the timeout if there is not one.
+DRBD_TIMEOUT=${DRBD_TIMEOUT:-20}
 
   # Build dict string with required elements.
   dict="dict:string:string:starttime,$(date +%s),resource,$res,timeout,$DRBD_TIMEOUT"
