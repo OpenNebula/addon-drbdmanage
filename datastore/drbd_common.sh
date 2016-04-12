@@ -34,7 +34,7 @@ drbd_get_res_nodes () {
   res_name=$1
 
   res_nodes="$(sudo drbdmanage assignments -m --resources "$res_name" | \
-    awk -F',' 'BEGIN { ORS = " " } { if ($4$5 == "connect|deployconnect|deploy") print $1 }')"
+    awk -F',' 'BEGIN { ORS = " " } { if ($5 == "connect|deploy") print $1 }')"
 
   if [ -n "$res_nodes" ]; then
     echo "$res_nodes"
