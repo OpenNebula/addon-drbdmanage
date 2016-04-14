@@ -140,6 +140,12 @@ drbd_deploy_res_on_nodes () {
 
   # Wait for resource to be deployed according to the WaitForResource plugin.
   status=$(drbd_poll_dbus WaitForResource "$res_name")
+  if [ "$status" -eq 0 ]; then
+    for node in $(sudo drbdmanage n -m | awk -F',' '{ print $1 }'); do
+      drbd_deploy_res_on_host "$res_name" "$node"
+    done
+  fi
+
   echo "$status"
 }
 
