@@ -129,9 +129,9 @@ drbd_distribute_clients () {
   res_name=$1
   num_local_deployments="$(drbd_get_res_nodes "$res_name" | wc -w)"
 
-  drbd_log "Assigning $res_name to remaining nodes in diskless mode."
+  drbd_log "Assigning $res_name to $num_local_deployments remaining nodes in diskless mode."
 
-  sudo drbdmanage deploy "$res_name $num_local_deployments --with-clients"
+  sudo drbdmanage deploy "$res_name" "$num_local_deployments" '--with-clients'
 }
 
 # Deploy resource based on deployment options, wait for res to be deployed on each node.
