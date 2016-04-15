@@ -55,6 +55,17 @@ DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
 SAVE_AS="${XPATH_ELEMENTS[j++]}"
 PERSISTENT="${XPATH_ELEMENTS[j++]}"
 
+# Get information for live migration
+XPATH="${DRIVER_PATH}/../../datastore/xpath.rb --stdin"
+
+unset XPATH_ELEMENTS
+
+while IFS= read -r -d '' element; do
+  XPATH_ELEMENTS[0]="$element"
+done < <(onedatastore show -x "$DS_ID" | $XPATH /DATASTORE/TEMPLATE/DRBD_SUPPORT_LIVE_MIGRATION)
+
+DRBD_SUPPORT_LIVE_MIGRATION="${XPATH_ELEMENTS[0]:-$DRBD_SUPPORT_LIVE_MIGRATION}"
+
 # Set the name of the new resource.
 DRBD_CLONE_NAME="$DST"
 if [ -z "$PERSISTENT" ]; then

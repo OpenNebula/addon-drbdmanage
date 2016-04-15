@@ -43,6 +43,17 @@ DST_HOST=$(arg_host "$DST")
 DST_DIR=$(dirname "$DST_PATH")
 DISK_ID=$(echo "$DST_PATH" | $AWK -F. '{print $NF}')
 
+# Get information for live migration
+XPATH="${DRIVER_PATH}/../../datastore/xpath.rb --stdin"
+
+unset XPATH_ELEMENTS
+
+while IFS= read -r -d '' element; do
+  XPATH_ELEMENTS[0]="$element"
+done < <(onedatastore show -x "$DS_ID" | $XPATH /DATASTORE/TEMPLATE/DRBD_SUPPORT_LIVE_MIGRATION)
+
+DRBD_SUPPORT_LIVE_MIGRATION="${XPATH_ELEMENTS[0]:-$DRBD_SUPPORT_LIVE_MIGRATION}"
+
 # Get new (cloned) resource name and original resource name.
 DRBD_CLONE_NAME="${SRC_PATH}-vm${VM_ID}-disk${DISK_ID}"
 DRBD_RES_NAME="$SRC_PATH"
