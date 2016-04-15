@@ -71,6 +71,15 @@ done < <(onevm show -x "$VM_ID" | $XPATH \
 DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
 PERSISTENT="${XPATH_ELEMENTS[j++]}"
 
+# Get information for live migration
+unset XPATH_ELEMENTS
+
+while IFS= read -r -d '' element; do
+  XPATH_ELEMENTS[0]="$element"
+done < <(onedatastore show -x "$DS_ID" | $XPATH /DATASTORE/TEMPLATE/DRBD_SUPPORT_LIVE_MIGRATION)
+
+DRBD_SUPPORT_LIVE_MIGRATION="${XPATH_ELEMENTS[0]:-$DRBD_SUPPORT_LIVE_MIGRATION}"
+
 # Get the bridge_list
 unset XPATH_ELEMENTS
 
@@ -93,8 +102,10 @@ DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_RES_NAME")
 exec_and_log "drbd_is_node_ready $DST_HOST $DRBD_DEVICE_PATH"
   "DRBD device at $DRBD_DEVICE_PATH not ready for IO on $DST_HOST"
 
-# Unassign res from source, unless the source is a storage node.
-if [ "$(drbd_is_node_in_list "$SRC_HOST" $BRIDGE_LIST)" -ne 0 ]; then
+# If the source is a not storage node and
+# live migrations are not enabled, unassign res from src.
+if [ "$(drbd_is_node_in_list "$SRC_HOST" $BRIDGE_LIST)" -ne 0 ] &&
+   [ "$DRBD_SUPPORT_LIVE_MIGRATION" != "yes" ]; then
   drbd_unassign_res "$DRBD_RES_NAME" "$SRC_HOST"
 fi
 

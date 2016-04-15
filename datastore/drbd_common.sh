@@ -124,6 +124,16 @@ drbd_size_check () {
   fi
 }
 
+# Deploys a resource in diskless mode to all nodes where is it not stored locally.
+drbd_distribute_clients () {
+  res_name=$1
+  num_local_deployments="$(echo drbd_get_res_nodes "$res_name" | wc -w)"
+
+  drbd_log "Assigning $res_name to remaining nodes in diskless mode."
+
+  sudo drbdmanage deploy "$res_name $num_local_deployments --with-clients"
+}
+
 # Deploy resource based on deployment options, wait for res to be deployed on each node.
 drbd_deploy_res_on_nodes () {
   res_name=$1
@@ -140,10 +150,9 @@ drbd_deploy_res_on_nodes () {
 
   # Wait for resource to be deployed according to the WaitForResource plugin.
   status=$(drbd_poll_dbus WaitForResource "$res_name")
-  if [ "$status" -eq 0 ]; then
-    for node in $(sudo drbdmanage n -m | awk -F',' '{ print $1 }'); do
-      drbd_deploy_res_on_host "$res_name" "$node"
-    done
+
+  if [ "$DRBD_SUPPORT_LIVE_MIGRATION" = "yes" ];then
+    drbd_distribute_clients "$res_name"
   fi
 
   echo "$status"
@@ -213,10 +222,14 @@ drbd_clone_res () {
   drbd_log "Creating new resource $res_from_snap_name from snapshot of $snap_name."
   sudo drbdmanage restore-snapshot "$res_from_snap_name" "$res_name" "$snap_name"
 
-  status=$(drbd_poll_dbus WaitForResource "$res_name")
+  status=$(drbd_poll_dbus WaitForResource "$res_from_snap_name")
 
   drbd_log "Removing snapshot taken from $res_name."
   sudo drbdmanage remove-snapshot "$res_name" "$snap_name"
+
+  if [ "$DRBD_SUPPORT_LIVE_MIGRATION" = "yes" ];then
+    drbd_distribute_clients "$res_from_snap_name"
+  fi
 
   echo "$status"
 }
