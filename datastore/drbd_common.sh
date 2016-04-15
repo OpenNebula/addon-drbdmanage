@@ -124,6 +124,14 @@ drbd_size_check () {
   fi
 }
 
+# Deploys a resource in diskless mode to all nodes where is it not stored locally.
+drbd_distribute_clients () {
+  res_name=$1
+  num_local_deployments="$(echo drbd_get_res_nodes "$res_name" | wc -w)"
+
+  sudo drbdmanage deploy "$res_name $num_local_deployments --with-clients"
+}
+
 # Deploy resource based on deployment options, wait for res to be deployed on each node.
 drbd_deploy_res_on_nodes () {
   res_name=$1
