@@ -222,7 +222,7 @@ drbd_clone_res () {
   drbd_log "Creating new resource $res_from_snap_name from snapshot of $snap_name."
   sudo drbdmanage restore-snapshot "$res_from_snap_name" "$res_name" "$snap_name"
 
-  status=$(drbd_poll_dbus WaitForResource "$res_name")
+  status=$(drbd_poll_dbus WaitForResource "$res_from_snap_name")
 
   drbd_log "Removing snapshot taken from $res_name."
   sudo drbdmanage remove-snapshot "$res_name" "$snap_name"
