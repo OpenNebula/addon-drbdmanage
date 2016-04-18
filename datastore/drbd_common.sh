@@ -137,7 +137,7 @@ drbd_distribute_clients () {
   total_nodes="$(sudo drbdmanage list-nodes -m | wc -l)"
 
   drbd_log "Assigning $res_name to $((total_nodes - num_local_deployments)) \
-    remaining nodes in diskless mode."
+remaining nodes in diskless mode."
 
   sudo drbdmanage deploy "$res_name" "$num_local_deployments" '--with-clients'
 }
