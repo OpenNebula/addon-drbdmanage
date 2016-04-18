@@ -29,12 +29,12 @@ script_name="${0##*/}"
 logger -t "addon-drbdmanage: $driver_name-$script_name: [$$]" "$1"
 }
 
-# Returns a space delimited list of storage nodes with a resource assigned to them.
+# Returns a newline delimited list of storage nodes with a resource assigned to them.
 drbd_get_res_nodes () {
   res_name=$1
 
   res_nodes="$(sudo drbdmanage assignments -m --resources "$res_name" | \
-    awk -F',' 'BEGIN { ORS = " " } { if ($5 == "connect|deploy") print $1 }')"
+    awk -F',' '{ if ($5 == "connect|deploy") print $1 }')"
 
   if [ -n "$res_nodes" ]; then
     echo "$res_nodes"
@@ -127,7 +127,7 @@ drbd_size_check () {
 # Deploys a resource in diskless mode to all nodes where is it not stored locally.
 drbd_distribute_clients () {
   res_name=$1
-  num_local_deployments="$(drbd_get_res_nodes "$res_name" | wc -w)"
+  num_local_deployments="$(echo drbd_get_res_nodes "$res_name" | wc -l)"
 
   drbd_log "Assigning $res_name to $num_local_deployments remaining nodes in diskless mode."
 
