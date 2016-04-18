@@ -134,8 +134,10 @@ drbd_size_check () {
 drbd_distribute_clients () {
   res_name=$1
   num_local_deployments="$(echo drbd_get_res_nodes "$res_name" "--storage_only" | wc -l)"
+  total_nodes="$(sudo drbdmanage list-nodes -m | wc -l)"
 
-  drbd_log "Assigning $res_name to $num_local_deployments remaining nodes in diskless mode."
+  drbd_log "Assigning $res_name to $((total_nodes - num_local_deployments)) \
+    remaining nodes in diskless mode."
 
   sudo drbdmanage deploy "$res_name" "$num_local_deployments" '--with-clients'
 }
