@@ -32,9 +32,13 @@ logger -t "addon-drbdmanage: $driver_name-$script_name: [$$]" "$1"
 # Returns a newline delimited list of storage nodes with a resource assigned to them.
 drbd_get_res_nodes () {
   res_name=$1
+  filter=$2
 
-  res_nodes="$(sudo drbdmanage assignments -m --resources "$res_name" | \
-    awk -F',' '{ if ($5 == "connect|deploy") print $1 }')"
+  res_nodes="$(sudo drbdmanage assignments -m --resources "$res_name")"
+
+  if [ "$filter" = "--storage_only" ]; then
+    res_nodes="$(echo "$res_nodes" | awk -F',' '{ if ($5 == "connect|deploy") print $1 }')"
+  fi
 
   if [ -n "$res_nodes" ]; then
     echo "$res_nodes"
@@ -127,7 +131,7 @@ drbd_size_check () {
 # Deploys a resource in diskless mode to all nodes where is it not stored locally.
 drbd_distribute_clients () {
   res_name=$1
-  num_local_deployments="$(echo drbd_get_res_nodes "$res_name" | wc -l)"
+  num_local_deployments="$(echo drbd_get_res_nodes "$res_name" "--storage_only" | wc -l)"
 
   drbd_log "Assigning $res_name to $num_local_deployments remaining nodes in diskless mode."
 
@@ -198,7 +202,7 @@ drbd_clone_res () {
   res_from_snap_name=$1
   res_name=$2
 
-  if ! nodes="$(drbd_get_res_nodes "$res_name")"; then
+  if ! nodes="$(drbd_get_res_nodes "$res_name" "--storage_only")"; then
     drbd_log "Unable to find any storage nodes to hold temporary snapshot of \
       $res_name needed to create new resource $res_from_snap_name"
     exit -1
