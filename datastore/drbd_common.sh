@@ -38,6 +38,8 @@ drbd_get_res_nodes () {
 
   if [ "$filter" = "--storage_only" ]; then
     res_nodes="$(echo "$res_nodes" | awk -F',' '{ if ($5 == "connect|deploy") print $1 }')"
+  else
+    res_nodes="$(echo "$res_nodes" | awk -F',' '{ print $1 }')"
   fi
 
   if [ -n "$res_nodes" ]; then
