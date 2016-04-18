@@ -127,7 +127,7 @@ drbd_size_check () {
 # Deploys a resource in diskless mode to all nodes where is it not stored locally.
 drbd_distribute_clients () {
   res_name=$1
-  num_local_deployments="$(echo drbd_get_res_nodes "$res_name" | wc -w)"
+  num_local_deployments="$(drbd_get_res_nodes "$res_name" | wc -w)"
 
   drbd_log "Assigning $res_name to remaining nodes in diskless mode."
 
