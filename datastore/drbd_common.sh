@@ -159,10 +159,6 @@ drbd_deploy_res_on_nodes () {
   # Wait for resource to be deployed according to the WaitForResource plugin.
   status=$(drbd_poll_dbus WaitForResource "$res_name")
 
-  if [ "$DRBD_SUPPORT_LIVE_MIGRATION" = "yes" ];then
-    drbd_distribute_clients "$res_name"
-  fi
-
   echo "$status"
 }
 

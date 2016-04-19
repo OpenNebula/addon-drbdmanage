@@ -169,6 +169,10 @@ if [ "$COPY_RC" -ne 0 ]; then
   exit -1
 fi
 
+# Distribute resource to remaning nodes if live migration is enabled.
+if [ "$DRBD_SUPPORT_LIVE_MIGRATION" = "yes" ];then
+  drbd_distribute_clients "$DRBD_RES_NAME"
+fi
 
 drbd_log "Ending cp action."
 echo "$DRBD_RES_NAME"
