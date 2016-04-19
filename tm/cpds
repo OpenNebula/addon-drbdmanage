@@ -76,6 +76,11 @@ fi
 exec_and_log "drbd_clone_res $DRBD_CLONE_NAME $DRBD_RES_NAME"
   "Error creating clone from $DRBD_RES_NAME"
 
+# Distribute resource to remaning nodes if live migration is enabled.
+if [ "$DRBD_SUPPORT_LIVE_MIGRATION" = "yes" ];then
+  drbd_distribute_clients "$DRBD_CLONE_NAME"
+fi
+
 drbd_log "Ending cpds action."
 
 exit 0

@@ -231,10 +231,6 @@ drbd_clone_res () {
   drbd_log "Removing snapshot taken from $res_name."
   sudo drbdmanage remove-snapshot "$res_name" "$snap_name"
 
-  if [ "$DRBD_SUPPORT_LIVE_MIGRATION" = "yes" ];then
-    drbd_distribute_clients "$res_from_snap_name"
-  fi
-
   echo "$status"
 }
 

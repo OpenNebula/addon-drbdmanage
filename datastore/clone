@@ -6,9 +6,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -64,6 +64,11 @@ if [ "$(drbd_clone_res "$DRBD_CLONE_NAME" "$DRBD_RES_NAME")" -ne 0 ]; then
   # Clean up resource.
   drbd_remove_res "$DRBD_CLONE_NAME"
   exit -1
+fi
+
+# Distribute resource to remaning nodes if live migration is enabled.
+if [ "$DRBD_SUPPORT_LIVE_MIGRATION" = "yes" ];then
+  drbd_distribute_clients "$DRBD_CLONE_NAME"
 fi
 
 echo "$DRBD_CLONE_NAME"
