@@ -29,12 +29,18 @@ script_name="${0##*/}"
 logger -t "addon-drbdmanage: $driver_name-$script_name: [$$]" "$1"
 }
 
-# Returns a space delimited list of storage nodes with a resource assigned to them.
+# Returns a newline delimited list of storage nodes with a resource assigned to them.
 drbd_get_res_nodes () {
   res_name=$1
+  filter=$2
 
-  res_nodes="$(sudo drbdmanage assignments -m --resources "$res_name" | \
-    awk -F',' 'BEGIN { ORS = " " } { if ($4$5 == "connect|deployconnect|deploy") print $1 }')"
+  res_nodes="$(sudo drbdmanage assignments -m --resources "$res_name")"
+
+  if [ "$filter" = "--storage_only" ]; then
+    res_nodes="$(echo "$res_nodes" | awk -F',' '{ if ($5 == "connect|deploy") print $1 }')"
+  else
+    res_nodes="$(echo "$res_nodes" | awk -F',' '{ print $1 }')"
+  fi
 
   if [ -n "$res_nodes" ]; then
     echo "$res_nodes"
@@ -124,6 +130,18 @@ drbd_size_check () {
   fi
 }
 
+# Deploys a resource in diskless mode to all nodes where is it not stored locally.
+drbd_distribute_clients () {
+  res_name=$1
+  num_local_deployments="$(drbd_get_res_nodes "$res_name" "--storage_only" | wc -l)"
+  total_nodes="$(sudo drbdmanage list-nodes -m | wc -l)"
+
+  drbd_log "Assigning $res_name to $((total_nodes - num_local_deployments)) \
+remaining nodes in diskless mode."
+
+  sudo drbdmanage deploy "$res_name" "$num_local_deployments" '--with-clients'
+}
+
 # Deploy resource based on deployment options, wait for res to be deployed on each node.
 drbd_deploy_res_on_nodes () {
   res_name=$1
@@ -140,6 +158,7 @@ drbd_deploy_res_on_nodes () {
 
   # Wait for resource to be deployed according to the WaitForResource plugin.
   status=$(drbd_poll_dbus WaitForResource "$res_name")
+
   echo "$status"
 }
 
@@ -183,7 +202,7 @@ drbd_clone_res () {
   res_from_snap_name=$1
   res_name=$2
 
-  if ! nodes="$(drbd_get_res_nodes "$res_name")"; then
+  if ! nodes="$(drbd_get_res_nodes "$res_name" "--storage_only")"; then
     drbd_log "Unable to find any storage nodes to hold temporary snapshot of \
       $res_name needed to create new resource $res_from_snap_name"
     exit -1
@@ -207,7 +226,7 @@ drbd_clone_res () {
   drbd_log "Creating new resource $res_from_snap_name from snapshot of $snap_name."
   sudo drbdmanage restore-snapshot "$res_from_snap_name" "$res_name" "$snap_name"
 
-  status=$(drbd_poll_dbus WaitForResource "$res_name")
+  status=$(drbd_poll_dbus WaitForResource "$res_from_snap_name")
 
   drbd_log "Removing snapshot taken from $res_name."
   sudo drbdmanage remove-snapshot "$res_name" "$snap_name"

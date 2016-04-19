@@ -6,9 +6,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -53,6 +53,17 @@ while IFS= read -r -d '' element; do
     DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
     PERSISTENT="${XPATH_ELEMENTS[j++]}"
 
+# Get information for live migration
+XPATH="${DRIVER_PATH}/../../datastore/xpath.rb --stdin"
+
+unset XPATH_ELEMENTS
+
+while IFS= read -r -d '' element; do
+  XPATH_ELEMENTS[0]="$element"
+done < <(onedatastore show -x "$DS_ID" | $XPATH /DATASTORE/TEMPLATE/DRBD_SUPPORT_LIVE_MIGRATION)
+
+DRBD_SUPPORT_LIVE_MIGRATION="${XPATH_ELEMENTS[0]:-$DRBD_SUPPORT_LIVE_MIGRATION}"
+
 # Link DRBD device to datastore location.
 UNLINK_COMMAND=$(cat <<EOF
     set -e
@@ -71,10 +82,15 @@ if [ -z "$PERSISTENT" ]; then
   drbd_log "Ending non-persistent delete action."
 
   exit 0
-else
+fi
+
+# Don't unassign images if live migration is enabled.
+if [ "$DRBD_SUPPORT_LIVE_MIGRATION" != "yes" ]; then
   drbd_unassign_res "$DRBD_RES_NAME" "$DST_HOST"
 
   drbd_log "Ending persistent delete action."
 
   exit 0
 fi
+
+exit 0
