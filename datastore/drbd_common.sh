@@ -133,7 +133,7 @@ drbd_size_check () {
 # Deploys a resource in diskless mode to all nodes where is it not stored locally.
 drbd_distribute_clients () {
   res_name=$1
-  num_local_deployments="$(echo drbd_get_res_nodes "$res_name" "--storage_only" | wc -l)"
+  num_local_deployments="$(drbd_get_res_nodes "$res_name" "--storage_only" | wc -l)"
   total_nodes="$(sudo drbdmanage list-nodes -m | wc -l)"
 
   drbd_log "Assigning $res_name to $((total_nodes - num_local_deployments)) \
