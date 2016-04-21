@@ -97,4 +97,12 @@ if "DRBD_MIN_COUNT" in config:
         print("DRBD_MIN_COUNT must be between 0 and "
               "the number of storage nodes.")
 
+if "DRBD_SUPPORT_LIVE_MIGRATION" in config:
+    choice = config["DRBD_SUPPORT_LIVE_MIGRATION"]
+    valid_options = ["yes", "no"]
+
+    if choice not in valid_options:
+        valid_config = False
+        print("DRBD_SUPPORT_LIVE_MIGRATION must be 'yes' or 'no'")
+
 report_validity(valid_config)
