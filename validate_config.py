@@ -27,8 +27,8 @@ valid_config = True
 
 # Convert configuration file into dict.
 config = {}
-with open(config_file) as file:
-    for line in file:
+with open(config_file) as f:
+    for line in f:
         key, value = line.split("=")
         config[key.strip()] = value.strip()
 
@@ -96,5 +96,13 @@ if "DRBD_MIN_COUNT" in config:
         valid_config = False
         print("DRBD_MIN_COUNT must be between 0 and "
               "the number of storage nodes.")
+
+if "DRBD_SUPPORT_LIVE_MIGRATION" in config:
+    choice = config["DRBD_SUPPORT_LIVE_MIGRATION"]
+    valid_options = ["yes", "no"]
+
+    if choice not in valid_options:
+        valid_config = False
+        print("DRBD_SUPPORT_LIVE_MIGRATION must be 'yes' or 'no'")
 
 report_validity(valid_config)
