@@ -25,7 +25,7 @@ Hayley Swimelar[<hayley@linbit.com>](hayley@linbit.com)
 ## Requirements
 
 * DRBD9 9.0.0+
-* DRBD Manage 0.93+
+* DRBD Manage 0.95+
 
 ## Features
 
