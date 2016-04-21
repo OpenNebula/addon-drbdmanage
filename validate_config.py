@@ -27,8 +27,8 @@ valid_config = True
 
 # Convert configuration file into dict.
 config = {}
-with open(config_file) as file:
-    for line in file:
+with open(config_file) as f:
+    for line in f:
         key, value = line.split("=")
         config[key.strip()] = value.strip()
 
