@@ -16,11 +16,11 @@ Support for this addon can be found at the * Support:
 
 ## Authors
 
-Hayley Swimelar[<hayley@linbit.com>](hayley@linbit.com)
+Hayley Swimelar [<hayley@linbit.com>](hayley@linbit.com)
 
 ## Compatibility
 
-* This addon is compatable with OpenNebula 4.14
+* This addon is compatible with OpenNebula 4.14
 
 ## Requirements
 
@@ -255,7 +255,7 @@ command:
 drbdmanage net-options --allow-two-primaries yes --common
 ----
 
-Please note that images that were created before live migration support is
+Please note that images that were created before live migration support has been
 enabled may not be available to all hosts. These images may be assigned to hosts
 after the fact using DRBD Manage directly.
 
@@ -270,8 +270,8 @@ configuration file you wish to validate as an argument.
 ```
 ## Usage
 
-This driver will use DRBD Manage to create new images and transfer them to Hosts.
-Images are attached to host accross the network using diskless mode. Images are replicated
+This driver will use DRBD Manage to create new images and transfer them to hosts.
+Images are attached to hosts across the network using diskless mode. Images are replicated
 according to the deployment policy set in the datastore template.
 
 ## License
@@ -281,5 +281,5 @@ Apache 2.0
 ##DRBD9 and DRBD Manage User's Guide
 
 If you have any questions about setting up, tuning, or administrating DRBD9 or
-DRBD Manage, be sure to checkout in the formation provided in the
+DRBD Manage, be sure to checkout in the information provided in the
 [User's Guide](http://drbd.linbit.com/users-guide-9.0/drbd-users-guide.html)
