@@ -151,7 +151,7 @@ vgcreate drbdpool /dev/sdX /dev/sdY
 lvcreate -l 95%VG  -T /dev/drbdpool/drbdthinpool
 ```
 
-Instructions on how to configure DRBDmange to use a storage plugin can be
+Instructions on how to configure DRBD Manage to use a storage plugin can be
 found in the cluster configuration section of the
 [User's Guide](http://drbd.linbit.com/users-guide-9.0/s-dm-set-config.html).
 
@@ -203,7 +203,7 @@ Create a datastore configuration file named ds.conf and use the `onedatastore`
 tool to create a new datastore based on that configuration. There are two
 mutually exclusive deployment options: DRBD_REDUNDANCY and
 DRBD_DEPLOYMENT_NODES. For both of these options, BRIDGE_LIST must be a space
-separated list of all storage nodes in the drbdmanage cluster.
+separated list of all storage nodes in the DRBD Manage cluster.
 
 #### Deploying to a Redundancy Level
 
