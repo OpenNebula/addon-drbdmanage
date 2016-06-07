@@ -148,7 +148,7 @@ the default names for the volume group and thinpool:
 ```bash
 pvcreate /dev/sdX /dev/sdY
 vgcreate drbdpool /dev/sdX /dev/sdY
-lvcreate -n drbdthinpool -T -l 95%VG /dev/drbdpool
+lvcreate -l 95%VG  -T /dev/drbdpool/drbdthinpool
 ```
 
 Instructions on how to configure DRBDmange to use a storage plugin can be
