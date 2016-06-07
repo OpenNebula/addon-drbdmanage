@@ -197,6 +197,10 @@ gain access to the devices and programs needed to access storage and
 instantiate VMs. For this addon, the oneadmin user must belong to the `disk`
 group on all nodes in order to access the DRBD devices where images are held.
 
+```bash
+usermod -a -G disk oneadmin
+```
+
 ### Creating a New DRBD Manage Datastore
 
 Create a datastore configuration file named ds.conf and use the `onedatastore`
