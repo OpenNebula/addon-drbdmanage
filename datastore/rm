@@ -51,7 +51,7 @@ if [ -z "$(drbd_res_exsists "$DRBD_RES_NAME")" ]; then
 fi
 
 # Exit with error if removing resource times out.
-exec_and_log "drbd_remove_res $DRBD_RES_NAME"
+exec_and_log "drbd_remove_res $DRBD_RES_NAME" \
   "Unable to remove $DRBD_RES_NAME: timed out."
 
 drbd_log "Ending rm action."
