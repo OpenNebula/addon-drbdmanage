@@ -49,7 +49,7 @@ drbd_deploy_res_on_host "$DRBD_RES_NAME" "$DST_HOST"
 # Get Device path and make sure it's ready for IO.
 DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_RES_NAME")
 
-exec_and_log "drbd_is_node_ready $DST_HOST $DRBD_DEVICE_PATH"
+exec_and_log "drbd_is_node_ready $DST_HOST $DRBD_DEVICE_PATH" \
   "DRBD device at $DRBD_DEVICE_PATH not ready for IO on $DST_HOST"
 
 # Link DRBD device to datastore location.
