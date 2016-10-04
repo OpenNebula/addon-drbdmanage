@@ -42,6 +42,20 @@ SRC_PATH=$(arg_path "$SRC")
 DST_HOST=$(arg_host "$DST")
 DST_DIR=$(dirname "$DST_PATH")
 
+# Get custom datastore values
+XPATH="${DRIVER_PATH}/../../datastore/xpath.rb --stdin"
+
+unset XPATH_ELEMENTS i j
+
+while IFS= read -r -d '' element; do
+  XPATH_ELEMENTS[i++]="$element"
+done < <(onedatastore show -x "$DS_ID" | $XPATH \
+  /DATASTORE/TEMPLATE/DRBD_MIN_RATIO \
+  /DATASTORE/TEMPLATE/DRBD_MIN_COUNT)
+
+DRBD_MIN_RATIO="${XPATH_ELEMENTS[j++]:-$DRBD_MIN_RATIO}"
+DRBD_MIN_COUNT="${XPATH_ELEMENTS[j++]:-$DRBD_MIN_COUNT}"
+
 # Get resource name and assign it to the host.
 DRBD_RES_NAME=$SRC_PATH
 drbd_deploy_res_on_host "$DRBD_RES_NAME" "$DST_HOST"
