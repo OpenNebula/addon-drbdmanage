@@ -20,13 +20,12 @@
 # Log argument to the syslog.
 drbd_log () {
 
-addon_path=$(dirname "$0")
-driver_path=$(dirname "$addon_path")
-driver_name=$(basename "$driver_path")
+  addon_path=$(dirname "$0")
+  driver_path=$(dirname "$addon_path")
+  driver_name=$(basename "$driver_path")
+  script_name="${0##*/}"
 
-script_name="${0##*/}"
-
-logger -t "addon-drbdmanage: $driver_name-$script_name: [$$]" "$1"
+  logger -t "addon-drbdmanage: $driver_name-$script_name: [$$]" "$1"
 }
 
 # Returns a newline delimited list of storage nodes with a resource assigned to them.
@@ -65,7 +64,7 @@ drbd_get_assignment_node () {
     drbd_log "Checking $device_path on $node"
     deployed=$(drbd_is_node_ready "$node" "$device_path")
     if [ "$deployed" -eq 0 ]; then
-    drbd_log "$node is ready for IO operations on $device_path"
+      drbd_log "$node is ready for IO operations on $device_path"
       echo "$node"
       exit 0
     fi
@@ -150,7 +149,7 @@ drbd_deploy_res_on_nodes () {
   if [ -n "$DRBD_DEPLOYMENT_NODES" ]; then
     drbd_log "Assigning resource $res_name to storage nodes $DRBD_DEPLOYMENT_NODES"
     sudo drbdmanage assign-resource "$res_name" $DRBD_DEPLOYMENT_NODES
-  # Otherwise deploy to a redundancy level.
+    # Otherwise deploy to a redundancy level.
   else
     drbd_log "Deploying resource $res_name with $DRBD_REDUNDANCY-way redundancy."
     sudo drbdmanage deploy-resource "$res_name" "$DRBD_REDUNDANCY"
@@ -164,14 +163,14 @@ drbd_deploy_res_on_nodes () {
 
 # Deploy resource on virtualization host in diskless mode.
 drbd_deploy_res_on_host () {
-    res_name=$1
-    node_name=$2
+  res_name=$1
+  node_name=$2
 
-    # Don't try to assign resources if they are already present on a node.
-    if [ -z "$(sudo drbdmanage list-assignments --resources "$res_name" --nodes "$node_name" -m)" ]; then
-      drbd_log "Assigning resource $res_name to client node $node_name"
-      sudo drbdmanage assign-resource "$res_name" "$node_name" --client
-    fi
+  # Don't try to assign resources if they are already present on a node.
+  if [ -z "$(sudo drbdmanage list-assignments --resources "$res_name" --nodes "$node_name" -m)" ]; then
+    drbd_log "Assigning resource $res_name to client node $node_name"
+    sudo drbdmanage assign-resource "$res_name" "$node_name" --client
+  fi
 }
 
 # Removes a resource, waits for operation to complete on all nodes.
@@ -244,7 +243,7 @@ drbd_unassign_res () {
   retries="$DRBD_TIMEOUT"
 
   until [ -z "$(sudo drbdmanage list-assignments --resources "$res_name" --nodes "$node" -m)" ]; do
-    sleep 1
+    sleep 2
     if (( retries < 1 )); then
       drbd_log "Failed to unassign $res_name: retries exceeded."
       exit -1
@@ -263,7 +262,7 @@ drbd_is_dev_ready () {
 
   retries="$timeout"
   for ((i=1;i<retries;i++)); do
-    sleep 1
+    sleep 5
 
     # Device is ready if it is path a block device with read/write permissions.
     if [ -b "$path" ] && [ -r "$path" ] && [ -w "$path" ]; then
@@ -301,13 +300,13 @@ drbd_build_dbus_dict () {
   res=$1
   snap=$2
 
-# Set the min count to one if there are no policies
-if [ -z "$DRBD_MIN_COUNT" ] && [ -z "$DRBD_MIN_RATIO" ]; then
-  DRBD_MIN_COUNT=1
-fi
+  # Set the min count to one if there are no policies
+  if [ -z "$DRBD_MIN_COUNT" ] && [ -z "$DRBD_MIN_RATIO" ]; then
+    DRBD_MIN_COUNT=1
+  fi
 
-# Set the timeout if there is not one.
-DRBD_TIMEOUT=${DRBD_TIMEOUT:-20}
+  # Set the timeout if there is not one.
+  DRBD_TIMEOUT=${DRBD_TIMEOUT:-20}
 
   # Build dict string with required elements.
   dict="dict:string:string:starttime,$(date +%s),resource,$res,timeout,$DRBD_TIMEOUT"
@@ -400,7 +399,7 @@ drbd_poll_dbus () {
   retries="$DRBD_TIMEOUT"
 
   for ((i=1;i<retries;i++)); do
-    sleep 1
+    sleep 7
     status=$(drbd_check_dbus_status "$plugin" "$res_name" "$snap_name")
 
     # If there is a timeout, the system can handle signals and we can exit.
