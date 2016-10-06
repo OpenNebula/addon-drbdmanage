@@ -243,7 +243,7 @@ drbd_unassign_res () {
   retries="$DRBD_TIMEOUT"
 
   until [ -z "$(sudo drbdmanage list-assignments --resources "$res_name" --nodes "$node" -m)" ]; do
-    sleep 1
+    sleep 2
     if (( retries < 1 )); then
       drbd_log "Failed to unassign $res_name: retries exceeded."
       exit -1
@@ -262,7 +262,7 @@ drbd_is_dev_ready () {
 
   retries="$timeout"
   for ((i=1;i<retries;i++)); do
-    sleep 1
+    sleep 5
 
     # Device is ready if it is path a block device with read/write permissions.
     if [ -b "$path" ] && [ -r "$path" ] && [ -w "$path" ]; then
@@ -399,7 +399,7 @@ drbd_poll_dbus () {
   retries="$DRBD_TIMEOUT"
 
   for ((i=1;i<retries;i++)); do
-    sleep 1
+    sleep 7
     status=$(drbd_check_dbus_status "$plugin" "$res_name" "$snap_name")
 
     # If there is a timeout, the system can handle signals and we can exit.
