@@ -21,7 +21,9 @@ Hayley Swimelar [<hayley@linbit.com>](hayley@linbit.com)
 
 ## Compatibility
 
-* This addon is compatible with OpenNebula 4.14
+* This addon is compatible with OpenNebula versions up to 5.0.2
+* It was tested with versions 4.14 and 5.0.2
+* This version of README.md describes the installation process for ONE 5.0.2 environments
 
 ## Requirements
 
