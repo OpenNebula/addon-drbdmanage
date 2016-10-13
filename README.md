@@ -76,16 +76,21 @@ TM_MAD = [
 ```
 ```
 DATASTORE_MAD = [
-    executable = "one_datastore",
-    arguments  = "-t 15 -d dummy,fs,vmfs,lvm,ceph,drbdmanage"
-]
+    EXECUTABLE = "one_datastore",
+    ARGUMENTS  = "-t 15 -d dummy,fs,lvm,ceph,dev,iscsi_libvirt,vcenter,drbdmanage -s shared,ssh,ceph,fs_lvm,qcow2"
 ```
 
-Add a new TM_MAD_CONF section:
+Add new TM_MAD_CONF and DS_MAD_CONF sections:
 
 ```
 TM_MAD_CONF = [
     name = "drbdmanage", ln_target = "NONE", clone_target = "SELF", shared = "yes"
+]
+```
+```
+DS_MAD_CONF = [
+    NAME = "drbdmanage", REQUIRED_ATTRS = "BRIDGE_LIST", PERSISTENT_ONLY = "NO",
+    MARKETPLACE_ACTIONS = "export"
 ]
 ```
 After making these changes, restart the opennebula service.
