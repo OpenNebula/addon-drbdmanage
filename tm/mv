@@ -98,7 +98,7 @@ drbd_deploy_res_on_host "$DRBD_RES_NAME" "$DST_HOST"
 DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_RES_NAME")
 
 exec_and_log "drbd_is_node_ready $DST_HOST $DRBD_DEVICE_PATH" \
-  "DRBD device at $DRBD_DEVICE_PATH not ready for IO on $DST_HOST"
+  "DRBD device at $DRBD_DEVICE_PATH not ready for IO on $DST_HOST, drbdsetup status: $(drbdsetup status --color=never $DRBD_RES_NAME)"
 
 # If the source is a not storage node and
 # live migrations are not enabled, unassign res from src.

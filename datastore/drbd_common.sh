@@ -69,7 +69,7 @@ drbd_get_assignment_node () {
       exit 0
     fi
     drbd_log "$node is unable to perform IO operations on $device_path, details following..."
-    drbd_log "$node, $device_path, $(drbdsetup status --verbose | grep -B1 -A3 "minor:$(sed -e 's,/dev/drbd,,g' <<<$device_path)")"
+    drbd_log "drbdsetup status: $node, $device_path, $(drbdsetup status --color=never --verbose | grep -B1 -A3 "minor:$(sed -e 's,/dev/drbd,,g' <<<$device_path)")"
   done
 
   drbd_log "No nodes in ($node_list) with usable DRBD device at $device_path"
