@@ -66,9 +66,13 @@ while IFS= read -r -d '' element; do
   XPATH_ELEMENTS[i++]="$element"
 done < <(onevm show -x "$VM_ID" | $XPATH \
   /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/SOURCE \
+  /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/TARGET \
+  /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/TYPE \
   /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/PERSISTENT)
 
 DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
+TARGET="${XPATH_ELEMENTS[j++]}"
+TYPE="${XPATH_ELEMENTS[j++]}"
 PERSISTENT="${XPATH_ELEMENTS[j++]}"
 
 # Get information for live migration and bridge list.
@@ -87,8 +91,17 @@ DRBD_MIN_RATIO="${XPATH_ELEMENTS[j++]:-$DRBD_MIN_RATIO}"
 DRBD_MIN_COUNT="${XPATH_ELEMENTS[j++]:-$DRBD_MIN_COUNT}"
 DRBD_SUPPORT_LIVE_MIGRATION="${XPATH_ELEMENTS[j++]:-$DRBD_SUPPORT_LIVE_MIGRATION}"
 
+drbd_log "Moving $TARGET"
+
 if [ -z "$PERSISTENT" ]; then
-  DRBD_RES_NAME="${DRBD_RES_NAME}-vm${VM_ID}-disk${DISK_ID}"
+  if [ $TYPE == "CDROM" ]; then
+    drbd_log "$DRBD_RES_NAME is a non-persistent CDROM image"
+  else
+    DRBD_RES_NAME="${DRBD_RES_NAME}-vm${VM_ID}-disk${DISK_ID}"
+    drbd_log "$DRBD_RES_NAME is a non-persistent OS or DATABLOCK image"
+  fi
+else
+    drbd_log "$DRBD_RES_NAME is a persistent OS, CDROM or DATABLOCK image"
 fi
 
 # Assign res to dest.
