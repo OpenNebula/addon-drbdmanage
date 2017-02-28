@@ -54,8 +54,8 @@ fi
 # Make a new path for the dst_host, remove the src_host's path.
 ssh_make_path "$DST_HOST" "$DST_DIR"
 
-ssh_exec_and_log "$SRC_HOST" "rm -rf $SRC_PATH" \
-  "Error removing $SRC_PATH on $SRC_HOST"
+(ssh_exec_and_log "$SRC_HOST" "rm -rf $SRC_PATH" \
+  "Error removing $SRC_PATH on $SRC_HOST")
 
 # Get image information
 XPATH="${DRIVER_PATH}/../../datastore/xpath.rb --stdin"
@@ -66,9 +66,13 @@ while IFS= read -r -d '' element; do
   XPATH_ELEMENTS[i++]="$element"
 done < <(onevm show -x "$VM_ID" | $XPATH \
   /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/SOURCE \
+  /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/TARGET \
+  /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/TYPE \
   /VM/TEMPLATE/DISK[DISK_ID=$DISK_ID]/PERSISTENT)
 
 DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
+TARGET="${XPATH_ELEMENTS[j++]}"
+TYPE="${XPATH_ELEMENTS[j++]}"
 PERSISTENT="${XPATH_ELEMENTS[j++]}"
 
 # Get information for live migration and bridge list.
@@ -87,8 +91,17 @@ DRBD_MIN_RATIO="${XPATH_ELEMENTS[j++]:-$DRBD_MIN_RATIO}"
 DRBD_MIN_COUNT="${XPATH_ELEMENTS[j++]:-$DRBD_MIN_COUNT}"
 DRBD_SUPPORT_LIVE_MIGRATION="${XPATH_ELEMENTS[j++]:-$DRBD_SUPPORT_LIVE_MIGRATION}"
 
+drbd_log "Moving $TARGET"
+
 if [ -z "$PERSISTENT" ]; then
-  DRBD_RES_NAME="${DRBD_RES_NAME}-vm${VM_ID}-disk${DISK_ID}"
+  if [ $TYPE == "CDROM" ]; then
+    drbd_log "$DRBD_RES_NAME is a non-persistent CDROM image"
+  else
+    DRBD_RES_NAME="${DRBD_RES_NAME}-vm${VM_ID}-disk${DISK_ID}"
+    drbd_log "$DRBD_RES_NAME is a non-persistent OS or DATABLOCK image"
+  fi
+else
+    drbd_log "$DRBD_RES_NAME is a persistent OS, CDROM or DATABLOCK image"
 fi
 
 # Assign res to dest.
@@ -98,7 +111,7 @@ drbd_deploy_res_on_host "$DRBD_RES_NAME" "$DST_HOST"
 DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_RES_NAME")
 
 exec_and_log "drbd_is_node_ready $DST_HOST $DRBD_DEVICE_PATH" \
-  "DRBD device at $DRBD_DEVICE_PATH not ready for IO on $DST_HOST"
+  "DRBD device at $DRBD_DEVICE_PATH not ready for IO on $DST_HOST, drbdsetup status: $(drbdsetup status --color=never $DRBD_RES_NAME)"
 
 # If the source is a not storage node and
 # live migrations are not enabled, unassign res from src.
