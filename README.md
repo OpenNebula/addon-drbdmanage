@@ -28,7 +28,7 @@ Hayley Swimelar [<hayley@linbit.com>](hayley@linbit.com)
 ## Requirements
 
 * DRBD9 9.0.0+
-* DRBD Manage 0.95+
+* DRBD Manage 0.99.2+
 
 ## Features
 
@@ -238,7 +238,7 @@ onedatastore create ds.conf
 ```
 #### Deploying to a List of Nodes
 
-Using the DRBD_DEPLOYMENT_NODES allows you to select a group of nodes that
+Using DRBD_DEPLOYMENT_NODES allows you to select a group of nodes that
 resources will always be assigned to. In the following example, new resources
 will always be assigned to the nodes alice and charlie. Please note that the
 bridge list still contains all of the storage nodes in the DRBD Manage cluster.
@@ -250,6 +250,28 @@ DS_MAD = drbdmanage
 TM_MAD = drbdmanage
 DRBD_DEPLOYMENT_NODES = "alice charlie"
 BRIDGE_LIST = "alice bob charlie"
+EOI
+
+onedatastore create ds.conf
+```
+#### Restricting Where Resources Can Be Deployed
+
+Using DRBD_DEPLOYMENT_SITE allows you to select a [site](https://www.drbd.org/en/doc/users-guide-90/s-dm-set-config)
+defined in DRBD MANAGE to restrict deployment of resources. This optional setting
+works in tandem with either DRBD_DEPLOYMENT_NODES or DRBD_REDUNDANCY. When
+deploying to a redundancy level, only nodes within the site are considered when
+deciding which nodes to deploy on. When deploying to a list of nodes, this
+option blocks deployment to nodes listed in DRBD_DEPLOYMENT_NODES that are not
+also in the site.
+
+```bash
+cat >ds.conf <<EOI
+NAME = drbdmanage_nodes
+DS_MAD = drbdmanage
+TM_MAD = drbdmanage
+DRBD_REDUNDANCY = 2
+BRIDGE_LIST = "alice bob charlie"
+DRBD_DEPLOYMENT_SITE = "alpha"
 EOI
 
 onedatastore create ds.conf

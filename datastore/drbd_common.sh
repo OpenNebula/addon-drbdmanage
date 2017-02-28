@@ -123,7 +123,7 @@ drbd_deploy_options_check () {
 # Determine if a new image exceeds the maximum size for a given redundancy level.
 drbd_size_check () {
   size=$1
-  size_limit=$(drbdmanage free-space -m "$DRBD_REDUNDANCY" | awk -F ',' '{ print $1 / 1024 }')
+  size_limit=$(drbdmanage free-space -m "$DRBD_REDUNDANCY" --site "$DRBD_DEPLOYMENT_SITE" | awk -F ',' '{ print $1 / 1024 }')
 
   if [ "$size" -gt "$size_limit" ]; then
     exit -1
@@ -149,11 +149,25 @@ drbd_deploy_res_on_nodes () {
   # If deployment nodes are set, deploy to those nodes manualy."
   if [ -n "$DRBD_DEPLOYMENT_NODES" ]; then
     drbd_log "Assigning resource $res_name to storage nodes $DRBD_DEPLOYMENT_NODES"
-    sudo drbdmanage assign-resource "$res_name" $DRBD_DEPLOYMENT_NODES
+
+    # Prevent deployment to nodes not in DRBD_DEPLOYMENT_SITE.
+    all_nodes=$(drbd_nodes_in_site "$DRBD_DEPLOYMENT_SITE" $DRBD_DEPLOYMENT_NODES)
+    in_site=$(echo "$all_nodes" | awk -F',' '{ print $1 }')
+    if [ -z "$(echo "$in_site" | xargs)" ]; then # xargs trims whitespace.
+      drbd_log "Site $DRBD_DEPLOYMENT_SITE contains none of the specified DRBD_DEPLOYMENT_NODES ($DRBD_DEPLOYMENT_NODES). Deployment failed"
+      echo "1"
+      exit -1
+    fi
+    outside_site=$(echo "$all_nodes" | awk -F',' '{ print $2 }')
+    if [ -n "$(echo "$outside_site" | xargs)" ]; then # xargs trims whitespace.
+      drbd_log "Not deploying $res_name to node(s) $outside_site. Deployment is restricted to the $DRBD_DEPLOYMENT_SITE site."
+    fi
+    sudo drbdmanage assign-resource "$res_name" $in_site
+
     # Otherwise deploy to a redundancy level.
   else
     drbd_log "Deploying resource $res_name with $DRBD_REDUNDANCY-way redundancy."
-    sudo drbdmanage deploy-resource "$res_name" "$DRBD_REDUNDANCY"
+    sudo drbdmanage deploy-resource "$res_name" "$DRBD_REDUNDANCY" --site "$DRBD_DEPLOYMENT_SITE"
   fi
 
   # Wait for resource to be deployed according to the WaitForResource plugin.
@@ -290,6 +304,33 @@ drbd_is_node_in_list () {
 
   echo "1"
   exit -1
+}
+
+# Return list of nodes belonging to a site, returns all nodes if site is blank.
+drbd_get_site_nodes () {
+  SITE=$1
+  sudo drbdmanage list-nodes -m | awk -F',' -v site="$SITE" -v ORS=" " '{ if ($7==site || site=="") { print $1 } }'
+}
+
+# Return two comma separated lists of nodes. First list contains nodes that
+# are in the site, second list contains nodes which are not outside of the site.
+drbd_nodes_in_site () {
+  site=$1
+  node_list=${*:2}
+
+  site_nodes=$(drbd_get_site_nodes "$site")
+  in_site=""
+  outside_site=""
+
+  for node in $node_list; do
+    if [ $(drbd_is_node_in_list "$node" $site_nodes) -eq "0" ]; then
+      in_site="$in_site $node"
+    else
+      outside_site="$outside_site $node"
+    fi
+  done
+
+  echo "$in_site,$outside_site"
 }
 
 #------------------------------------------------------------------------------

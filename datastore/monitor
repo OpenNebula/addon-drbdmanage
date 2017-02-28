@@ -40,12 +40,12 @@ unset i j XPATH_ELEMENTS
 
 while IFS= read -r -d '' element; do
     XPATH_ELEMENTS[i++]="$element"
-done < <($XPATH     /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/BRIDGE_LIST \
-                    /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/DRBD_REDUNDANCY \
+done < <($XPATH     /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/DRBD_REDUNDANCY \
+                    /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/DRBD_DEPLOYMENT_SITE \
                     /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/DRBD_DEPLOYMENT_NODES )
 
-BRIDGE_LIST="${XPATH_ELEMENTS[j++]}"
 DRBD_REDUNDANCY="${XPATH_ELEMENTS[j++]}"
+DRBD_DEPLOYMENT_SITE="${XPATH_ELEMENTS[j++]}"
 DRBD_DEPLOYMENT_NODES="${XPATH_ELEMENTS[j++]}"
 
 DST_HOST=$(get_destination_host "$IMAGE_ID")
@@ -64,9 +64,9 @@ if [ -n "$DRBD_DEPLOYMENT_NODES" ]; then
     awk -F',' '{ if (!total || $5<total) total=$5 } END { print total / 1024 }')
 else
   # Calculate how much space is left for redundant volumes.
-  TOTAL_MB=$(sudo drbdmanage free-space "$DRBD_REDUNDANCY" -m | \
+  TOTAL_MB=$(sudo drbdmanage free-space "$DRBD_REDUNDANCY" --site "$DRBD_DEPLOYMENT_SITE" -m | \
     awk -F',' -v redundancy="$DRBD_REDUNDANCY" '{print $2 / 1024 / redundancy}')
-  FREE_MB=$(sudo drbdmanage n -N $BRIDGE_LIST -m | \
+  FREE_MB=$(sudo drbdmanage n -N $(drbd_get_site_nodes "$DRBD_DEPLOYMENT_SITE") -m | \
     awk -F',' -v redundancy="$DRBD_REDUNDANCY" 'BEGIN { total=$5 } { total += $5 } END { print total / 1024 / redundancy }')
 fi
 
