@@ -54,8 +54,8 @@ fi
 # Make a new path for the dst_host, remove the src_host's path.
 ssh_make_path "$DST_HOST" "$DST_DIR"
 
-ssh_exec_and_log "$SRC_HOST" "rm -rf $SRC_PATH" \
-  "Error removing $SRC_PATH on $SRC_HOST"
+(ssh_exec_and_log "$SRC_HOST" "rm -rf $SRC_PATH" \
+  "Error removing $SRC_PATH on $SRC_HOST")
 
 # Get image information
 XPATH="${DRIVER_PATH}/../../datastore/xpath.rb --stdin"
