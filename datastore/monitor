@@ -26,7 +26,6 @@ fi
 source "$LIB_LOCATION"/sh/scripts_common.sh
 
 DRIVER_PATH=$(dirname "$0")
-source "${DRIVER_PATH}"/../libfs.sh
 source "${DRIVER_PATH}"/drbdmanage.conf
 source "${DRIVER_PATH}"/drbd_common.sh
 
@@ -47,13 +46,6 @@ done < <($XPATH     /DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/DRBD_REDUNDANCY \
 DRBD_REDUNDANCY="${XPATH_ELEMENTS[j++]}"
 DRBD_DEPLOYMENT_SITE="${XPATH_ELEMENTS[j++]}"
 DRBD_DEPLOYMENT_NODES="${XPATH_ELEMENTS[j++]}"
-
-DST_HOST=$(get_destination_host "$IMAGE_ID")
-
-if [ -z "$DST_HOST" ]; then
-    error_message "Datastore template missing 'BRIDGE_LIST' attribute."
-    exit -1
-fi
 
 # Monitor pool space.
 if [ -n "$DRBD_DEPLOYMENT_NODES" ]; then
