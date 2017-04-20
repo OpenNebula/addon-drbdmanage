@@ -150,12 +150,13 @@ To prepare thinly-provisioned storage for DRBD Manage, you must create a volume
 group and thinLV using LVM on each storage node.
 
 Example of this process using two physical volumes (/dev/sdX and /dev/sdY) and
-the default names for the volume group and thinpool:
+the default names for the volume group and thinpool. Make sure to set the thinLV's
+metadata volume to a reasonable size, once it runs full it can be difficult to resize:
 
 ```bash
 pvcreate /dev/sdX /dev/sdY
 vgcreate drbdpool /dev/sdX /dev/sdY
-lvcreate -l 95%VG  -T /dev/drbdpool/drbdthinpool
+lvcreate -l 95%VG --poolmetadatasize 8g -T /dev/drbdpool/drbdthinpool
 ```
 
 Instructions on how to configure DRBD Manage to use a storage plugin can be
