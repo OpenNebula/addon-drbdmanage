@@ -170,8 +170,17 @@ normally `/var/lib/one/remotes/datastore/drbdmanage/drbdmanage.conf`
 
 ### Permissions for Oneadmin
 
-The oneadmin user must have passwordless sudo access to the `drbdmanage`
-program on the Front-End node and the `mkfs` command on the Storage nodes.
+The oneadmin user must have passwordless sudo access to the `drbdmanage` program on the Front-End node 
+
+```bash
+oneadmin ALL=(root) NOPASSWD: /usr/bin/drbdmanage
+```
+
+and the `mkfs` command on the Storage nodes
+
+```bash
+oneadmin ALL=(root) NOPASSWD: /sbin/mkfs
+```
 
 A policy section for the oneadmin user must also be added in
 `/etc/dbus-1/system.d/org.drbd.drbdmanaged.conf` on the Front-End node. Be
