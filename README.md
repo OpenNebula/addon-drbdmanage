@@ -102,14 +102,14 @@ After making these changes, restart the opennebula service.
 The Front-End node issues commands to the Storage and Host nodes via DRBD
 Manage.
 
-Storage nodes hold disk images of VM locally.
+Storage nodes hold disk images of VMs locally.
 
 Host nodes are responsible for running instantiated VMs and typically have the
 storage for the images they need attached across the network via DRBD Manage
 diskless mode.
 
 All nodes must have DRBD9 and DRBD Manage installed. This process is detailed in the
-[User's Guide for DRBD9](http://drbd.linbit.com/users-guide-9.0/ch-admin-drbdmanage.html)
+[User's Guide for DRBD9](http://docs.linbit.com/doc/users-guide-90/ch-admin-drbdmanage/)
 
 It is possible to have Front-End and Host nodes act as storage nodes in
 addition to their primary role as long as they the meet all the requirements
@@ -118,7 +118,7 @@ for both roles.
 If you do not intend for the Front-End or Host nodes to be used as storage
 nodes in addition to their primary role, they should be added to the DRBD
 Manage cluster as
-[pure controller nodes](http://drbd.linbit.com/users-guide-9.0/s-dm-add-node.html#_adding_a_pure_controller_node).
+[pure controller nodes](http://docs.linbit.com/doc/users-guide-90/s-dm-add-node/#_adding_a_pure_controller_node).
 
 #### Front-End Configuration
 
@@ -130,7 +130,7 @@ DRBD storage.
 #### Host Configuration
 
 The Host nodes may also be configured as
-[pure client nodes](http://drbd.linbit.com/users-guide-9.0/s-dm-add-node.html#_adding_a_pure_client_node)
+[pure client nodes](http://docs.linbit.com/doc/users-guide-90/s-dm-add-node/#_adding_a_pure_client_node)
 without a local control volume by adding the `--satellite` option while adding
 the node the the DRBD Manage cluster. This allows hosts to be added without
 preparing local storage for DRBD on that node.
@@ -144,7 +144,7 @@ configure the oneadmin user account.
 
 The Storage nodes must use one of the thinly-provisioned storage plugins. The
 merits of the different plugins are dicussed in the
-[User's Guide](http://drbd.linbit.com/users-guide-9.0/s-drbdmanage-storage-plugins.html).
+[User's Guide](http://docs.linbit.com/doc/users-guide-90/s-drbdmanage-storage-plugins/#_discussion_of_the_storage_plugins).
 
 To prepare thinly-provisioned storage for DRBD Manage, you must create a volume
 group and thinLV using LVM on each storage node.
@@ -161,7 +161,7 @@ lvcreate -l 95%VG --poolmetadatasize 8g -T /dev/drbdpool/drbdthinpool
 
 Instructions on how to configure DRBD Manage to use a storage plugin can be
 found in the cluster configuration section of the
-[User's Guide](http://drbd.linbit.com/users-guide-9.0/s-dm-set-config.html).
+[User's Guide](http://docs.linbit.com/doc/users-guide-90/s-drbdmanage-storage-plugins/).
 
 ### Additonal Driver Configuration
 
@@ -302,9 +302,9 @@ deployment of a new resource to be considered a success. This should be a
 number between 0.0 and 1.0.
 
 More information on the above policies can be found in the
-[Policy Plugin](http://drbd.linbit.com/users-guide-9.0/s-drbdmanage-deployment-policy.html)
+[Policy Plugin](http://docs.linbit.com/doc/users-guide-90/s-drbdmanage-deployment-policy/)
 section of the
-[DRBD9 User's Guide](http://drbd.linbit.com/users-guide-9.0/drbd-users-guide.html).
+[DRBD9 User's Guide](http://docs.linbit.com/doc/users-guide-90/drbd-users-guide/).
 
 DRBD_SUPPORT_LIVE_MIGRATION enables the live migration of VMs. Valid options are
 "yes" and "no" (default). If this option is enabled, you must also configure
@@ -344,4 +344,4 @@ Apache 2.0
 
 If you have any questions about setting up, tuning, or administrating DRBD9 or
 DRBD Manage, be sure to check out the information provided in the
-[User's Guide](http://drbd.linbit.com/users-guide-9.0/drbd-users-guide.html)
+[User's Guide](http://docs.linbit.com/doc/users-guide-90/drbd-users-guide/)
