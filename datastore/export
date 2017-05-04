@@ -1,0 +1,102 @@
+#!/bin/bash
+#
+#==========================================================================
+# Copyright 2017 LINBIT HA-Solutions GmbH
+# Author: Roland Kammerer
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#==========================================================================
+
+# Set up environment
+if [ -z "${ONE_LOCATION}" ]; then
+    LIB_LOCATION=/usr/lib/one
+else
+    LIB_LOCATION=$ONE_LOCATION/lib
+fi
+
+source "$LIB_LOCATION"/sh/scripts_common.sh
+
+DRIVER_PATH=$(dirname "$0")
+source "${DRIVER_PATH}"/../libfs.sh
+# TODO(rck): drbdmanage.conf maybe unused...
+source "${DRIVER_PATH}"/drbdmanage.conf
+source "${DRIVER_PATH}"/drbd_common.sh
+
+drbd_log "Beginning export action."
+
+# Get arguments from OpenNebula Core
+DRIVER_ACTION=$1
+APP_ID=$2
+
+XPATH="${DRIVER_PATH}/../xpath.rb -b $DRIVER_ACTION"
+
+unset i j XPATH_ELEMENTS
+
+while IFS= read -r -d '' element; do
+    XPATH_ELEMENTS[i++]="$element"
+done < <($XPATH 	/DS_DRIVER_ACTION_DATA/IMAGE/SOURCE \
+						/DS_DRIVER_ACTION_DATA/DATASTORE/TEMPLATE/BRIDGE_LIST \
+)
+
+DRBD_RES_NAME="${XPATH_ELEMENTS[j++]}"
+BRIDGE_LIST="${XPATH_ELEMENTS[j++]}"
+
+DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_RES_NAME")
+DST_HOST=$(get_destination_host "$APP_ID")
+
+if [ -z "$DST_HOST" ]; then
+    error_message "Datastore template missing 'BRIDGE_LIST' attribute."
+    exit -1
+fi
+
+# TODO(rck): don't know what it is, saw it set in another driver as default.
+DISPOSE="YES"
+
+# TODO(rck): We probably want to take a snapshot here, for now assume the VM is off
+
+OUTPUT_FILE="${STAGING_DIR:-/var/tmp}/$DRBD_RES_NAME-$APP_ID"
+if [ -n "$EXPORT_TO" ]; then
+	FORMAT=$EXPORT_TO
+	CMD="$QEMU_IMG convert -O $FORMAT $DRBD_DEVICE_PATH $OUTPUT_FILE"
+	ssh_monitor_and_log "$DST_HOST" "$CMD" "export file convert"
+else
+	ssh_monitor_and_log "$DST_HOST" "$DD if=$DRBD_DEVICE_PATH of=$OUTPUT_FILE bs=4M" "dd image"
+	CMD="$QEMU_IMG info $OUTPUT_FILE | grep 'file format' | cut -d' ' -f3"
+	FORMAT=$(ssh_monitor_and_log "$DST_HOST" "$CMD" "export file fromat")
+fi
+
+SIZE=$(ssh_monitor_and_log "$DST_HOST" "${DU} -Lm ${OUTPUT_FILE} | cut -f1" "get file size")
+if [ -z "$SIZE" ]; then
+    error_message "Could not determine the size of the exported file"
+    exit -1
+fi
+
+CHECKSUM=$(ssh_monitor_and_log "$DST_HOST" "openssl dgst -md5 $OUTPUT_FILE | cut -d' ' -f2" "export file checksum calc." 2>&1)
+if [ -z "$CHECKSUM" ]; then
+    error_message "Could not generate MD5SUM of the exported file"
+    exit -1
+fi
+
+IMPORT_SOURCE="ssh://$DST_HOST:$OUTPUT_FILE"
+
+cat <<EOF
+<IMPORT_INFO>
+    <IMPORT_SOURCE><![CDATA[$IMPORT_SOURCE]]></IMPORT_SOURCE>
+    <MD5><![CDATA[$CHECKSUM]]></MD5>
+    <SIZE><![CDATA[$SIZE]]></SIZE>
+    <FORMAT><![CDATA[$FORMAT]]></FORMAT>
+    <DISPOSE><![CDATA[$DISPOSE]]</DISPOSE>
+</IMPORT_INFO>"
+EOF
+
+drbd_log "Ending export action."
