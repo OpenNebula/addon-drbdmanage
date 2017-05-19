@@ -139,7 +139,7 @@ drbd_distribute_clients () {
   drbd_log "Assigning $res_name to $((total_nodes - num_local_deployments)) \
 remaining nodes in diskless mode."
 
-  sudo drbdmanage deploy "$res_name" "$num_local_deployments" '--with-clients'
+  sudo drbdmanage deploy "$res_name" "$num_local_deployments" '--with-clients' --site "$DRBD_DEPLOYMENT_SITE"
 }
 
 # Deploy resource based on deployment options, wait for res to be deployed on each node.
