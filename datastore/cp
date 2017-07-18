@@ -150,6 +150,7 @@ DRBD_DEVICE_PATH=$(drbd_get_device_for_res "$DRBD_RES_NAME")
 # Find node with a resource assigned to it.
 RES_NODES=$(drbd_get_res_nodes "$DRBD_RES_NAME")
 RES_HOST=$(drbd_get_assignment_node "$DRBD_DEVICE_PATH" $RES_NODES)
+RES_HOST_IP="$(sudo drbdmanage nodes -m -N $RES_HOST --show IP |  awk -F',' '{ print $3 }')"
 
 if [ -z "$RES_HOST" ]; then
   error_message "No nodes in $RES_NODES ready for IO on $DRBD_DEVICE_PATH"
@@ -159,9 +160,20 @@ if [ -z "$RES_HOST" ]; then
   exit -1
 fi
 
-# Copy SRC on the the DRBD device.
-$(exec_and_log "eval $COPY_COMMAND | $SSH $RES_HOST $DD of=$DRBD_DEVICE_PATH bs=2M" \
-  "Error dumping $SRC to $RES_HOST:$DRBD_DEVICE_PATH")
+# Copy SRC on the DRBD device.
+$(exec_and_log "eval $COPY_COMMAND | $SSH $RES_HOST_IP $DD of=$DRBD_DEVICE_PATH bs=2M" \
+  "Error dumping $SRC to $RES_HOST_IP:$DRBD_DEVICE_PATH")
+
+if [ $? -ne 0 ]; then
+  drbd_log "Error copying $SRC to $RES_HOST_IP:$DRBD_DEVICE_PATH, retrying with $RES_HOST:$DRBD_DEVICE_PATH"
+  $(exec_and_log "eval $COPY_COMMAND | $SSH $RES_HOST $DD of=$DRBD_DEVICE_PATH bs=2M" \
+    "Error dumping $SRC to $RES_HOST:$DRBD_DEVICE_PATH")
+  if [ -n "$ERROR" ]; then
+    drbd_log "Error copying $SRC to $RES_HOST:$DRBD_DEVICE_PATH"
+  else
+    drbd_log "Copying finished successfully"
+  fi
+fi
 
 # Remove the resource if copy fails.
 COPY_RC=$1
