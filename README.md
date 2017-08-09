@@ -24,6 +24,7 @@ Hayley Swimelar [<hayley@linbit.com>](hayley@linbit.com)
 * This addon is compatible with OpenNebula versions up to 5.0.2
 * It was tested with versions 4.14 and 5.0.2
 * This version of README.md describes the installation process for ONE 5.0.2 environments
+* This is intended for use as an images datastore for use with an NFS system datastore
 
 ## Requirements
 
@@ -142,16 +143,18 @@ oneadmin user must be able to passwordlessly access storage nodes. Refer to
 the OpenNebula install guide for your distribution on how to manually
 configure the oneadmin user account.
 
-The Storage nodes must use one of the thinly-provisioned storage plugins. The
-merits of the different plugins are dicussed in the
+The Storage nodes must use one of the storage plugins that support snapshots,
+this means one of the thin LVM plugins or ZFS. The merits of the different
+plugins are discussed in the
 [User's Guide](http://docs.linbit.com/doc/users-guide-90/s-drbdmanage-storage-plugins/#_discussion_of_the_storage_plugins).
 
-To prepare thinly-provisioned storage for DRBD Manage, you must create a volume
-group and thinLV using LVM on each storage node.
+In this example preparation of thinly-provisioned storage using LVM for DRBD
+Manage, you must create a volume group and thinLV using LVM on each storage
+node.
 
 Example of this process using two physical volumes (/dev/sdX and /dev/sdY) and
 the default names for the volume group and thinpool. Make sure to set the thinLV's
-metadata volume to a reasonable size, once it runs full it can be difficult to resize:
+metadata volume to a reasonable size, once it becomes full it can be difficult to resize:
 
 ```bash
 pvcreate /dev/sdX /dev/sdY
